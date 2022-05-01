@@ -13,6 +13,23 @@ function currentUser()
 }
 
 
+function currentUserInConciliacion($conciliacion,$roles)
+{
+    $role = auth()->user()->tipo_conciliacion()->where('conciliacion_id',$conciliacion)->get();
+    if(is_array($roles)){
+        foreach ($role as $key => $rol) {   
+            
+            if(in_array($rol->ref_value,$roles)){
+                return true;
+           }
+        }
+    }
+     return  false;
+
+}
+
+
+
 
 
 function fechasSem($criterio)
@@ -46,6 +63,23 @@ function TiempoTrans($criterio)
 
     return $fecha;
 
+}
+function getSmallDate($date){
+    $created_at = Carbon::parse($date);   
+
+    $meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    $fecha = $created_at->day.' '.$meses[($created_at->month)-1].". ".$created_at->year;
+   
+    return $fecha;
+}
+
+function getSmallDateWithHour($date){
+    $created_at = Carbon::parse($date);   
+
+    $meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    $fecha = $created_at->day.' '.$meses[($created_at->month)-1].". ".$created_at->year.". ".$created_at->format('g:i A');
+   
+    return $fecha;
 }
 
 

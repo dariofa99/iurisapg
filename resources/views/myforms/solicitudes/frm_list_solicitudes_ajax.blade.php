@@ -39,3 +39,4 @@
 						
 
 			</table>
+			{{ $solicitudes->appends(request()->query())->links() }}

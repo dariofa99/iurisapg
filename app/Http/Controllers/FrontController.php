@@ -51,7 +51,7 @@ class FrontController extends Controller
      */
     public function show($id)
     {
-        //
+        dd('$conciliaciones' )     ;
     }
 
     /**
@@ -83,26 +83,39 @@ class FrontController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function conciliaciones(Request $request)
     {
-        //
+        $conciliaciones = \App\Conciliacion::where(function($query){
+            
+                //$query->on('conciliaciones.id', '=', 'conciliacion_has_user.conciliacion_id');
+            if(!currentUser()->can('ver_conciliaciones')){                
+                return $query->where('user_id',currentUser()->id);
+            }
+        }) 
+        
+        ->orderBy('conciliaciones.created_at','desc')->paginate(10);  
+      //  dd($conciliaciones)     ;
+        return view('front.conciliaciones.index',compact('conciliaciones'));
+    }
+
+    public function conciliacion_edit(Request $request,$id)
+    {
+        $conciliacion= \App\Conciliacion::find($id);  
+        //dd($conciliacion)     ;
+        return view('front.conciliaciones.edit',compact('conciliacion'));
     }
 
     public function solicitud_show($id)
-    {
-
-   
-        $solicitud = Solicitud::find($id);
-       // dd();
-       // dd($solicitud->user,currentUser());
-       if($solicitud and $solicitud->user->id == currentUser()->id){
-        if($solicitud and $solicitud->type_status_id==171){
-            $solicitud->type_status_id = 165;
-            $solicitud->save();
-            NewPush::channel('solicitudes_coord')
-            ->message(['solicitud_id'=>$id,'type_status_id'=>$solicitud->type_status_id,
-            'type_status'=>$solicitud->estado->ref_nombre])->publish();
-        }
+    {   
+        $solicitud = Solicitud::find($id);   
+        if($solicitud and $solicitud->user->id == currentUser()->id){
+            if($solicitud and $solicitud->type_status_id==171){
+                $solicitud->type_status_id = 165;
+                $solicitud->save();
+                NewPush::channel('solicitudes_coord')
+                ->message(['solicitud_id'=>$id,'type_status_id'=>$solicitud->type_status_id,
+                'type_status'=>$solicitud->estado->ref_nombre])->publish();
+            }
         $tur_aten=  Solicitud::whereIn('type_status_id',[155,156])
         ->whereDate('created_at',date('Y-m-d'))
         ->orderBy("turno", 'desc')->first();

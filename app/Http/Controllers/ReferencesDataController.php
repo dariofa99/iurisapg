@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\ConciliacionUserForm;
 use App\ReferencesData;
 use DB;
 use Illuminate\Http\Request;
@@ -42,10 +43,10 @@ class ReferencesDataController extends Controller
      */
     public function store(Request $request)
     {
-      //  dd($request->all());
+       //dd($request->all());
         $request['categories'] = $request->table;
         $referencia = ReferencesData::create($request->all());
-
+ 
         if($request->has('option_name')){
             foreach ($request->option_name as $key => $option) {
                 $insert = DB::table("references_data_options")
@@ -62,6 +63,15 @@ class ReferencesDataController extends Controller
                     'references_data_id'=>$referencia->id,
                     'active_other_input'=>0
                 ]);
+        }
+        if ($request->table=='conciliacion') {
+            foreach ($request->parte as $key => $parte) {
+                $insert = ConciliacionUserForm::create([
+                    'parte'=>$parte,
+                    'reference_data_id'=>$referencia->id,                    
+                ]);
+            }
+           
         }
         $categories = $this->getCategories();
         $view =  view('myforms.categories.partials.ajax.index',compact('categories'))->render();
@@ -92,6 +102,7 @@ class ReferencesDataController extends Controller
     {
         $referencia = ReferencesData::find($id);     
         $referencia->options; 
+        $referencia->partes;
         return response()->json($referencia);
     }
 
@@ -159,10 +170,20 @@ class ReferencesDataController extends Controller
                         'references_data_id'=>$referencia->id,
                         'active_other_input'=>0
                     ]);  
+                }            
+            }
+            if ($request->table=='conciliacion') {
+                $delete = DB::table('conciliacion_user_form')
+                ->where('reference_data_id',$referencia->id)->delete();
+                foreach ($request->parte as $key => $parte) {
+                    $insert = ConciliacionUserForm::create([
+                        'parte'=>$parte,
+                        'reference_data_id'=>$referencia->id,                    
+                    ]);
                 }
                
-            
             }
+
             $categories = $this->getCategories();
             $view =  view('myforms.categories.partials.ajax.index',compact('categories'))->render();
             $response=[];

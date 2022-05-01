@@ -16,6 +16,7 @@ class CreateReferencesDataTable extends Migration
         Schema::create('references_data', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('short_name')->nullable();
             $table->string('categories')->nullable();   
             $table->string('section')->nullable();  
             $table->boolean('is_visible')->default(1);   

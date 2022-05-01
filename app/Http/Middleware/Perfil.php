@@ -30,7 +30,7 @@ class Perfil
             } 
             $correo=explode("@", $user->email);
           if(isset($correo[1])){
-            if (($user->tel1=='' and $user->tel2 =='') || $user->tipodoc_id=='1' || $user->idnumber=='' || $user->name =='' || $user->lastname=='' || $user->fechanacimien=='' || $user->estrato_id=='9' || $user->address==''  || $correo[1]=='mail.com' || $user->cursando_id=='1'  ) {
+            if (($user->tel1=='' and $user->tel2 =='') || $user->tipodoc_id=='1' || $user->idnumber=='' || $user->name =='' || $user->lastname=='' || $user->fechanacimien=='' || $user->address==''  || $correo[1]=='mail.com' || $user->cursando_id=='1'  ) {
             Session::flash('message-danger', 'Recuerda! Primero necesitamos que actualices tu información personal, Correo, contraseña y curso.');
             return redirect('users/'.$user->id.'/edit');
                        

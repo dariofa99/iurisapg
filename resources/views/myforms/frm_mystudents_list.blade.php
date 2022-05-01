@@ -12,7 +12,7 @@
                </div>
 
 
-
+ 
               <div class="col-md-2">
 
                 <div class="form-group">
@@ -47,8 +47,9 @@
 {!! Form::hidden('curso_selected',null,['id'=>"curso_selected"]) !!}
 <div class="row">
   <div class="col-md-2 col-md-offset-10">
-    
-    <button type="submit" @if(!isset($data_search) || count($users)<=0) disabled="disabled" @endif class="btn btn-warning"><i class="fa  fa-hourglass-o" ></i> Vaciar Curso</button>
+   
+    <button type="submit" @if(count($users)<=0 || !Request::get('data_search')) disabled  @endif class="btn btn-warning">
+      <i class="fa  fa-hourglass-o" ></i>Vaciar Curso</button>
    
 </div>
 </div>

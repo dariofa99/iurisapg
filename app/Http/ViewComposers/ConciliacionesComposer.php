@@ -30,9 +30,28 @@ class ConciliacionesComposer
 		$types_status = TablaReferencia::where(['categoria'=>'type_status','tabla_ref'=>'conciliaciones'])
 		->where('ref_nombre','<>','Sin definir')
 		->pluck('ref_nombre','id'); 
-		
+		$types_users = TablaReferencia::where(['categoria'=>'type_user_conciliacion',
+		'tabla_ref'=>'conciliaciones_has_user'])
+		->where('ref_nombre','<>','Sin definir')
+		->pluck('ref_nombre','id');
 
-		$view->with(['types_status'=>$types_status]);
+		$types_status_pretension = TablaReferencia::where([
+			'categoria'=>'type_status',
+			'tabla_ref'=>'conc_hechos_preten'])
+		->where('ref_nombre','<>','Sin definir')
+		->pluck('ref_nombre','id'); 
+		$types_firma_users = TablaReferencia::where(['categoria'=>'type_user_firm_conciliacion',
+		'tabla_ref'=>'pdf_reportes_users'])
+		->where('ref_nombre','<>','Sin definir')
+		->pluck('ref_nombre','id');
+
+//dd("s");
+		$view->with([
+			'types_firma_users'=>	$types_firma_users ,
+			'types_status'=>$types_status,
+			'types_users'=>$types_users,
+			'types_status_pretension'=>$types_status_pretension
+		]);
 	}
 
 	

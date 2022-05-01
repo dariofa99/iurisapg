@@ -10,29 +10,56 @@
 	@slot('body')
 	<div class="row">
 		<div class="col-md-12">   
-            <form method="POST" class="form_store" accept-charset="UTF-8" id="myformCreateEstado">
+            <form method="POST" class="form_store" enctype="multipart/form-data" accept-charset="UTF-8" id="myformCreateEstado">
                 <input type="hidden" name="estado_id">
                 <div class="form-group">
                     <label for="description">Estado</label>
-                    <select name="type_status_id" class="form-control" required>
-                       <option value="">Seleccione</option>
-                       @foreach($types_status as $key => $type_status)
-                       @if($key!=$conciliacion->estado_id)<option value="{{$key}}">{{$type_status}}</option>@endif
-                       @endforeach
-                    </select>                   
+                   @include("myforms.conciliaciones.componentes.estados_select_list")       
+                  {{-- <select name="type_status_id" class="form-control" required>
+                  
+                  
+                  
+                    @foreach($types_status as $key => $type_status)
+                      @if($key!=$conciliacion->estado_id)
+                           <option value="{{$key}}">{{$type_status}}</option>
+                      @endif
+                      @endforeach 
+                   </select>  --}}          
                 </div>
                 <div class="form-group">
                     <label for="description">Concepto</label>
                     <textarea name="concepto" class="form-control"  rows="5"></textarea>                        
                 </div> 
-                     
+
+                <div class="form-group"> 
+                    <label for="description">Subir archivo</label>
+                    <input type="file" name="status_file">                      
+                </div> 
+                    <div class="row">
+                    <div class="col-md-12">
+                        <table class="table" id="myReportList">
+                            <tbody>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                    <div class="row" id="alertmyReportList" style="display: none">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                Debe tener en cuenta que una vez guardado el estado se generaran los archivos correspondientes en pdf y estos no se podrán modificar
+                            </div>
+                        </div>
+                    </div>
+
+
                 <div class="col-md-12">
                     <div class="form-group">
                             <br>
                     <button type="submit" class="btn btn-block btn-primary btn-sm">
                         Guardar
                     </button>
-                    <button type="button" style="display:none" id="btn_cancel_upsoldoc" class="btn btn-block btn-default btn-sm">
+                    <button type="button" style="display:none" id="btn_ancel_upsoldoc" class="btn btn-block btn-default btn-sm">
                         Cancelar
                     </button>                            
                     </div>

@@ -1,8 +1,9 @@
 @extends('layouts.dashboard')
 @section('titulo_area')
 
+@if(currentuser()->can('crear_conciliaciones'))
 <a href="/conciliaciones/create" class="btn btn-success">Nueva conciliación</a>
-            
+@endif          
 @endsection
 @section('area_forms')
 
@@ -17,10 +18,14 @@
         Número
     </th>
     <th>
-        Estado
+        Solicitante
     </th>
+   
     <th>
         Tipo
+    </th>
+    <th>
+        Estado
     </th>
     <th>
         Fecha
@@ -33,16 +38,25 @@
     @foreach($conciliaciones as $key => $conciliacion)
     <tr>
         <td>
-            {{$conciliacion->id}}
+            {{$conciliacion->num_conciliacion}}
         </td>
         <td>
-            {{$conciliacion->estado->ref_nombre}}
+            @if(count($conciliacion->usuarios()->where('tipo_usuario_id',185)->get())>0)
+            {{$conciliacion->usuarios()->where('tipo_usuario_id',185)->first()->name}}
+            @else
+            Sin usuarios
+            @endif
         </td>
+      
         <td>
             {{$conciliacion->categoria->ref_nombre}}
         </td>
         <td>
-            {{$conciliacion->created_at}}
+            <span class="badge bg-{{$conciliacion->estado->color}}">{{$conciliacion->estado->ref_nombre}}</span> 
+        </td>
+        
+        <td>
+            {{getSmallDateWithHour($conciliacion->created_at)}}
         </td>
         <td>
             <a href="/conciliaciones/{{$conciliacion->id}}/edit" class="btn btn-primary">Editar</a>
@@ -53,6 +67,7 @@
 </tbody>
 </table>
 
+{{ $conciliaciones->appends(request()->query())->links() }}
 </div>
 </div>
 

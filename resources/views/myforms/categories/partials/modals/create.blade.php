@@ -22,19 +22,40 @@
 </div>
 
 <div class="form-group">
+  <label for="description">Nombre corto</label>
+ <input type="text" class="form-control " required name="short_name" id="short_name">
+</div>
+
+<div class="form-group">
     <label for="description">Utilizar en</label>
    <select required name="table" id="table" class="form-control">      
-       <option value="users">Usuarios</option>     
+       <option value="users">Usuarios</option> 
+       <option value="conciliaciones">Conciliaciones</option>     
    </select>
+</div>
+
+<div class="form-group">
+  <label for="description">Parte</label>
+ <select style="width: 100%"  required multiple name="parte[]" id="parte" class="form-control select2">
+     
+     <option value="solicitante">Solicitante</option>
+     <option value="rep_legal_solicitante">Representante legal - solicitante</option>
+     <option value="apoderado_solicitante">Apoderado de la parte solicitante</option>
+     <option value="solicitada" >Solicitada</option>
+     <option value="rep_legal_solicitada">Representante legal - solicitada</option>
+</select>
 </div>
 
 <div class="form-group">
     <label for="description">Sección</label>
    <select  required name="section" id="section" class="form-control">
        <option value="" >Seleccione...</option>
+       <option value="datos_personales">Datos personales</option>
        <option value="enfoque_diferencial">Enfoque diferencial</option>
        <option value="discapacidad" >Discapacidad</option>
+       <option value="socio_economica" >Inf. Socio-económica</option>
        <option value="grupo_etnico" >Grupo etnico</option>
+       <option value="sin_seccion" >Sin sección</option>
      
    </select>
 </div>

@@ -18,21 +18,29 @@ Registrado
 @include('msg.ajax.success')
 
 {!!Form::open([ 'id'=>'myform_expediente_user_edit','method'=>'post'])!!}
+	@if(isset($conciliacion))
+	<input type="hidden" id="conciliciacion" name="conciliacion_id" value="{{$conciliacion->id}}" >
+	<input type="hidden" id="type_solicitud_user" name="type_solicitud_user" value="" >
+	
+	@endif
 	<input type="hidden" name="_token" value="{{csrf_token()}}" id="token">
 	<input type="hidden" id="usercreated" name="usercreated" value="{{currentUser()->idnumber}}" >
 	<input type="hidden" id="userupdated" name="userupdated" value="{{currentUser()->idnumber}}" >
 	<input type="hidden"  name='cursando_id' value="1">
-
+	<input type="hidden" name="genero_id" value="9">
+	<input type="hidden" name="estadocivil_id" value="9">
+	<input type="hidden" name="estrato_id" value="9">
 	{!!Form::hidden('id',  null , ['class' => 'form-control', 'readonly', 'id'=>'id' ]); !!}
 	
 
 <div class="row">
+	<input type="hidden" name="active" id="active_text" value="0">
+	@if(!isset($conciliacion))
 	<div class="col-md-12">
-		<label for="active">Activo:</label><br>
-		<input type="hidden" name="active" id="active_text" value="0">
+		<label for="active">Activo:</label><br>		
 		<input type="checkbox" name="active" id="active_us" value="1">
 	</div>
-
+	@endif
 	<div class="col-md-6">
 		<div class="form-group">
 			{!!Form::label('Tipo de documento ') !!}
@@ -50,7 +58,7 @@ Registrado
 	<div class="col-md-6">
 		<div class="form-group">
 			{!!Form::label('Identificación: ') !!}
-			{!!Form::text('idnumber',  null  , ['class' => 'form-control', 'id'=>'idnumber','required','onBlur'=>'comprIdnumber()']); !!}
+			{!!Form::text('idnumber',  null  , ['class' => 'form-control onlynumber', 'id'=>'idnumber', 'data-toggle'=>'tooltip', 'title'=>'Solo números', 'required','onBlur'=>'comprIdnumber()']); !!}
 		</div> 
 	</div>
 
@@ -75,19 +83,16 @@ Registrado
 	</div>
 </div>
 
-@if(session('sede')->has('ocultar_inputs_form_user'))
-  <input type="hidden" name="genero_id" value="9">
-  <input type="hidden" name="estadocivil_id" value="9">
-  <input type="hidden" name="estrato_id" value="9">
-@else
-	<div class="col-md-4">
+@if(!session('sede')->has('ocultar_inputs_form_user'))
+
+<div class="col-md-{{isset($conciliacion) ? '12' : '4'}}">
 		<div class="form-group">
 			{!!Form::label('Tel. Celular: ') !!}
 			{!!Form::text('tel1', null, ['class' => 'form-control', 'id'=>'tel1','required']); !!}
 		</div>
 	</div>
 
-
+@if(!isset($conciliacion))
 	<div class="col-md-4">
 		<div class="form-group">
 			{!!Form::label('Telefóno Fijo: ') !!}
@@ -235,13 +240,13 @@ Registrado
 		</div>
 	</div>
 
-
+@endif
 
 
 <div id="content_aditional_data">
-	
+	@include('myforms.components_user.aditional_comp_data')
 </div>
-
+@if(!isset($conciliacion))
 	<div class="col-md-6">
 		<div class="form-group">
 			{!!Form::label('Dirección: ') !!}
@@ -255,9 +260,10 @@ Registrado
 			{!!Form::text('description', null, ['class' => 'form-control', 'id'=>'description']); !!}
 		</div>
 	</div>
-
+@endif 
 @endif
 
+@if(!isset($conciliacion))
 <div class="row">
 	<div class="col-md-12">		
 		<input type="checkbox" id="active_password" value="1">
@@ -269,8 +275,7 @@ Registrado
 		</div>
 	</div>
 </div>
-
-
+@endif
 
 	<div class="col-md-12" align="right">
 		<div class="form-group">

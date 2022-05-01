@@ -349,7 +349,7 @@ return response()->json($data);
                     "periodo"=>$nota_final['nota_aplicacion']['periodo'],
                     "tipo"=>$nota_final['nota_aplicacion']['tipo'],
                     "tipo_id"=>$nota_final['nota_aplicacion']['tipo_id'],
-                    "segmento_id"=>$nota_final['segmento_id']['nota'],
+                    "segmento_id"=>$nota_final['segmento_id'],
                     "docevname"=>$nota_final['nota_conocimiento']['docevname']
                 ];
 

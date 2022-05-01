@@ -222,6 +222,20 @@ class Expediente extends Model
           }
           
         }
+    } elseif (count($docentes)>0) {
+        foreach ($docentes as $key => $docente) {
+        
+    
+               $asignacion = new AsigDocenteCaso();
+               $asignacion->docidnumber =  $docente->idnumber;
+               $asignacion->asig_caso_id = $asignacion_caso->id;
+               $asignacion->user_created_id = \Auth::user()->idnumber;
+               $asignacion->user_updated_id = \Auth::user()->idnumber;
+               $asignacion->save();
+              break;
+            
+        }
+
     }
 
     }

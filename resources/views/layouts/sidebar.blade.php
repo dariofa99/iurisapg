@@ -6,7 +6,7 @@
       <div class="user-panel">
         <div class="pull-left image">
 
-         {!! HTML::image(currentUser()->image,'User Image', array('class' => 'img-circle')) !!}
+         {!! HTML::image('/thumbnails/'.currentUser()->image,'User Image', array('class' => 'img-circle')) !!}
            
         </div>
 
@@ -222,38 +222,29 @@
         <!--Menu reportes-->
      
 <!---->
- {{-----------------------------------menu asiganciones----------------------------------------}}
-@if(currentUser()->can("ver_conciliaciones"))
-            
-               <li class="treeview {{active('conciliaciones')}}">
-           
-          <a href="/conciliaciones"> 
-           <i class="fa fa-hand-paper-o" aria-hidden="true"></i> <span>Conciliaciones</span>
-            
-          </a>
-	
-         {{--   <ul class="treeview-menu">
-             
-    
-              <li> <a href="/conciliaciones">Estudiantes           
-            
-          </a>
-          </li>   
-             
-            
-            @if(currentUser()->hasRole('amatai') || currentUser()->hasRole('diradmin'))
-              <li>{!! link_to_route('horario.index', 'Docentes')!!}</li>
-             @endif
-
-    
-             
-
-           
-          </ul> --}} 
+ {{-----------------------------------menu conciliaciones----------------------------------------}}
+@if(currentUser()->can("crear_conciliaciones"))           
+          <li class="treeview">        
+                    <a href="#">
+                    <i class="fa fa-hand-paper-o" aria-hidden="true"></i>
+                      <span>Conciliaciones</span>  
+                      <span class="pull-right-container">
+                        <i class="fa fa-angle-left pull-right"></i>
+                      </span>
+                    </a>
+              <ul class="treeview-menu">       
+                <li><a href="/conciliaciones"> Ver conciliaciones </a></li>   
+                <li><a href="/audiencias"> Agenda audiencias </a></li>  
+          @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai'))))
+            <li><a href="{{route('reportes.create')}}"> Administrar formatos </a></li>        
+           @endif
+              </ul>
         </li>
-    @endif
-{{----------------------------------- fin menu asiganciones----------------------------------------}}
-  
+@endif
+{{----------------------------------- fin menu conciliaicones----------------------------------------}}
+    {{-- @if(currentUser()->hasRole('amatai') || currentUser()->hasRole('diradmin'))
+              <li>{!! link_to_route('horario.index', 'Docentes')!!}</li>
+             @endif --}}
 {{-----------------------------------menu calendario--------------------------------------}}
           @if(currentUser()->can("ver_horarios"))
          @if ( isset($active_calendar))
@@ -333,7 +324,7 @@
           <ul class="treeview-menu">
             @if(currentUser()->hasRole("amatai"))
                   
-            <li>{!! link_to_route('users.index', 'Usuarios y Roles')!!}</li>  
+            <li>{!! link_to_route('users.index', 'Usuarios')!!}</li>  
             <li>{!! link_to_route('users.index', 'Parametros Generales')!!}</li> 
 
             @endif

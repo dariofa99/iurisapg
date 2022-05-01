@@ -362,8 +362,17 @@ function datemodalcalendarest(color,horario,fecha) {
         texthorario["113"] = "4PM a 6PM";
 
   $("#tituloturnos").html('<div class="col-md-6">Truno: <span style="color: white; background-color: '+codcolor[color]+'; border-radius: 7px; padding: 0px 15px 0px 15px;"> '+textcolor[color]+'</span></div><div class="col-md-4">Horario: '+texthorario[horario]+'</div>');
+        //define turno presencial o virtual
+          var weeknumber = moment(fecha, "YYYY-MM-DD").isoWeek();
+          var parimparweek = parImpar(weeknumber);//1 par, 0 impar
+          var estadoturno=""//virtual,presencial
+
+          var fechacalendar = moment(fecha).format('YYYY-MM-DD HH:mm:ss');
+          var horacalendar = moment(fechacalendar).format('H');
+   
           var route = "/consultahor/"+color+"/"+horario+"/"+fecha;
 
+/*
 
           $.get(route, function(res){
 
@@ -371,6 +380,21 @@ function datemodalcalendarest(color,horario,fecha) {
                $('#contencalendarid').html('No hay información');
                   } else {
           $(res).each(function(key, value){
+
+            var idparimpar = parImpar(parseInt(key+1));//1 par, 0 impar
+            if (parimparweek == 1) {
+              if (idparimpar == 1) {
+                estadoturno = "Presencial" 
+              } else {
+                estadoturno = "Virtual"
+              }
+            } else {
+              if (idparimpar == 0) {
+                estadoturno = "Presencial" 
+              } else {
+                estadoturno = "Virtual"
+              }
+            }
 
                 
 @if (currentUser()->hasRole('coordprac') OR currentUser()->hasRole('diradmin') OR currentUser()->hasRole('dirgral') OR currentUser()->hasRole('amatai'))
@@ -412,7 +436,7 @@ function datemodalcalendarest(color,horario,fecha) {
                       $('#idlugarestasis'+key).val(value.astid_lugar);
                     }
                      if ( typeof value.astdescrip_asist === "undefined") {
-                      $('#comentarioestasis'+key).val('.');
+                      $('#comentarioestasis'+key).val(estadoturno);
                     } else {
                       $('#comentarioestasis'+key).val(value.astdescrip_asist);
                       $("#idasis"+key).val(value.id);
@@ -420,7 +444,7 @@ function datemodalcalendarest(color,horario,fecha) {
                      numid=parseInt(numid+1);
 @else
 
-$('#contencalendarid').append('<tr><td>'+parseInt(key+1)+'</td><td>'+value.name+' '+value.lastname+'</td><td>'+value.ref_nombre+'</td></tr>');
+$('#contencalendarid').append('<tr><td>'+parseInt(key+1)+'</td><td>'+value.name+' '+value.lastname+'</td><td>'+value.ref_nombre+' (Asiste: '+estadoturno+') </td></tr>');
 
 @endif
 
@@ -432,8 +456,122 @@ $('#contencalendarid').append('<tr><td>'+parseInt(key+1)+'</td><td>'+value.name+
 
           });
 
+  */
+
    // }
-  
+
+
+   $.ajax({
+		url: route,
+		headers: { 'X-CSRF-TOKEN' : token },
+		type:'GET',
+		datatype: 'json',
+		data: {},
+		 beforeSend: function(xhr){
+      xhr.setRequestHeader('X-CSRF-TOKEN', $("#token").attr('content'));
+      $("#wait").css("display", "block");   
+    },
+    success:function(res){		
+      	
+
+
+
+      
+      if (res == "") {
+               $('#contencalendarid').html('No hay información');
+                  } else {
+          $(res).each(function(key, value){
+            if (horacalendar == 8 || horacalendar == 14 || value.cursando_id == 114 || value.cursando_id == 115) {
+              
+              var idparimpar = parImpar(parseInt(key+1));//1 par, 0 impar
+              if (parimparweek == 1) {
+                if (idparimpar == 1) {
+                  estadoturno = "Presencial" 
+                } else {
+                  estadoturno = "Virtual"
+                }
+              } else {
+                if (idparimpar == 0) {
+                  estadoturno = "Presencial" 
+                } else {
+                  estadoturno = "Virtual"
+                }
+              }
+            } else { estadoturno = ""}
+                
+@if (currentUser()->hasRole('coordprac') OR currentUser()->hasRole('diradmin') OR currentUser()->hasRole('dirgral') OR currentUser()->hasRole('amatai'))
+                   $('#contencalendarid').append('<tr id="row_'+key+'">'+
+                    '<td><span class="lbl_index" id="lbl_index-'+key+'">'+numid+'</span></td>'+
+                    '<td>'+value.name+' '+value.lastname+''+
+                    '<input type="hidden" id="idasis'+key+'" value="'+value.id+'" name="idasis[]">'+
+                    '<input type="hidden" id="idnumberestasis'+key+'" value="'+value.idnumber+'" name="idnumberestasis[]"></td>'+
+                    '<td>'+value.ref_nombre+'</td>'+
+                    '<td><select class="form-control required" id="idasisestasis'+key+'" name="idasisestasis[]">'+
+                    '<option value="121">Asistió</option>'+
+                    '<option value="122">Falta simple</option>'+
+                    '<option value="123">Falta doble</option>'+
+                    '<option value="124">Permiso sin falta</option>'+
+                    '</select></td>'+
+                    '<td><select class="form-control required" id="idlugarestasis'+key+'" name="idlugarestasis[]"  >'+
+                    '<option value="130">Consultorios</option>'+
+                    '<option value="131">C.J. Virtuales</option>'+
+                    '<option value="132">Of. Desplazados</option>'+
+                    '<option value="133">Externo</option>'+
+                    '<option value="134">Otro</option>'+
+                    '</select></td>'+
+                    '<td><textarea class="form-control required" required rows="1" id="comentarioestasis'+key+'" name="comentarioestasis[]" style="height: 35px;min-height: 33px;max-height: 150px;"></textarea></td>'+
+                    '</tr>');
+
+                     if (typeof value.astid_tip_asist === "undefined") {
+                      $('#idasisestasis'+key).val('121');
+                      } else {
+                      var optionasis = '<option value="125">Reposición</option>'+
+                                        '<option value="126">Falta reposición</option>'+
+                                        '<option value="127">Turno extenporaneo</option>'+
+                                        '<option value="128">Turno fijo</option>';
+                        $('#idasisestasis'+key).append(optionasis);
+                        $('#idasisestasis'+key).val(value.astid_tip_asist);
+                      }
+                     if (typeof value.astid_lugar === "undefined") {
+                      $('#idlugarestasis'+key).val('130');
+                    } else {
+                      $('#idlugarestasis'+key).val(value.astid_lugar);
+                    }
+                     if ( typeof value.astdescrip_asist === "undefined") {
+                      $('#comentarioestasis'+key).val(estadoturno);
+                    } else {
+                      $('#comentarioestasis'+key).val(value.astdescrip_asist);
+                      $("#idasis"+key).val(value.id);
+                    }
+                     numid=parseInt(numid+1);
+@else
+
+$('#contencalendarid').append('<tr><td>'+parseInt(key+1)+'</td><td>'+value.name+' '+value.lastname+'</td><td>'+value.ref_nombre+' (Asiste: '+estadoturno+') </td></tr>');
+
+@endif
+
+          });
+  $('#idestlistcal').val('');//borra contenido contador lista estudiantes calendario
+  $('#idestlistcal').val(parseInt(parseInt(numid)));//coloca el contador de la lista de estudiantes calendario
+
+        }
+
+    $("#wait").css("display", "none");
+
+
+    
+	
+		},
+    error:function(xhr, textStatus, thrownError){
+      $("#wait").css("display", "none");
+        alert("Hubo un error con el servidor ERROR:: este es"+thrownError,textStatus);
+    }
+
+	});	
+
+
+
+
 }
 
   function datemodalcalendardoc(color,id,fecha,registableasis) {
@@ -875,6 +1013,16 @@ function store_asistencia(data){
         });
 
 }
+
+function parImpar(numero) {
+  if(numero % 2 == 0) {
+    return 1;
+  }
+  else {
+    return 0;
+  }
+}
+
 $( "#horariourl" ).change(function() {
 
         var data = this.value;

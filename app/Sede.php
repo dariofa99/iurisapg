@@ -31,5 +31,8 @@ class Sede extends Model
         return $this->belongsToMany(Configuracion::class,'configuraciones_sede','sede_id','configuracion_id')
         ->withPivot('id','sede_id','configuracion_id')->withTimestamps(); 
      } 
+
+     
+     
 }
  

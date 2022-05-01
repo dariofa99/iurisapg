@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Conciliacion;
 use Illuminate\Http\Request;
 use App\User;
 use App\Roles;
 use App\Expediente;
+
 use App\Solicitud;
 use App\ReferenceDataOptions;
 use App\ReferencesData;
@@ -45,10 +47,12 @@ class ExpedienteUserController extends Controller
     public function store(Request $request)
     {
 
+        //return response()->json(session('sede')->id_sede);
 
         if($request->ajax()){
 
             if(!$request->has('password')) $request['password'] = $request->idnumber;
+            if(!$request->has('email')) $request['email'] = $request->idnumber."@email.com";
 
             $user=User::create($request->all()); 
             $user->roles()->attach(8); 
@@ -60,9 +64,7 @@ class ExpedienteUserController extends Controller
                   'solicitud_id'=>$solicitud->id,                            
                   ])->publish();    
             }
-            if($request->has('reference_data_id')){
-
-   
+            if($request->has('reference_data_id')){   
                 foreach ($request->reference_data_id as $key => $rd_id) {
                     $var = "value_".$rd_id;
                     $data = $request->$var;             
@@ -78,7 +80,7 @@ class ExpedienteUserController extends Controller
                                 'user_id'=>$user->id,
                                 'reference_data_option_id'=>$data[0],
                                 'value'=>$data_text[0],
-                                'value_is_other'=>$data_value_other_text[0],
+                                'value_is_other'=>$data_value_other_text ? $data_value_other_text[0]:'',
                             ]);
                         }else{
                             foreach ($data as $key_2 => $option) {
@@ -97,15 +99,22 @@ class ExpedienteUserController extends Controller
                     }
                 }   
             }  
-                
-            //return response()->json($request->all());
+            $response=[];        
             if(session()->has('sede')){
                 $user->sedes()->attach(session('sede')->id_sede);
-              }
-            
-             return response()->json(['idnumber'=>$request->idnumber]
-              
-            ); 
+            }
+              if($request->has('conciliacion_id')) {
+               // $userc_con = count($user->conciliaciones()->where(['conciliacion_id'=>$request->conciliacion_id,'tipo_usuario_id'=>$request->tipo_usuario_id])->get());
+                 //   if($userc_con <= 0 ){
+                        $conciliacion = Conciliacion::find($request->conciliacion_id);
+                        $conciliacion->usuarios()->attach($user->id,[
+                            'tipo_usuario_id'=>$request->tipo_usuario_id
+                        ]);
+                  //  }
+                
+           } 
+           $response ['idnumber'] = $request->idnumber;
+             return response()->json($response); 
             
         }
     }
@@ -133,21 +142,14 @@ class ExpedienteUserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-
-    {
-
-
-
-         $user= User::find($id);
-        // $user->aditional_data;
-         $adtda = view('myforms.components_user.aditional_comp_data',compact('user'))->render();
-         $response = [
+    public function edit($id){     
+        $user= User::find($id);
+        $adtda = view('myforms.components_user.aditional_comp_data',compact('user'))->render();
+        $response = [
              'user'=> $user,
              'aditional_view'=> $adtda  
          ];
-
-            return response()->json($response); 
+        return response()->json($response); 
     }
 
     /**
@@ -159,12 +161,8 @@ class ExpedienteUserController extends Controller
      */
     public function update(Request $request, $id)
     {
-      
-        //return $request->all();
         $user= User::find($id);
-        if($request->has('reference_data_id')){
-
-   
+        if($request->has('reference_data_id')){   
         foreach ($request->reference_data_id as $key => $rd_id) {
             $var = "value_".$rd_id;
             $data = $request->$var;             
@@ -172,15 +170,12 @@ class ExpedienteUserController extends Controller
             $data_text = $request->$var2; 
             $value_other_text = 'value_other_text_'.$rd_id;
             $data_value_other_text = $request->$value_other_text;
-
             $reference = ReferencesData::find($rd_id); 
             $uad = UserAditionalData::where([
                 'reference_data_id'=>$rd_id,
-                'user_id'=>$id,
-                //'reference_data_option_id'=>$option
+                'user_id'=>$id,             
                 ])
-            ->first();
-          //  dd($id,$rd_id);
+            ->first(); 
             if($data){                
                 if($uad){                   
                     if($reference->type_data_id==168){
@@ -292,6 +287,19 @@ class ExpedienteUserController extends Controller
                 $response['view'] = view("myforms.components_exp.frm_oficina_virtual",compact('expediente'))->render();
             }
         }
+      // dd($request->all());
+        if($request->has('conciliacion_id')) {
+            $userc_con = count($user->conciliaciones()->where([
+                'conciliacion_id'=>$request->conciliacion_id,'tipo_usuario_id'=>$request->tipo_usuario_id])->get());
+                $conciliacion = Conciliacion::find($request->conciliacion_id);
+                if($userc_con <= 0 ){                   
+                    $conciliacion->usuarios()->attach($user->id,[
+                        'tipo_usuario_id'=>$request->tipo_usuario_id
+                    ]);
+                }
+            
+       }     
+
             if($result){
                 $response['user'] = $user;
               return response()->json($response); 
@@ -304,6 +312,8 @@ class ExpedienteUserController extends Controller
  
 
         }
+
+      
     }
 
     /**
@@ -315,5 +325,5 @@ class ExpedienteUserController extends Controller
     public function destroy($id)
     {
         //
-    }
+    } 
 }

@@ -11,17 +11,15 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use \App\User;
-use Intervention\Image\ImageManager;
 use Intervention\Image\ImageManagerStatic as Image;
 use Input;
 use Entrust; 
-use Storage;
 use App\Role;
-use DB;
+use DB; 
 use App\TablaReferencia; 
 use App\Turno;
 use App\Mail\ConfirmarCorreo;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Mail;  
 
 class MyusersController extends Controller 
 {
@@ -42,7 +40,7 @@ class MyusersController extends Controller
     public function users(Request $request){
       $users_list = DB::table('tipo_nota')->get();
       return $users_list;
-    }
+    }  
 
     public function index(Request $request)
     {
@@ -93,7 +91,30 @@ class MyusersController extends Controller
      */
     public function store(Request $request)
     {
-      // return $request->all();
+       //return $request->all();
+      if(!$request->ajax()){
+      
+        $messages = [
+          'email.unique' => 'El :attribute  ya existe en otra cuenta.',
+          'email.required' => 'El :attribute es requerido.',
+          'idnumber.unique' => 'El número de documento ya existe en otra cuenta.',
+      ];
+      $validator = Validator::make($request->all(), [
+          'email' => [
+                  'required','unique:users'
+          ],
+          'idnumber' => [
+            'required','unique:users'
+    ]
+          ],$messages);
+
+
+    if ($validator->fails()) {
+        return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+    }
+  }
         $date = Carbon::now();
         $user = User::create([
             'active' => $request['active'],
@@ -101,7 +122,7 @@ class MyusersController extends Controller
             'idnumber' => $request['idnumber'],
             'name' => $request['name'],
             'lastname' => $request['lastname'],
-            'password' => bcrypt($request['idnumber']),
+            'password' => $request->has('password') ? $request['password'] : bcrypt($request['idnumber']),
             'accesofvir' => $request['accesofvir'],
             'description' => $request['description'],
             'institution' => $request['institution'],
@@ -195,17 +216,21 @@ class MyusersController extends Controller
        $user = User::find($id);
 
 
-      /*  $messages = [
-                    'email' => 'El email no es valido o ya existe.',
-                    'password' => 'La contraseña debe tener minimo 6 caracteres.',
-                ]; */
-                 $validator = Validator::make($request->all(), [
-                    'email' => [
-                      'required',
-                        Rule::unique('users')->ignore($user->id)
-                      ]
-                    
-                 ]);
+       $messages = [
+        'email.unique' => 'El :attribute  ya existe en otra cuenta.',
+        'email.required' => 'El :attribute es requerido.',     
+        'idnumber.unique' => 'El número de documento ya existe en otra cuenta.',   
+    ];
+    $validator = Validator::make($request->all(), [
+      'email' => [
+        'required',
+          Rule::unique('users')->ignore($user->id)        
+      ],
+      'idnumber' => [
+                        Rule::unique('users')->ignore($user->id)    
+    ]
+        ],$messages);
+               
 
                 if ($validator->fails()) {
                     return redirect()->back()
@@ -236,54 +261,38 @@ class MyusersController extends Controller
       }
        
        
-      if($request->file('image')!=''){      
-       // dd($request->file('image'))   ;
-        $docum = $request->file('image');
-        $nombre_arch= $docum->getClientOriginalName();
-        $nombre_arch = htmlentities($nombre_arch);
-        $nombre_arch = preg_replace('/\&(.)[^;]*;/', '\\1', $nombre_arch);
-        $file_name = preg_replace('([^A-Za-z0-9. ])', '', $nombre_arch);             
-        $extension = $docum->extension();
-        $file_name = md5($file_name).'.'.$extension;
-        $file_route = time()."_".$file_name;                
-       // Storage::disk('profile_files')->put($file_route, file_get_contents($docum->getRealPath() ) );
-       // $complet_path = Storage::disk('profile_files')->url($file_route);
-        if ($user->image!='') {            
-           if(file_exists(public_path($user->image)) AND $user->image != "dist/img/user-default-min.jpg") {
-             unlink($user->image);               
-           }                             
-        }              
-       // $user->image = $complet_path;            
-        $user->save();               
-    }
 
 
-       if($request->image!=''){
-            $thumbnail = User::find($id);
-            $path = public_path().'/thumbnails/';
 
-        /*if ($thumbnail->image!='') {
-            //\File::delete($path.''.$thumbnail->idnumber.'.jpg');
-        }*/
+      if($request->image!=''){
+         //   $thumbnail = User::find($id);
+         $path = public_path().'/thumbnails/';
 
-        // $file = \Input::file('image');
-         //Creamos una instancia de la libreria instalada   
-          $image = Image::make(\Input::file('image'));
-         //Ruta donde queremos guardar las imagenes
-         
+         /*if ($thumbnail->image!='') {
+             //\File::delete($path.''.$thumbnail->idnumber.'.jpg');
+         }*/
+ 
+         // $file = \Input::file('image');
+          //Creamos una instancia de la libreria instalada   
+         // Image::configure(array('driver' => 'profile_files'));
+           $image = Image::make($request->image);
+          //Ruta donde queremos guardar las imagenes
+          
+ 
+          // Guardar Original
+          //$image->save($path.$file->getClientOriginalName());
+          // Cambiar de tamaño
+          $image->resize(215,215);
+          // Guardar
+          $image->save($path.''.$user->idnumber.'.jpg');
+          
+          //Guardamos nombre y nombreOriginal en la BD
+          //$thumbnail = User::find($id);
+          
+          $user->image = $user->idnumber.'.jpg';
+     $user->save();
+  }
 
-         // Guardar Original
-         //$image->save($path.$file->getClientOriginalName());
-         // Cambiar de tamaño
-         $image->resize(160,160);
-         // Guardar
-         $image->save($path.''.$thumbnail->idnumber.'.jpg');
-         
-         //Guardamos nombre y nombreOriginal en la BD
-         //$thumbnail = User::find($id);
-         
-         $user->image = $thumbnail->idnumber.'.jpg';
-      }
         $asig=true;
         $asigt = true;
        
@@ -306,14 +315,14 @@ class MyusersController extends Controller
         }
 
 
-      
+
        //$user->roles()->sync($request['idrol']);
 
 
        
        return Redirect::to('users/'.$user->id.'/edit');
-   
-  }
+    }
+
     /**
      * Remove the specified resource from storage.
      *
@@ -459,16 +468,13 @@ class MyusersController extends Controller
 
     public function cursoEmpty(Request $request){
      
-        foreach ($request->idnumber as $key => $idnumber) {
-            
-              
+        foreach ($request->idnumber as $key => $idnumber) {         
                 $user = User::where('idnumber',$idnumber)->first();
                 if ($request->curso_selected=='116' || $request->curso_selected=='117') {
                   $user->active=0;
                 }                
                 $user->cursando_id=1;
-                $user->save();
-             
+                $user->save();             
          }
         return redirect('/students');
 

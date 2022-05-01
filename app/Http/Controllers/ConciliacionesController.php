@@ -13,13 +13,26 @@ use App\ConciliationAditionalStaticData;
 use App\ReferencesStaticData;
 use App\ConciliacionComentario;
 use App\ConciliacionEstado;
+use App\ConciliacionPdfTemporal;
+use App\ConciliacionReporte;
+use App\AudienciaConciliacion;
+use App\PdfReporte;
+use App\PdfReporteDestino;
+use App\Periodo;
+use App\Traits\PdfReport as TraitPdf;
+use Barryvdh\DomPDF\PDF as DomPDFPDF;
+use Illuminate\Support\Facades\DB as FacadesDB;
+use PDF;
+use Str;
 use Storage;
+use App\SalasAlternasConciliacion;
+use Carbon\Carbon;
 
 class ConciliacionesController extends Controller
 {
+    use TraitPdf;
     public function __construct()
     {
-        
       $this->middleware('permission:ver_conciliaciones',   ['only' => ['index']]);
      // $this->middleware('permission:sustituir_casos',   ['only' => ['replacecaso']]);
     }
@@ -32,74 +45,16 @@ class ConciliacionesController extends Controller
     public function index(Request $request)
     {
 
-        /* 
-    		$cursando = TablaReferencia::where(['categoria'=>'cursando','tabla_ref'=>'turnos'])->pluck('ref_nombre','id');
-    		$ref_color = TablaReferencia::where(['categoria'=>'color','tabla_ref'=>'turnos'])->pluck('ref_nombre','id');
-    		$ref_horarios = TablaReferencia::where(['categoria'=>'horario','tabla_ref'=>'turnos'])->pluck('ref_nombre','id');
-           // $oficinas = Oficina::pluck('nombre','id');
-            $dias = TablaReferencia::where(['categoria'=>'dias_turno','tabla_ref'=>'turnos'])->pluck('ref_nombre','id');
-            
-            $estudiantes = $this->getEstudiantes();
- 
 
-    		$turnos = Turno::orderBy('trnid_color','asc')->get();
-    		$data_search='';
-
-    		if (isset($request->data_search) and !$request->ajax()) {
-    		    $data_search = $request->data_search;
- 
-    		$colores = DB::table('turnos')
-    		->join('users','users.idnumber','=','turnos.trnid_estudent')
-    		->select(
-    			DB::raw('SUM(if(trnid_color = "105", 1, 0)) AS amarillo'),
-    			DB::raw('SUM(if(trnid_color = "106", 1, 0)) AS azul'),
-    			DB::raw('SUM(if(trnid_color = "107", 1, 0)) AS verde'),
-    			DB::raw('SUM(if(trnid_color = "108", 1, 0)) AS gris'),
-    			DB::raw('SUM(if(trnid_color = "109", 1, 0)) AS rojo'),
-                DB::raw('SUM(if(trnid_color = "120", 1, 0)) AS morado')
-    		)
-            ->where('users.cursando_id',$request->data_search)->get();
-            
-            $colores = (object)$colores;
-
-//dd($turnos);
-    		}elseif(!$request->ajax()){
-                $colores = DB::table('turnos')
-            ->join('users','users.idnumber','=','turnos.trnid_estudent')
-            ->select(
-                DB::raw('SUM(if(trnid_color = "105", 1, 0)) AS amarillo'),
-                DB::raw('SUM(if(trnid_color = "106", 1, 0)) AS azul'),
-                DB::raw('SUM(if(trnid_color = "107", 1, 0)) AS verde'),
-                DB::raw('SUM(if(trnid_color = "108", 1, 0)) AS gris'),
-                DB::raw('SUM(if(trnid_color = "109", 1, 0)) AS rojo'),
-                DB::raw('SUM(if(trnid_color = "120", 1, 0)) AS morado')
-            )->get();
-            }
-
-        if ($request->ajax()) {
-            if ($request->data_search!='all' and !empty($request->data_search)) {
-            $estudiantes = $this->getEstudiante($request);
-            }
-//return response()->json($estudiantes);
-           /*  return view('myforms.frm_turnos_students_list_ajax',compact('estudiantes'))->render(); 
-        }
-
-    	 
-
-
-        $conciliaciones = Conciliacion::orderBy('created_at','asc')->paginate(10);
-    		/* return  view('myforms.conciliaciones.frm_list_turnos',[
-                'dias'=>$dias,
-                'oficinas'=>$oficinas,
-                'ref_horarios'=>$ref_horarios,
-                'ref_color'=>$ref_color,'turnos'=>$turnos,
-                'cursando'=>$cursando,'colores'=>$colores,
-                'data_search'=>$data_search,'estudiantes'=>$estudiantes,
-                'conciliaciones'=>$conciliaciones]); 
-    
-            */
-        $conciliaciones = Conciliacion::all();
+        $conciliaciones = Conciliacion::orderBy('created_at','desc')->paginate(10);
+       // $reporte = ConciliacionReporte::find(5);
         return view('myforms.conciliaciones.index',compact('conciliaciones'));
+    }
+
+    public function audiencias(Request $request)
+    {
+        $conciliaciones = Conciliacion::orderBy(DB::raw("FIELD(estado_id,'182')"),'desc')->paginate(10);
+        return view('myforms.conciliaciones.audiencias',compact('conciliaciones'));
     }
 
     /**
@@ -109,13 +64,18 @@ class ConciliacionesController extends Controller
      */
     public function create()
     {
-        //dd('puta');
+        $periodo = Periodo::where('estado','1')->first();
         $conciliacion = Conciliacion::create([
-            'fecha_cita'=>date('Y-m-d'),
-            'hora_inicio'=>'10:00',
+            'fecha_radicado'=>date('Y-m-d'),
+            'num_conciliacion'=>"0000-00",
             'categoria_id'=>175,
-            'estado_id'=>177,  
-           
+            'estado_id'=>177,
+            'periodo_id'=> $periodo->id,
+            'user_id'=>auth()->user()->id
+        ]);
+
+        $conciliacion->usuarios()->attach(auth()->user()->id,[
+            'tipo_usuario_id'=>183
         ]);
 
         return redirect('/conciliaciones/'.$conciliacion->id.'/edit');
@@ -149,10 +109,132 @@ class ConciliacionesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($id,Request $request)
     {
-        $conciliacion = Conciliacion::find($id);
-        return view('myforms.conciliaciones.edit',compact('conciliacion'));
+
+
+    //---------------------------------------
+
+    $cursando = TablaReferencia::where(['categoria'=>'cursando','tabla_ref'=>'turnos'])->pluck('ref_nombre','id');
+    
+    $estudiantes = $this->getEstudiantes();
+        $turnos = Turno::join('users','users.idnumber','=','turnos.trnid_estudent')
+        ->join('sede_usuarios','sede_usuarios.user_id','=','users.id')
+        ->join('sedes','sedes.id_sede','=','sede_usuarios.sede_id')
+        ->join('referencias_tablas as rc','rc.id','=','turnos.trnid_color')
+        ->join('referencias_tablas as rh','rh.id','=','turnos.trnid_horario')
+        ->join('referencias_tablas as cursos','cursos.id','=','users.cursando_id')
+        ->join('referencias_tablas as rd','rd.id','=','turnos.trnid_dia')
+        ->where('sedes.id_sede',session('sede')->id_sede)
+        ->select("turnos.id as id",'users.idnumber','users.cursando_id','users.id as estudiante_id','users.name','users.lastname',
+        'trnid_color','rc.ref_value as color_ref_value','rc.ref_nombre as color_nombre','cursos.id as curso_id',
+        'cursos.ref_nombre as curso_nombre','rh.ref_nombre as horario_nombre','trnid_horario','rd.ref_nombre as dia_nombre','trnid_dia')
+        ->orderBy('trnid_color','asc')->get();
+
+    		/*SELECT SUM(if(trnid_color = '105', 1, 0)) AS amarillo, SUM(if(trnid_color = '106', 1, 0)) AS Azul, SUM(if(trnid_color = '107', 1, 0)) AS verde, SUM(if(trnid_color = '108', 1, 0)) AS gris, SUM(if(trnid_color = '108', 1, 0)) AS rojo FROM users, turnos WHERE trnid_estudent`=idnumber` AND `cursando_id`='116'*/
+
+//dd($colores[0]->amarillo);
+//dd($estudiantes);
+
+
+
+    //-------------------------------------
+
+
+    $conciliacion = Conciliacion::find($id);
+
+    
+
+    if($conciliacion->estado_id==179){
+        $estado = $conciliacion->estados()->where('type_status_id',$conciliacion->estado_id)->orderBy("created_at","desc")->first();
+        $today =   Carbon::now();     
+        $estadoFecha = Carbon::parse($estado->created_at);    
+        $diferencia = $today->diffInDays($estadoFecha);
+        //dd($diferencia)  ;
+        if($diferencia>5){
+            $pdfs =  PdfReporteDestino::with('reporte')->where('status_id',182)            
+             ->get(); 
+            $estado = ConciliacionEstado::create([
+                "concepto"=>"Dias vencidos",
+                "type_status_id"=>182,
+                "user_id"=>auth()->user()->id,
+                "conciliacion_id"=>$conciliacion->id,
+            ]);
+            $conciliacion->estado_id = 182;
+            $conciliacion->save();
+            if(count($pdfs)>1000000){                   
+                foreach ($pdfs as $key_1 => $pdf_repor) {
+                    //obtengo el pdf temporal
+                    $reporte_t = ConciliacionPdfTemporal::where('parent_reporte_pdf_id',$pdf_repor->reporte_id)->first();
+                   //dd($reporte_t);
+                    if($reporte_t){  
+                        $reporte =     $reporte_t->reporte_child;          
+                        $bodytag = $this->getBody($reporte->report_keys,$reporte->reporte,$conciliacion);
+                        $reporte->delete();
+                        $name = $reporte->nombre_reporte;
+                        $config = json_decode($reporte->configuraciones); 
+                    }else{                            
+                        $bodytag = $this->getBody($pdf_repor->reporte->report_keys,$pdf_repor->reporte->reporte,$conciliacion);
+                        $name = $pdf_repor->reporte->nombre_reporte;
+                        $config = json_decode($pdf_repor->reporte->configuraciones); 
+                    }
+                    if($pdf_repor){
+                        $file_pie = $pdf_repor->reporte->files()->where('seccion','pie')->first();
+                        $pie_conf = $file_pie != null ? json_decode($file_pie->pivot->configuracion) : null;          
+                        $file_enc = $pdf_repor->reporte->files()->where('seccion','encabezado')->first();
+                        $encab_conf = $file_enc != null ? json_decode($file_enc->pivot->configuracion) : null;      
+                    }
+                  $pdf = PDF::loadView('pdf.conciliacion', 
+                        [
+                        'is_preview'=>false,
+                        'pdf'=> $bodytag,
+                        'margin'=>$config->margin_string, 
+                        'pie'=>$file_pie, 
+                        'pie_conf'=>$pie_conf,
+                        'encabezado'=>$file_enc,
+                        'encab_conf'=>$encab_conf
+                        ])
+                    ->setPaper($config->tipo_papel);
+                    $path = storage_path('app/conciliaciones_pdf');        
+                    $fileName =  time().'_'.md5($name).'.'. 'pdf' ;
+                    $pdf->save($path . '/' . $fileName);
+                    $path =   'app/conciliaciones_pdf';  
+                    $file = new \App\File();
+                    $file->original_name = $name ;   
+                    $file->encrypt_name = $fileName;  
+                    $file->path = $path . '/' . $fileName; 
+                    $file->size = '0000';             
+                    $file->save();
+                    $estado->files()->attach($file,[
+                        'conciliacion_id'=>$conciliacion->id
+                    ]);
+                }
+            }
+        }
+    }
+  
+    $numusers=$conciliacion->usuarios->count();
+    $audiencia = AudienciaConciliacion::where('id_conciliacion',$conciliacion->id)->first();
+    $salaalterna = SalasAlternasConciliacion::where(['idnumber'=>\Auth::user()->idnumber,"id_conciliacion"=>$conciliacion->id])->first();
+    $sala_alterna_url = "";
+    if ($salaalterna) {
+        $sala_alterna_url=$request->root()."/audiencia"."/salaalaterna"."/".$salaalterna->token_access;
+    }
+        if (!$audiencia) {  //si no existe lo crea
+            $audiencia="";
+        }
+       return  view('myforms.conciliaciones.edit',[
+        'cursando'=>$cursando,
+        'turnos'=>$turnos,
+        'estudiantes'=>$estudiantes,
+        'conciliacion'=>$conciliacion,
+        'cont'=>'1',
+        'audiencia'=>$audiencia,
+        'numusers'=>$numusers,
+        'sala_alterna_url'=>$sala_alterna_url]);
+
+
+       // return view('myforms.conciliaciones.edit',compact('conciliacion'));
     }
 
     /**
@@ -177,15 +259,94 @@ class ConciliacionesController extends Controller
     {
         //
     }
+     
+
+
 
     public function insertEstado(Request $request){
-       
-        $request['user_id'] = \Auth::user()->id;       
-        $comentario = ConciliacionEstado::create($request->all());
-        $conciliacion = Conciliacion::find($request->conciliacion_id);
-        $conciliacion->estado_id = $request->type_status_id;
-        $conciliacion->save();
-        $view = view('myforms.conciliaciones.componentes.solicitud_estados_ajax',compact('conciliacion'))->render();
+       // return response()->json($request->all());
+       $request['user_id'] = \Auth::user()->id;       
+       $estado = ConciliacionEstado::create($request->all());
+       $conciliacion = Conciliacion::find($request->conciliacion_id);
+       $conciliacion->estado_id = $request->type_status_id;
+       if($request->type_status_id == 180 )  $conciliacion->auto_admisorio = intval($conciliacion->auto_admisorio)+1;
+        if($request->type_status_id == 178 ){
+            $periodo = Periodo::where('estado','1')->first();      
+            $year = Date('Y');
+            $month = Date('m');       
+            $con_ul = Conciliacion::where('periodo_id',$periodo->id)
+            ->where('num_conciliacion','<>','0000-00')
+            ->orderBy('created_at','desc')->first();
+           
+            if($con_ul==null){
+                $id_num ='01';
+            }else{
+                $id_num =  explode('-',$con_ul->num_conciliacion)[1] + 1;
+                if($id_num<10)  $id_num =  '0'.$id_num;
+            }
+           // dd($id_num);
+            if($conciliacion->num_conciliacion=='0000-00')$conciliacion->num_conciliacion = $year."".$month."-".$id_num;
+            if($conciliacion->fecha_radicado=='0000-00-00')$conciliacion->fecha_radicado = date('Y-m-d');
+        }
+       $conciliacion->save();   
+       if($request->rpdf_id == 'no aplica'){          
+        $pdfs =  PdfReporteDestino::with('reporte')->where('status_id',$request->type_status_id)
+        ->whereIn('reporte_id',$request->rpdf_id)
+        ->get();       
+        foreach ($pdfs as $key_1 => $pdf_repor) {
+            //obtengo el pdf temporal
+            $reporte_t = ConciliacionPdfTemporal::where('parent_reporte_pdf_id',$pdf_repor->reporte_id)
+            ->first();
+           //dd($reporte_t);
+            if($reporte_t){  
+                $reporte =     $reporte_t->reporte_child;          
+                $bodytag = $this->getBody($reporte->report_keys,$reporte->reporte,$conciliacion);
+                $reporte->delete();
+                $name = $reporte->nombre_reporte;
+                $config = json_decode($reporte->configuraciones); 
+            }else{                            
+                $bodytag = $this->getBody($pdf_repor->reporte->report_keys,$pdf_repor->reporte->reporte,$conciliacion);
+                $name = $pdf_repor->reporte->nombre_reporte;
+                $config = json_decode($pdf_repor->reporte->configuraciones); 
+            }
+            if($pdf_repor){
+                $file_pie = $pdf_repor->reporte->files()->where('seccion','pie')->first();
+                $pie_conf = $file_pie != null ? json_decode($file_pie->pivot->configuracion) : null;          
+                $file_enc = $pdf_repor->reporte->files()->where('seccion','encabezado')->first();
+                $encab_conf = $file_enc != null ? json_decode($file_enc->pivot->configuracion) : null;      
+            }
+          $pdf = PDF::loadView('pdf.conciliacion', 
+                [
+                    'is_preview'=>false,
+                    'pdf'=> $bodytag,
+                    'margin'=>$config->margin_string,
+                    'pie'=>$file_pie, 
+                    'pie_conf'=>$pie_conf,
+                    'encabezado'=>$file_enc,
+                    'encab_conf'=>$encab_conf
+                ])
+            ->setPaper($config->tipo_papel);
+            $path = storage_path('app/conciliaciones_pdf');        
+            $fileName =  time().'_'.md5($name).'.'. 'pdf' ;
+            $pdf->save($path . '/' . $fileName);
+            $path =   'app/conciliaciones_pdf';  
+            $file = new \App\File();
+            $file->original_name = $name ;   
+            $file->encrypt_name = $fileName;  
+            $file->path = $path . '/' . $fileName; 
+            $file->size = '0000';             
+            $file->save();
+            $estado->files()->attach($file,[
+                'conciliacion_id'=>$conciliacion->id
+            ]);
+        }
+     }
+    if($request->has("status_file")){
+        $file = $estado->uploadFile($request->file('status_file'),'/concilacion_'.$conciliacion->id.'/status_'.$estado->id);
+        $estado->files()->attach($file,['conciliacion_id'=>$conciliacion->id]);   
+
+    }
+        $view = view('myforms.conciliaciones.componentes.conciliacion_estados_ajax',compact('conciliacion'))->render();
         return response()->json([
             'view'=>$view
         ]);
@@ -250,7 +411,7 @@ class ConciliacionesController extends Controller
         $comentario->save();
         $conciliacion = Conciliacion::find($request->conciliacion_id);
         
-        $view = view('myforms.conciliaciones.componentes.solicitud_estados_ajax',compact('conciliacion'))->render();
+        $view = view('myforms.conciliaciones.componentes.conciliacion_estados_ajax',compact('conciliacion'))->render();
         return response()->json([
             'view'=>$view
         ]);
@@ -354,6 +515,71 @@ class ConciliacionesController extends Controller
 			
 			return redirect("act_temp/".$filename); 
 		}
-	   }
-       
+	}
+
+    public function getEstadosReportesPdf(Request $request)
+    {
+        $estado = ConciliacionEstado::find($request->estado_id);
+        $estado->files = $estado->files()->where('conciliacion_id',$request->conciliacion_id)->get();
+        return response()->json($estado);
+    }
+
+    public function getUser(Request $request,$idnumber)
+    {
+       // return $request->all();
+        $user =User::where(['idnumber'=>$idnumber])->first();
+        $conciliacion = Conciliacion::find($request->conciliacion_id);
+        if($user){       
+          $user->roles;       
+          $view = view('myforms.conciliaciones.componentes.user_form',compact('conciliacion','user'))->render();
+          //$viewD = view('myforms.conciliaciones.componentes.user_detalles_form',compact('conciliacion','user'))->render();
+           return response()->json(['encontrado'=>true,'user'=>$user,'view'=>$view]);   
+        } 
+        $view = view('myforms.conciliaciones.componentes.user_form',compact('conciliacion'))->render();
+          
+          return  response()->json(['encontrado'=>false,'view'=>$view]);
+    }
+    public function getDetallesUser(Request $request,$idnumber)
+    {
+       // return $request->all();
+        $user =User::where(['idnumber'=>$idnumber])->first();       
+        if($user){       
+            $conciliacion = Conciliacion::find($request->conciliacion_id);
+          $user->roles;             
+          $view = view('myforms.conciliaciones.componentes.user_detalles_form',compact('user','conciliacion'))->render();
+           return response()->json(['encontrado'=>true,'user'=>$user,'view'=>$view]);   
+        } 
+        //$view = view('myforms.conciliaciones.componentes.user_detalles_form',compact('user'))->render();
+          
+         return  response()->json(['encontrado'=>false]);
+    }
+
+    public function deleteUser(Request $request){       
+        $user = DB::table('conciliacion_has_user')
+        ->where('id',$request->pivot)->delete();
+        return response()->json([
+            'user'=>$user
+        ]);
+    }
+
+    public function getEstudiantes(){
+
+        $users = DB::table('users')
+       ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
+       ->leftjoin('roles' , 'role_user.role_id','=','roles.id')
+       ->leftjoin('turnos' , 'turnos.trnid_estudent','=','users.idnumber')
+       ->leftjoin('referencias_tablas' , 'referencias_tablas.id','=','users.cursando_id')
+       ->leftjoin('sede_usuarios','sede_usuarios.user_id','=','users.id')
+       ->leftjoin('sedes','sedes.id_sede','=','sede_usuarios.sede_id')
+       ->where ('turnos.trnid_estudent','=',null)
+       ->where ('role_id', '6' ) 
+       ->where ('users.active', true)
+       ->where('sedes.id_sede',session('sede')->id_sede)
+       ->select('referencias_tablas.ref_nombre as cursando','users.active','users.id','users.idnumber',
+         DB::raw('CONCAT(users.name," ",users.lastname) as full_name')
+         ,'role_user.role_id', 'roles.display_name')->orderBy('users.created_at', 'desc')->get();
+
+  return ($users);
+ }
+
 } 

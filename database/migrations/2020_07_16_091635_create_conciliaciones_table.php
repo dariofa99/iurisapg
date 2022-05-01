@@ -15,12 +15,19 @@ class CreateConciliacionesTable extends Migration
     {
         Schema::create('conciliaciones', function (Blueprint $table) {
             $table->increments('id');
-            $table->date('fecha_cita');                        
-            $table->string('hora_inicio');            
+            $table->date('fecha_radicado');                        
+            $table->string('num_conciliacion');   
+            $table->string('auto_admisorio')->default("0");          
             $table->integer('estado_id')->unsigned(); // 
             $table->foreign('estado_id')->references('id')->on('referencias_tablas'); //Tipo de asistencia: asistencia, permiso, reposicion 
             $table->integer('categoria_id')->unsigned(); // 
-            $table->foreign('categoria_id')->references('id')->on('referencias_tablas'); //Tipo de asistencia: asistencia, permiso, reposicion 
+            $table->foreign('categoria_id')->references('id')->on('referencias_tablas'); 
+            $table->integer('periodo_id')->unsigned(); // 
+            $table->foreign('periodo_id')->references('id')->on('periodo'); //Tipo de asistencia: asistencia, permiso, reposicion 
+            $table->integer('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users')
+            ->onUpdate('cascade')->onDelete('cascade');
+            //Tipo de asistencia: asistencia, permiso, reposicion 
             $table->timestamps();
         });
 
@@ -32,7 +39,7 @@ class CreateConciliacionesTable extends Migration
             $table->foreign('conciliacion_id')->references('id')->on('conciliaciones'); //Tipo de asistencia: asistencia, permiso, reposicion 
             $table->integer('user_id')->unsigned(); // 
             $table->foreign('user_id')->references('id')->on('users'); //Tipo de asistencia: asistencia, permiso, reposicion 
-            $table->timestamps();
+            $table->timestamps(); 
         });
 
         

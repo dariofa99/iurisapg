@@ -337,10 +337,12 @@ class SolicitudesController extends Controller
 
     public function waitRoom($token)
     {
+       // dd('Hola');
         try {
             $solicitud = Solicitud::where('token',$token)->first();
+           /// dd ($solicitud->sedes);
             $tur_aten=  Solicitud::join('sede_solicitudes','sede_solicitudes.solicitud_id','=','solicitudes.id')
-        ->where("sede_id",session('sede')->id_sede)
+        ->where("sede_id",$solicitud->sedes[0]->id_sede)
         ->whereIn('type_status_id',[155,156])
             ->whereDate('solicitudes.created_at',date('Y-m-d'))
             ->orderBy("turno", 'desc')->first();
@@ -349,10 +351,11 @@ class SolicitudesController extends Controller
            
             return view('myforms.recepcion.frm_solicitud_espera',compact('solicitud','tur_aten','user'));
   
-        } catch (\Throwable $th) {
+       } catch (\Throwable $th) {
+           dd($th);
             return view('errors.error');
   
-        }
+       }
           }
 
     public function find(Request $request){

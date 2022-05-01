@@ -49,7 +49,7 @@
 	<div class="col-md-4">
 		<div class="form-group">
 			{!!Form::label('Número de Identificación: ') !!}
-			{!!Form::text('idnumber', $user->idnumber, ['class' => 'form-control', 'disabled' => 'disabled'] ); !!}
+			{!!Form::text('idnumber', $user->idnumber, ['class' => 'form-control onlynumber', 'disabled' => 'disabled'] ); !!}
 		</div>
 	</div>
 

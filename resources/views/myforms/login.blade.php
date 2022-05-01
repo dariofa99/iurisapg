@@ -87,7 +87,7 @@ Sigue estos pasos:<br>
                                 </a>
                             </div>
                             <div class="col-md-6" style="text-aling:center" align="center">
-                                <a class="btn btn-warning" href="https://youtu.be/U0DzDEDIdQU" target="_blank">
+                                <a class="btn btn-warning" href="/videos" target="_blank">
                                   <i class="fa fa-play-circle-o" aria-hidden="true"></i> Vídeo tutorial
                                 </a>
                             </div>

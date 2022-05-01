@@ -7,112 +7,127 @@
 </div>
 
 <div class="row">
-    <div class="col-md-3">
-        <div class="form-group">
-			<label>
-                @if($conciliacion->getStaticDataLabel('estado_civil',$section))
-                {{$conciliacion->getStaticDataLabel('estado_civil',$section)->display_name}}
-                @endif
-            </label>
-           
-                @if($conciliacion->getStaticDataLabel('estado_civil',$section))               
-                    <select data-name="estado_civil"  data-section="{{$section}}" @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
-                        disabled 
-                        class="form-control"
-                        @else 
-                            class="form-control  insert_adv"
-                        @endif>
-                        <option value="">Seleccione...</option>
-                        @foreach($conciliacion->getStaticDataLabel('estado_civil',$section)->options as $key => $value)
-                            <option data-option_id="{{$value->id}}" @if($conciliacion->getStaticDataVal('estado_civil',$section,$value->id) and $conciliacion->getStaticDataVal('estado_civil',$section,$value->id)->reference_data_option_id == $value->id) selected @endif value="{{$value->value}}">{{$value->value}}</option>
-                        @endforeach
-                    </select>
-                @endif
-            
-		</div>
-    </div>
+
+ 
+
 
     <div class="col-md-3">
         <div class="form-group">
 			<label>
-                @if($conciliacion->getStaticDataLabel('numero_personas_cargo',$section))
-                {{$conciliacion->getStaticDataLabel('numero_personas_cargo',$section)->display_name}}
-                @endif
+                Estado civil
             </label>
-           
-                @if($conciliacion->getStaticDataLabel('numero_personas_cargo',$section))               
-                    <select data-name="numero_personas_cargo"  data-section="{{$section}}" @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
+             <select disabled data-name="estado_civil"  data-section="{{$section}}" @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
                         disabled 
                         class="form-control"
                         @else 
                             class="form-control  insert_adv"
                         @endif>
                         <option value="">Seleccione...</option>
-                        @foreach($conciliacion->getStaticDataLabel('numero_personas_cargo',$section)->options as $key => $value)
-                            <option data-option_id="{{$value->id}}" @if($conciliacion->getStaticDataVal('numero_personas_cargo',$section,$value->id) and $conciliacion->getStaticDataVal('numero_personas_cargo',$section,$value->id)->reference_data_option_id == $value->id) selected @endif value="{{$value->value}}">{{$value->value}}</option>
+
+                        @foreach($estcivil as $key => $estado_civil)
+                            <option data-option_id="1" {{$user->estadocivil_id == $estado_civil->id ? 'selected' : '' }}  value="{{$estado_civil->id}}">{{$estado_civil->ref_nombre}}</option>
                         @endforeach
-                    </select>
-                @endif
+            </select >
+                
             
 		</div>
     </div>
+
     <div class="col-md-3">
         <div class="form-group">
 			<label >
-                @if($conciliacion->getStaticDataLabel('estrato',$section))
-                {{$conciliacion->getStaticDataLabel('estrato',$section)->display_name}}
-                @endif</label>
-            <input  data-name="estrato"  data-section="{{$section}}" required  type="text"
-            @if($conciliacion->getStaticDataVal('estrato',$section)) value="{{$conciliacion->getStaticDataVal('estrato',$section)->value}}" @endif
-            @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
-            disabled 
-            class="form-control"
-            @else 
-                class="form-control  insert_adv"
-            @endif>
+               Estrato</label>
+                <select disabled data-name="estrato"  data-section="{{$section}}" @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
+                    disabled 
+                    class="form-control"
+                    @else 
+                        class="form-control  insert_adv"
+                    @endif>
+                    <option value="">Seleccione...</option>
+
+                    @foreach($estrato as $key => $estra)
+                        <option data-option_id="1" {{$user->estrato_id == $estra->id ? 'selected' : '' }}  value="{{$estra->id}}">{{$estra->ref_nombre}}</option>
+                    @endforeach
+        </select >
 
 		</div>
     </div>
+
+    @foreach($conciliacion->getUserForm('solicitante','socio_economica') as $key => $question)
     <div class="col-md-3">
         <div class="form-group">
+            <label > {{$question->name}}</label>
+            <input data-name="{{$question->short_name}}"  data-section="{{$question->section}}" required  type="text"
+            @if($user->getDataValWShort($question->short_name))
+            value="{{$user->getDataValWShort($question->short_name)->value}}" @endif
+            @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
+             disabled 
+             class="form-control form-control-sm"
+            @else 
+            class="form-control form-control-sm insert_adv"
+             @endif disabled>
+    
+        </div>
+    </div>
+    @endforeach
+
+
+
+  {{--   <div class="col-md-3">
+        <div class="form-group">
 			<label>
-                @if($conciliacion->getStaticDataLabel('afiliado_regimen_subsidiado_salud',$section))
-                {{$conciliacion->getStaticDataLabel('afiliado_regimen_subsidiado_salud',$section)->display_name}}
-                @endif
-            </label>
-           
-                @if($conciliacion->getStaticDataLabel('afiliado_regimen_subsidiado_salud',$section))               
-                    <select data-name="afiliado_regimen_subsidiado_salud"  data-section="{{$section}}" @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
-                        disabled 
-                        class="form-control"
-                        @else 
-                            class="form-control  insert_adv"
-                        @endif>
-                        <option value="">Seleccione...</option>
-                        @foreach($conciliacion->getStaticDataLabel('afiliado_regimen_subsidiado_salud',$section)->options as $key => $value)
-                            <option data-option_id="{{$value->id}}" @if($conciliacion->getStaticDataVal('afiliado_regimen_subsidiado_salud',$section,$value->id) and $conciliacion->getStaticDataVal('afiliado_regimen_subsidiado_salud',$section,$value->id)->reference_data_option_id == $value->id) selected @endif value="{{$value->value}}">{{$value->value}}</option>
-                        @endforeach
-                    </select>
-                @endif
+                No. Personas a cargo
+            </label>  
+
+                <input data-name="numero_personas_cargo"  data-section="{{$section}}" required  type="text"
+                @if($user->getDataValWShort('numero_personas_cargo'))
+                value="{{$user->getDataValWShort('numero_personas_cargo')->value}}" @endif
+                @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
+                disabled 
+                class="form-control form-control-sm"
+                @else 
+                class="form-control form-control-sm insert_adv"
+                @endif>
             
 		</div>
     </div>
+
+    <div class="col-md-3">
+        <div class="form-group">
+			<label>
+                Afiliado a SISBEN
+            </label>
+           
+            <input data-name="numero_personas_cargo"  data-section="{{$section}}" required  type="text"
+            @if($user->getDataValWShort('afiliado_regimen_sisben'))
+            value="{{$user->getDataValWShort('afiliado_regimen_sisben')->value}}" @endif
+            @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
+            disabled 
+            class="form-control form-control-sm"
+            @else 
+            class="form-control form-control-sm insert_adv"
+            @endif>
+            
+		</div>
+    </div> --}}
+
+
 </div>
 
-<div class="row">
+{{-- <div class="row">
     <div class="col-md-3">
         <div class="form-group">
 			<label >
-                @if($conciliacion->getStaticDataLabel('ingresos_mensuales',$section))
-                {{$conciliacion->getStaticDataLabel('ingresos_mensuales',$section)->display_name}}
-                @endif</label>
-            <input  data-name="ingresos_mensuales"  data-section="{{$section}}" required  type="text"
-            @if($conciliacion->getStaticDataVal('ingresos_mensuales',$section)) value="{{$conciliacion->getStaticDataVal('ingresos_mensuales',$section)->value}}" @endif
+            Ingresos mensuales    
+            </label>
+            <input data-name="ingresos_mensuales"  data-section="{{$section}}" required  type="text"
+            @if($user->getDataValWShort('ingresos_mensuales'))
+            value="{{$user->getDataValWShort('ingresos_mensuales')->value}}" @endif
             @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
             disabled 
-            class="form-control"
+            class="form-control form-control-sm"
             @else 
-                class="form-control  insert_adv"
+            class="form-control form-control-sm insert_adv"
             @endif>
 
 		</div>
@@ -120,59 +135,53 @@
     <div class="col-md-3">
         <div class="form-group">
 			<label >
-                @if($conciliacion->getStaticDataLabel('egresos_mensuales',$section))
-                {{$conciliacion->getStaticDataLabel('egresos_mensuales',$section)->display_name}}
-                @endif</label>
-            <input data-name="egresos_mensuales"  data-section="{{$section}}" required  type="text"
-            @if($conciliacion->getStaticDataVal('egresos_mensuales',$section)) value="{{$conciliacion->getStaticDataVal('egresos_mensuales',$section)->value}}" @endif
-            @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
-            disabled 
-            class="form-control"
-            @else 
-                class="form-control  insert_adv"
-            @endif>
+               Egresos mensuales
+               </label>
+                <input data-name="egresos_mensuales"  data-section="{{$section}}" required  type="text"
+                @if($user->getDataValWShort('egresos_mensuales'))
+                value="{{$user->getDataValWShort('egresos_mensuales')->value}}" @endif
+                @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
+                disabled 
+                class="form-control form-control-sm"
+                @else 
+                class="form-control form-control-sm insert_adv"
+                @endif>
+    
 
 		</div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
 			<label>
-                @if($conciliacion->getStaticDataLabel('tipo_vivienda',$section))
-                {{$conciliacion->getStaticDataLabel('tipo_vivienda',$section)->display_name}}
-                @endif
+                Tipo de vivienda
             </label>
            
-                @if($conciliacion->getStaticDataLabel('tipo_vivienda',$section))               
-                    <select data-name="tipo_vivienda"  data-section="{{$section}}" @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
-                        disabled 
-                        class="form-control"
-                        @else 
-                            class="form-control  insert_adv"
-                        @endif>
-                        <option value="">Seleccione...</option>
-                        @foreach($conciliacion->getStaticDataLabel('tipo_vivienda',$section)->options as $key => $value)
-                            <option data-option_id="{{$value->id}}" @if($conciliacion->getStaticDataVal('tipo_vivienda',$section,$value->id) and $conciliacion->getStaticDataVal('tipo_vivienda',$section,$value->id)->reference_data_option_id == $value->id) selected @endif value="{{$value->value}}">{{$value->value}}</option>
-                        @endforeach
-                    </select>
-                @endif
+            <input data-name="tipo_vivienda"  data-section="{{$section}}" required  type="text"
+            @if($user->getDataValWShort('tipo_vivienda'))
+            value="{{$user->getDataValWShort('tipo_vivienda')->value}}" @endif
+            @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
+            disabled 
+            class="form-control form-control-sm"
+            @else 
+            class="form-control form-control-sm insert_adv"
+            @endif>
             
 		</div>
     </div>
     <div class="col-md-3">
         <div class="form-group">
 			<label >
-                @if($conciliacion->getStaticDataLabel('nivel_escolaridad',$section))
-                {{$conciliacion->getStaticDataLabel('nivel_escolaridad',$section)->display_name}}
-                @endif</label>
-            <input data-name="nivel_escolaridad"  data-section="{{$section}}" required  type="text"
-            @if($conciliacion->getStaticDataVal('nivel_escolaridad',$section)) value="{{$conciliacion->getStaticDataVal('nivel_escolaridad',$section)->value}}" @endif
-            @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
-            disabled 
-            class="form-control"
-            @else 
-                class="form-control  insert_adv"
-            @endif>
+                Nivel de escolaridad</label>
+                <input data-name="nivel_escolaridad"  data-section="{{$section}}" required  type="text"
+                @if($user->getDataValWShort('nivel_escolaridad'))
+                value="{{$user->getDataValWShort('nivel_escolaridad')->value}}" @endif
+                @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
+                disabled 
+                class="form-control form-control-sm"
+                @else 
+                class="form-control form-control-sm insert_adv"
+                @endif>
 
 		</div>
     </div>
-</div>
+</div> --}}

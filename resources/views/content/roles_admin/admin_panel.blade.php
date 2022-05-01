@@ -21,7 +21,7 @@ Editar
 <div class="container-fluid spark-screen">
     <div class="row">
         <!-- Nav tabs -->
-        <div class="col-md-12">
+        <div class="col-md-12 ">
         
      @include('content.roles_admin.navbar')
        
@@ -40,7 +40,7 @@ Editar
 
   <!-- Tab panes -->
   <div class="">
-    <div role="" class="" id="home"> 
+    <div role="" class="table-responsive no-padding" id="home"> 
     <table class="table table-hover" id="table_list" style="font-size:14px">
             
             <tbody>   

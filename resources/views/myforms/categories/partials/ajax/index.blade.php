@@ -5,14 +5,21 @@
     Nombre
     </th>
     <th>
+    Nombre en BD
+    </th>
+    <th>
     Uso en
     </th>
+    
     </thead>
     <tbody>
     @foreach ($categories as $category )
         <tr>
         <td>
         {{$category->name}}
+        </td>
+        <td>
+            {{$category->short_name}}
         </td>
         <td>
         {{$category->getCategory()}} 

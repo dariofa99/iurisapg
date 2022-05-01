@@ -3,16 +3,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Auth; 
-use Session;
-use Redirect;  
+
+
 use App\Http\Requests;
 use App\Http\Requests\LoginRequest;
 use App\Http\Controllers\Controller;
 use App\Sede;
+use App\LogSession;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Session;
 
 class LoginController extends Controller
 {
+
+    use AuthenticatesUsers ; 
+
     public function __construct()
     {
         try {
@@ -73,8 +81,9 @@ class LoginController extends Controller
         }      
         if(Auth::attempt([$clave => $request['user_name'], 'password' => $request['password'] ])){
 
+            if (Auth::user()->active) LogSession::create(['user_id'=>Auth::user()->id]);
             //Asignar sede
-           //dd(Auth::user()->sedes);
+           
             if(count(Auth::user()->sedes)<=0){
                 if(count(Sede::all())==1){
                     $sede = Sede::first();

@@ -27,7 +27,7 @@
 
                                 <tr>
                                   <th>IDENTIFICACIÓN:</th>
-                                   <td>{{  $expediente->solicitante->idnumber   }}
+                                   <td>{{  $expediente->solicitante->idnumber }}
                                    </td>
                                 </tr>
 

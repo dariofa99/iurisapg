@@ -25,28 +25,24 @@
                         </div>
                         @endif
                         @if($expediente->expfecha_res)
-                        <div class="col-md-2">
-                        
+                        <div class="col-md-2">                        
                             <div class="form-group">
                                 <label>Fecha respuesta</label>
                                 <p>
                                <label for="" id="lbl_expfecha_res">
                                {{  $expediente->expfecha_res  }} 
                                </label> 
-
                                 @if(currentUser()->hasRole('docente') or currentUser()->hasRole('diradmin') or currentUser()->hasRole('dirgral')  or currentUser()->hasRole('amatai')) 
                                 &nbsp;&nbsp;<a style="cursor: pointer;" data-toggle="modal" data-target="#fechalimitres">Modificar</a>
                                 @endif
                                 </p>
-                            </div>    
-                     
-                         
+                            </div>                         
                         </div>
                         @endif
                        
                         <div class="col-md-3 col-md-offset-3">
                                 <div class="pull-right" style="margin-top:20px;">
-                                    @if((currentUser()->hasRole('tomar_caso') and $expediente->getDocenteAsig()->name=='Sin asignar'))
+                                    @if((currentUser()->can('tomar_caso') and $expediente->getDocenteAsig()->name=='Sin asignar'))
                                         <a class="btn btn-primary" id="btnTomarCaso" ><i class="fa fa-check"> </i>
                                         Tomar Caso</a>
                                     @endif

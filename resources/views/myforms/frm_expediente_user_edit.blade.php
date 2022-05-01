@@ -234,7 +234,6 @@ Registrado
 		</div>
 	</div>
 
-
 <div id="content_aditional_data">
 	
 </div>

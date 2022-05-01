@@ -81,7 +81,27 @@ class User extends Authenticatable
     {
         $this->notify(new MyResetPassword($token));
     }
-    
+    public function tipo_conciliacion()
+    {
+       return $this->belongsToMany(TablaReferencia::class,'conciliacion_has_user','user_id','tipo_usuario_id')
+       ->withPivot('user_id','tipo_usuario_id','conciliacion_id')->withTimestamps();
+    } 
+    public function tipo_pdf_firmante()
+    {
+       return $this->belongsToMany(TablaReferencia::class,'pdf_reportes_users','user_id','tipo_usuario_id')
+       ->withPivot('user_id','tipo_usuario_id','conciliacion_id','token','codigo')->withTimestamps();
+    }  
+    public function conciliaciones()
+    {
+       return $this->belongsToMany(Conciliacion::class,'conciliacion_has_user','user_id','conciliacion_id')
+       ->withPivot('user_id','tipo_usuario_id','conciliacion_id')->withTimestamps();
+    } 
+
+    public function estado_civil()
+    {
+       return $this->belongsTo(TablaReferencia::class,'estadocivil_id');
+    } 
+
     public function turno(){           
     
         //return $this->hasMany('App\Turno','trnid_estudent','idnumber');
@@ -221,14 +241,29 @@ class User extends Authenticatable
 
 
     public function getDataVal($ref_id,$ref_option){
-        $ref_data = $this->aditional_data()
+        $ref_data = $this->aditional_data()       
         ->where([ 'reference_data_id'=>$ref_id,
                 'reference_data_option_id'=>$ref_option])->first();
+               
         if($ref_data){
             return $ref_data;
         }
        return false;
     }
+
+    public function getDataValWShort($short_name){
+        $ref_data = $this->aditional_data()
+        ->join('references_data','references_data.id','user_aditional_data.reference_data_id')
+       // ->join('referencias_tablas','referencias_tablas.id','estadocivil_id')
+        ->where(['short_name'=>$short_name])->first();
+           //dd($ref_data)     ;
+        if($ref_data){
+            return $ref_data;
+        }
+
+       return false;
+    }
+
     public function getNotificaciones($item=''){        
         switch ($item) {
             case 'casos_solicitados':
@@ -240,7 +275,7 @@ class User extends Authenticatable
               return [];
                 break;
         }
-        dd($casos_solicitados[0]->asignacion_estudiante);
+      ///  dd($casos_solicitados[0]->asignacion_estudiante);
         
     }
 

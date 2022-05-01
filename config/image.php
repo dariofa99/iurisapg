@@ -15,6 +15,6 @@ return [
     |
     */
 
-    'driver' => 'gd','profile_files'
+    'driver' => 'profile_files'
 
 ];

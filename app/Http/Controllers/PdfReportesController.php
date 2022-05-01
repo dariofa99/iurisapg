@@ -1,0 +1,236 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Conciliacion;
+use App\ConciliacionPdfTemporal;
+use App\ConciliacionReporte;
+use App\PdfReporte;
+use App\PdfReporteDestino;
+use App\Traits\PdfReport as PdfTrait;
+use PDF;
+use Illuminate\Http\Request;
+use Storage;
+
+//use Illuminate\Http\Response;
+
+class PdfReportesController extends Controller
+{
+    use PdfTrait;
+
+    public function loadPdf($conciliacion,$reporte,$estado=null){
+       // dd("");
+        $conciliacion = Conciliacion::find($conciliacion);
+        $reporte = PdfReporte::find($reporte);
+       // dd($reporte);
+        $pdf_temp = ConciliacionPdfTemporal::where(function ($query) use ($conciliacion,$reporte,$estado){
+            if($estado==null){
+                return $query->where([
+                    'conciliacion_id'=>$conciliacion->id,
+                    'parent_reporte_pdf_id'=>$reporte->id
+                ]);
+                
+            }else{
+                return $query->where([
+                    'conciliacion_id'=>$conciliacion->id,
+                    'status_id'=>$estado,
+                    'parent_reporte_pdf_id'=>$reporte->id
+                ]);
+            }           
+        })->first(); 
+        if($pdf_temp){
+            $reporte =  $pdf_temp->reporte_child;
+            $reporte->is_temp = true;
+        }
+        $cadena = '';
+       if($reporte){
+        $config = json_decode($reporte->configuraciones);  
+        //dd($config->margin_string);
+        $file_pie = $reporte->files()->where('seccion','pie')->first();
+        $pie_conf = $file_pie != null ? json_decode($file_pie->pivot->configuracion) : null;            
+        
+        $file_enc = $reporte->files()->where('seccion','encabezado')->first();
+        $encab_conf = $file_enc != null ? json_decode($file_enc->pivot->configuracion) : null;            
+       
+        $bodytag =  $this->getBody($reporte->report_keys,$reporte->reporte,$conciliacion);
+       
+        $pdf = PDF::loadView('pdf.conciliacion', 
+        [
+            'pdf'=> $bodytag,
+            'margin'=>$config->margin_string,
+            'pie'=>$file_pie,  
+            'pie_conf'=>$pie_conf,
+            'encabezado'=>$file_enc,
+            'encab_conf'=>$encab_conf
+        ])
+        ->setPaper($config->tipo_papel);
+        $path = public_path('/pdf_temp');
+        $fileName =  time().'.'. 'pdf' ;
+        $pdf->save($path . '/' . $fileName);
+      
+        return redirect('/pdf_temp' . '/' . $fileName)  ;
+        //return $pdf->stream('conciliacion.pdf'); 
+    // echo ($cadena);
+       // dd($bodytag);
+    }
+    
+   
+
+    }
+
+
+
+    public function loadPdfPreview(Request $request){
+        return dd($request->all());
+        array_map('unlink', glob(public_path('pdf_temp/*')));//elimina los archivos que el 
+        $reporte = PdfReporte::find($request->id);
+        if($request->reporte){
+        $conciliacion = null;
+        if($request->has('conciliacion_id')) $conciliacion = Conciliacion::find($request->conciliacion_id);
+       if($reporte){
+        $file_pie = $reporte->files()->where('seccion','pie')->first();
+        $pie_conf = $file_pie != null ? json_decode($file_pie->pivot->configuracion) : null;          
+        $file_enc = $reporte->files()->where('seccion','encabezado')->first();
+        $encab_conf = $file_enc != null ? json_decode($file_enc->pivot->configuracion) : null;      
+       }else{
+        $file_pie =null;
+        $pie_conf = null;          
+        $file_enc = null;
+        $encab_conf = null;      
+       }
+        
+        $bodytag = $this->getBody($request->report_keys,$request->reporte,$conciliacion);   
+        $config = $this->setConfig($request)     ;
+      //  dd($file_enc)    ;
+        $pdf = \PDF::loadView('pdf.conciliacion', [
+            'pdf'=> trim($bodytag),
+            'margin'=>$config['margin_string'],
+            'pie'=>$file_pie, 
+            'pie_conf'=>$pie_conf,
+            'encabezado'=>$file_enc,
+            'encab_conf'=>$encab_conf
+            ])
+        ->setPaper($config['tipo_papel']);
+        $path = public_path('/pdf_temp');
+        $fileName =  time().'.'. 'pdf' ;
+        $pdf->save($path . '/' . $fileName);
+        return response()->json([
+            'url'=>'/pdf_temp' . '/' . $fileName
+        ]);    
+    }
+    }
+    public function editAsignacionReporte(Request $request){
+        $asignacionReporte = PdfReporteDestino::where([
+            'tabla_destino'=>$request->tabla_destino,
+            'status_id'=>$request->status_id            
+       ])->get();
+        return response()->json($asignacionReporte);
+    }
+    public function asignarReporte(Request $request){
+        $asignacionReporte = PdfReporteDestino::where([
+            'tabla_destino'=>$request->tabla_destino ,
+            'status_id'=>$request->status_id            
+       ])->delete();
+       if($request->reporte_id and count($request->reporte_id)>0){
+        foreach ($request->reporte_id as $reporte_id) {
+            $asignacionReporte = PdfReporteDestino::create([
+                 'tabla_destino'=>$request->tabla_destino,
+                 'status_id'=>$request->status_id,
+                 'reporte_id'=>$reporte_id
+            ]);
+         }
+       }
+    
+       
+        return response()->json($asignacionReporte);
+    }
+    public function create(){
+        $conciliaciones = Conciliacion::all();
+        $reportes = PdfReporte::all();
+        $conciliacion = new Conciliacion();
+        return view('myforms.conciliaciones.reportes.edit',compact('conciliaciones','reportes','conciliacion'));
+   }
+    public function store(Request $request){
+      //  dd($request->all());
+        $config = $this->setConfig($request); 
+        $request['configuraciones'] = json_encode($config);
+        $co_reporte = PdfReporte::create($request->all());
+        if($request->file('encabezado_file')!=''){  
+            $configuracion = json_encode($this->setEncaConfig($request)); 
+            //$request['configuraciones'] = json_encode($configuracion);     
+            $file = $co_reporte->uploadFile($request->file('encabezado_file'),'/pdf_reportes_'.$co_reporte->id);
+            $co_reporte->files()->attach($file,[
+                'seccion'=>'encabezado' ,
+                'configuracion'=>$configuracion          
+                ]);                    
+		}
+        if($request->file('pie_file')!=''){     
+            $configuracion = json_encode($this->setPieConfig($request));        
+            $file = $co_reporte->uploadFile($request->file('pie_file'),'/pdf_reportes_'.$co_reporte->id);
+            $co_reporte->files()->attach($file,[
+                'seccion'=>'pie',
+                'configuracion'=>$configuracion                  
+                ]);                   
+		}
+        return response()->json($co_reporte);
+    }
+ 
+    public function update(Request $request,$id){
+      //  return $request->all();
+        $config = $this->setConfig($request);
+        $request['configuraciones'] = json_encode($config);
+        $co_reporte = PdfReporte::find($id); 
+        $co_reporte->fill($request->all());
+        $co_reporte->save();
+
+        $file_en = $co_reporte->files()->where('seccion','encabezado')->first();
+        $configuracion = json_encode($this->setEncaConfig($request));
+        if($file_en){            
+            $file_en->pivot->configuracion =  $configuracion ;
+            $file_en->pivot->save();
+        }        
+        if($request->file('encabezado_file')!=''){          
+           if($file_en and $file_en->path!=''){
+            Storage::delete("public/".$file_en->path);
+        }
+        if($file_en) $file = $file_en->delete();                            
+            $file = $co_reporte->uploadFile($request->file('encabezado_file'),'/pdf_reportes_'.$co_reporte->id);
+            $co_reporte->files()->attach($file,[
+                'seccion'=>'encabezado',
+                'configuracion'=>$configuracion          
+                ]);                    
+		}
+        $file_pie = $co_reporte->files()->where('seccion','pie')->first();
+        $configuracion = json_encode($this->setPieConfig($request));
+        if($file_pie){           
+            $file_pie->pivot->configuracion =  $configuracion ;
+            $file_pie->pivot->save();
+        }             
+        if($request->file('pie_file')!=''){              
+            if($file_pie and $file_pie->path!=''){
+             Storage::delete("public/".$file_pie->path);                  
+         }
+         if($file_pie) $file = $file_pie->delete();                  
+            $file = $co_reporte->uploadFile($request->file('pie_file'),'/pdf_reportes_'.$co_reporte->id);
+            $co_reporte->files()->attach($file,[
+                'seccion'=>'pie',
+                'configuracion'=>$configuracion                  
+                ]);                   
+		}
+        return response()->json($co_reporte);
+    }
+
+    public function edit($id){
+        $co_reporte = PdfReporte::find($id);
+        $config = json_decode($co_reporte->configuraciones);  
+        $co_reporte->configuraciones = $config;
+        $co_reporte->files->each(function($file){
+            //$rutaDeArchivo = storage_path("app/".$file->path);
+           // copy( $rutaDeArchivo, public_path("act_temp/".$file->original_name));
+            $file->temp_path = url(("storage/".$file->path));
+            $file->pivot->configuracion = json_decode($file->pivot->configuracion);
+        });
+        return response()->json($co_reporte);
+    }
+   
+}

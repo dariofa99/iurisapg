@@ -111,7 +111,7 @@ a {
 }
 
     </style>
-    
+@stack('styles')
 </head>
 <body class="content-wrapper" style="background-image: linear-gradient(-90deg,#c0c0c0 0,#ffffff 50%,#c0c0c0 100%);">
 
@@ -224,7 +224,8 @@ a {
 
 
     
-    
+    <div id="wait" style="display:none; position: absolute; width: 100%;min-height: 100%;height: auto;position: fixed;top:0; left:0;background-color: rgba(236, 240, 245, 0.8);" ><img src="{{asset('img/logo2.png')}}" id="load" width="67" height="71" style="margin-top:18%;margin-left:48%;padding:2px;" /><br><span style="margin-top:18%;margin-left:48%;padding:2px;color:#848484;font-size: 16px;">Cargando...<span></div>
+
 </body>
 <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
@@ -239,9 +240,15 @@ a {
   {!! Html::script('plugins/datepicker/js/moment.min.js')!!}
 @stack('scripts')
 
-
+ 
 <script type="text/javascript">
 var token = localStorage.getItem('tokensessionpc');
+const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+});
 $(document).ready(function(){
     $("#myLoginForm").on('submit',function(e){
       if (typeof(Storage) !== 'undefined') {

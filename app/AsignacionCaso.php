@@ -13,7 +13,7 @@ class AsignacionCaso extends Model
      */
     protected $table = 'asignacion_caso';
 
-    /** 
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
@@ -29,7 +29,7 @@ class AsignacionCaso extends Model
                             'ref_mot_asig_id'
 						];
 
-/*                        
+/*
 public function estudianteact()
     {
         return $this->belongsTo(User::class, 'asigest_id', 'idnumber');

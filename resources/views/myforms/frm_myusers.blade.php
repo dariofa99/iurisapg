@@ -2,6 +2,16 @@
 @section('area_forms')
 
 @include('msg.success')
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 {!!Form::open(['route'=>'users.store', 'method'=>'post'])!!}
 
 	<div class="col-md-12">
@@ -29,7 +39,7 @@
 	<div class="col-md-4">
 		<div class="form-group">
 			{!!Form::label('Número de Identificación: ') !!}
-			{!!Form::text('idnumber', null, ['class' => 'form-control', 'required' => 'required'] ); !!}
+			{!!Form::text('idnumber', null, ['class' => 'form-control onlynumber', 'data-toggle'=>'tooltip', 'title'=>'Solo números', 'required' => 'required'] ); !!}
 		</div>
 	</div>
 

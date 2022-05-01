@@ -38,7 +38,7 @@
                             Guardar
                             </button>
 
-                            <button type="button" style="display:none" id="btn_cancel_upsoldoc" class="btn btn-block btn-default btn-sm">
+                            <button type="button" style="display:none" id="btn_cancel_upsoldo" class="btn btn-block btn-default btn-sm">
                             Cancelar
                             </button>
                             

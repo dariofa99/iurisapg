@@ -48,7 +48,7 @@ Ver
 		<ul class="nav nav-tabs">
 		@if(!currentUser()->hasRole("solicitante"))
 		  <li class="active"><a href="#tab_1" data-toggle="tab">Datos del caso</a></li>
-		  @if($expediente->exptipoproce_id == 2)
+		  @if($expediente->exptipoproce_id == 2 or $expediente->exptipoproce_id=='1')
 		  <li><a href="#tab_2" class="tab-btn-show-notas" data-toggle="tab">Actuaciones</a></li>
 		  <li><a href="#tab_3" class="tab-btn-show-notas" data-toggle="tab">Cita o req. a solicitante</a></li> 
 		  @endif
@@ -73,24 +73,20 @@ Ver
 		<div class="tab-content">
 	@if(!currentUser()->hasRole("solicitante"))
 		<!--Tab pane tab_1-->
-		  <div class="tab-pane active" id="tab_1">
-		  
-			@include("myforms.components_exp.frm_datos_caso")
-			
-			@include("myforms.components_exp.frm_asesorias_caso")
-			
-			@include("myforms.components_exp.frm_notas_caso")
-		
+		  <div class="tab-pane active" id="tab_1">		  
+			@include("myforms.components_exp.frm_datos_caso")			
+			@include("myforms.components_exp.frm_asesorias_caso")			
+			@include("myforms.components_exp.frm_notas_caso")		
 		  </div>
 		<!--Tab pane tab_1-->
 		<!--Tab pane tab_2-->
 		<div class="tab-pane" id="tab_2">
 				<div class="row">
 						<div class="col-md-12">	
-						@if($expediente->exptipoproce_id=='2') 
+						@if($expediente->exptipoproce_id=='2' or $expediente->exptipoproce_id=='1') 
 							<div id="frm_actuacion_create">
-							@include('myforms.frm_actuacion_create') 
-							@include('myforms.frm_actuacion_list')
+								@include('myforms.frm_actuacion_create') 
+								@include('myforms.frm_actuacion_list')
 							</div>						
 						@else
 							<div id="frm_actuacion_create">

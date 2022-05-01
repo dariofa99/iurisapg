@@ -7,10 +7,7 @@
 </div> 
 </div>
 <div class="col-md-4">
-
 <button class="btn btn-success btn-sm btn-block"  id="btn_adm_documentos">Documentos</button>
-
-
 <button class="btn btn-warning btn-sm btn-block" data-type="151" id="btn_adm_notificaciones">Notificaciones</button>
 
 @if(currentUser()->can('crear_videollamada_oficina_vir'))
@@ -21,8 +18,7 @@
  <div class="col-md-12">
  <div class="alert alert-info">
  <h5>El usuario no esta activo o no tiene una solicitud. Para activar actualice la información del usuario en datos del caso.</h5>
- 	
- </div>
+  </div>
  </div>
 @endif
 </div>

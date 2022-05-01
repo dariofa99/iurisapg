@@ -1,3 +1,11 @@
+#wait{
+	z-index: 200000;
+}
+#load{
+animation: spin 5s linear infinite;
+}
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+
 .pasos-recepcion > .col-md-4{
 	max-width: 170px !important;
     padding-left: 5px !important;

@@ -62,7 +62,7 @@ class ExpedientesComposer
 		$estados = Estado::all(); 
 
 		$rdata_enf_dif = ReferencesData::where([
-			'section' => 'enfoque_diferencial',
+			'section' => 'enfoque_diferencial', 
 			'table'=>'users'
 			])->get();
 		$rdata_discap = ReferencesData::where([
@@ -75,12 +75,29 @@ class ExpedientesComposer
 			'table'=>'users'
 		])->get();
 	
+		$rdata_sin_secc = ReferencesData::where([
+			'section' => 'sin_seccion',
+			'table'=>'users'
+		])->get();
+
+		$rdata_info_soc_ec = ReferencesData::where([
+			'section' => 'socio_economica',
+			'table'=>'users'
+		])->get();
+
+		$rdatos_personales = ReferencesData::where([
+			'section' => 'datos_personales',
+			'table'=>'users'
+		])->get();
+
 	//	$user = \App\User::find(10458);
 
 
 		$view->with(['rama_derecho'=>$rama_derecho]) 
 		->with(['rdata_enf_dif'=>$rdata_enf_dif])
-	//	->with(['user'=>$user])
+		->with(['rdata_info_soc_ec'=>$rdata_info_soc_ec])
+		->with(['rdatos_personales'=>$rdatos_personales])
+		->with(['rdata_sin_secc'=>$rdata_sin_secc])
 		->with(['rdata_discap'=>$rdata_discap])
 		->with(['rdata_gretnc'=>$rdata_gretnc])
 		->with(['segmento'=>$segmento])

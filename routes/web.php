@@ -18,22 +18,32 @@ Route::get('pruebasocket','WebServicesController@pruebaSocket');
 Route::get('autorizacion', 'AutorizacionesController@verificar');
 Route::post('autorizacion/verificar', 'AutorizacionesController@verificarPdf');
 
+//se usa de manera general para emitir mensajes desde javascript a los sockets
+Route::post('msg/socketjs', 'MsgSocketOriginJsController@postSend');
 
-
-Route::resource('logout', 'LogoutController'); 
+Route::resource('logout', 'LogoutController');
 
 Route::get('terminosycondiciones', function () {
   return view('auth.terminosycondiciones');
 });
 
+Route::get('videos', function () {
+  return view('videos');
+});
 
+Route::get('audiencia/{code}','AudienciaController@ExternoSalaAudiencia');
+Route::post('audiencia/{code}','AudienciaController@ExternoSalaAudiencia');
+Route::get('audiencia/salaalaterna/{code}','AudienciaController@getSalaAlternaAudciencia');
 
+Route::get('/firmar/digital/{token}', 'ConciliacionesFirmasController@firmaVerify');
+Route::get('/firmar/digital/confirm/{token}/{codigo}', 'ConciliacionesFirmasController@firmaConfirm');
 
-
-
-
+Route::post('/firmar/digital/', 'ConciliacionesFirmasController@tokenVerify')->name('firmar.verify');
+Route::post('/firmar/ok', 'ConciliacionesFirmasController@firmaAccept')->name('firma.ok');
+Route::get('/firmar/digital/show/doc', 'ConciliacionesFirmasController@showFirmaAccept')->name('firmar.accept');
 ///rutas que requieren atenticación
 Route::group(['middleware' => ['auth']], function() {
+ 
 
 Route::post('mail', 'MailController@store')->name('mail.store');
 
@@ -175,7 +185,7 @@ Route::get('expediente/createstream/{id}', 'ExpedienteController@createStream');
 Route::get('expediente/sharestream/{id}', 'ExpedienteController@shareStream');  
 
 
-
+ 
 //Ediar usuarios desde Expedientes
 Route::resource('expuser', 'ExpedienteUserController');
 
@@ -276,7 +286,44 @@ Route::post('conciliaciones/update/anexo', 'ConciliacionesController@updateAnexo
 Route::get('conciliaciones/download/file/{file_id}', 'ConciliacionesController@downloadFile'); 
 Route::get('conciliaciones/delete/estado', 'ConciliacionesController@deleteEstado');
 Route::get('conciliaciones/edit/estado', 'ConciliacionesController@editEstado');
+Route::get('audiencias', 'AudienciaController@calendarAudiencias');
 Route::post('conciliaciones/update/estado', 'ConciliacionesController@updateEstado');
+Route::get('conciliaciones/get/estado/pdf', 'ConciliacionesController@getEstadosReportesPdf');
+Route::get('conciliacion/user/{idnumber}', 'ConciliacionesController@getUser');
+Route::get('conciliacion/detalles/user/{idnumber}', 'ConciliacionesController@getDetallesUser');
+Route::get('conciliacion/delete/user', 'ConciliacionesController@deleteUser');
+Route::post('conciliacion/audiencia/create', 'AudienciaController@audienciaCreate');
+Route::get('conciliacion/users/salasalternasaudiencia/{id}/{cont}', 'AudienciaController@getSalasAudiencia');
+Route::post('conciliacion/create/salasalternasaudiencia', 'AudienciaController@postSalasAudienciaCreate');
+Route::get('conciliacion/numusers/salasalternasaudiencia/{id}', 'AudienciaController@getUsersSalasAudiencia');
+Route::get('conciliacion/est/rol/{idconciliacion}', 'AudienciaController@getEstudianteRol');
+Route::get('conciliacion/estados/rol', 'AudienciaController@getconciliacionRolList');
+Route::post('conciliacion/update/est/rolconciliacion', 'AudienciaController@postConciliacionEstRolUpate');
+Route::get('conciliacion/turnos/estudiantes/asig/{data}/{id}', 'AudienciaController@getConciliacionTurnosEst');
+Route::get('conciliacion/chat/{chatroom}', 'AudienciaController@getChangeChatRoom');
+
+
+//PDF >Reportes
+
+
+Route::get('pdf/reportes/generate/{conciliacion}/{reporte}/{estado}', 'PdfReportesController@loadPdf')->name('pdf.generate');
+Route::post('pdf/reportes/preview', 'PdfReportesController@loadPdfPreview')->name('pdf.generate');
+Route::post('pdf/reportes/asignar', 'PdfReportesController@asignarReporte');
+Route::get('pdf/reportes/editar/asignacion', 'PdfReportesController@editAsignacionReporte');
+Route::resource('pdf/reportes', 'PdfReportesController');
+Route::post('pdf/reportes/{id}', 'PdfReportesController@update')->name('pdf.update');
+//Conciliaciones >Reportes
+Route::resource('conciliaciones/pdf', 'ConciliacionesReportesController');
+Route::post('conciliaciones/pdf/{id}', 'ConciliacionesReportesController@update');
+Route::post('conciliaciones/get/all/pdf', 'ConciliacionesReportesController@getAllPdf');
+Route::get('conciliacion/reportes/get', 'ConciliacionesReportesController@getPdfReportesConciliacion');
+Route::get('pdf/reportes/editar/temporal/{reporte}/{conciliacion}/{estado}', 'ConciliacionesReportesController@editReporteTemporal');
+Route::get('conciliacion/reporte/firmantes', 'ConciliacionesReportesController@getFirmantes');
+Route::post('conciliacion/reporte/firmantes', 'ConciliacionesReportesController@setFirmantes');
+Route::post('conciliacion/reporte/firmantes/reenviar/mails', 'ConciliacionesReportesController@reenviarMails');
+//Conciliaciones
+Route::resource('conciliaciones/hechos/pretenciones', 'ConcHechosPretencionesController');
+
 
 //imagen perfil
 Route::resource('thumbnail', 'ThumbnailController');
@@ -324,8 +371,12 @@ Route::get('/mail/html', function () {
 Route::group(['middleware' =>'front'], function() { 
 
 Route::group(['prefix' =>'oficina'], function() { 
+  Route::get('solicitante/conciliaciones','FrontController@conciliaciones')->name("front.conciliaciones");
+  Route::get('solicitante/conciliaciones/{id}/edit','FrontController@conciliacion_edit')->name("front.conciliacion.edit");
+ 
   Route::resource('solicitante','FrontController');
   Route::get('solicitante/solicitud/{id}','FrontController@solicitud_show');
+  
 
 });
 
@@ -354,6 +405,8 @@ Route::get('recepcion',function(){
  
   return view('myforms.recepcion.frm_solicitud');
 });  */
+
+Route::get('pdf/reportes/generate/{conciliacion}/{reporte}/{estado}', 'PdfReportesController@loadPdf')->name('pdf.generate');
 
 
 

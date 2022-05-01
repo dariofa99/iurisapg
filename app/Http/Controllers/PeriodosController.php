@@ -15,7 +15,7 @@ class PeriodosController extends Controller
   {
       
      // $this->middleware('permission:edit_usuarios',   ['only' => ['edit']]);
-      $this->middleware('permission:ver_periodos',   ['only' => ['index']]);
+      //$this->middleware('permission:ver_periodos',   ['only' => ['index']]);
   }
 
 	function getPeriodos($request){

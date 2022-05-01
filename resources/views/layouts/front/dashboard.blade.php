@@ -481,7 +481,7 @@ function getDateServer(){
 <!-- SweetAlert2 -->
   <script src="{{asset('plugins/sweetalert2/sweetalert2.min.js')}}"></script>
   <script src="{{asset('plugins/toastr/toastr.min.js')}}"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
 <!-- NewPush -->
 <script>var tokendefault = '';</script>
 <script src="{{asset('plugins/new-push/io.js?v=3')}}"></script>

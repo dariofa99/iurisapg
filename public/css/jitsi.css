@@ -1,0 +1,37 @@
+.boton-redondo{
+	height: 40px;
+	width: 40px;
+	line-height: 40px;
+	font-size: 1.2em;
+	border-radius: 50%;
+	background-color: rgb(44 45 55);
+	color: white;
+	text-align: center;
+	border: none;
+	cursor: pointer;
+	margin: 5px;
+	
+
+
+  }
+  .boton-redondo:hover{
+	opacity: 0.70;
+	-moz-opacity: .70;
+	filter:alpha (opacity=70);
+  }
+  .boton-redondo i{
+	color:#fff;
+	text-decoration:none;
+  }
+
+
+  .jitsi-exit {
+	float: right;
+	height: 30px;
+	width: 70px;
+	border-radius: 20px;
+	font-size: 0.9em;
+	margin-left: -70px;
+	margin-top: 15px;
+    line-height: 30px;
+  }

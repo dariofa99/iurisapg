@@ -44,6 +44,8 @@ class CaseLogController extends Controller
 		NewPush::channel('notifications_'.$user->idnumber)
 		->message(['notifications'=>$notifications])->publish();
         return response()->json($response); 
+
+		
 	}
 
 

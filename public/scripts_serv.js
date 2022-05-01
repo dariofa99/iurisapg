@@ -108,11 +108,12 @@ var dateServer = getDateServer();
 var color;
 var rutadescarga;
 var textodescarga;
-var row; 
+//ar row; 
 var estadoBtn='';
 var btnsParent ='';
 var btnsChildren = '';
-console.log(res)
+var estado_exp = $("#expestado_id").val();
+console.log(estado_exp)
 	$(res).each(function(key, value){
 		var aprobado = false;
 		var revisado = false;
@@ -122,6 +123,7 @@ console.log(res)
 		end_status = '';
 		ultimo = '';
 		var swac=false;
+
 		$(value.children).each(function(llave, val){
 				if (val.actestado_id =='104') {
 					aprobado = true;
@@ -135,9 +137,7 @@ console.log(res)
 					ultimo = val;
 					swac=true;
 				}
-
-		if (llave == 0) end_status = val;
-
+			if (llave == 0) end_status = val;
 		});
  
 		if (value.parent.actdocnomgen!=''){
@@ -169,7 +169,17 @@ console.log(res)
 		var bnt_rev_anexo_false =" <button "+estadoBtn+" type='button' value="+value.parent.id+"  class='btn btn-default btn-sm btn_change_status' style='color:#777'>Revisar</button>"
 		var bnt_rev_anexo_true =" <button "+estadoBtn+" type='button' value="+value.parent.id+" class='btn btn-default btn-sm btn_change_status' style='color:#777'>Quitar revisado</button>"
 		var bnt_return_actestado =" <button "+estadoBtn+" type='button' id="+value.parent.actestado_id+"	 value="+value.parent.id+" class='btn btn-warning btn-sm btn_change_status' style='color:#fff'>Volver a correcciones</button>"
-									
+			
+		if((value.user.name == 'docente' || value.user.name == 'estudiante') && (estado_exp != 1 && estado_exp !=  3)){
+			btn_editar = '';
+			btn_eliminar = '';
+			btn_revisar = '';
+			btn_ag_correccion = '';
+			btn_edit_revision = '';
+
+		}
+		
+
 			if(value.parent.actestado_id=='101'){
 				color='green';
 			if (value.user.name == 'estudiante') {
@@ -345,6 +355,14 @@ var con=0;
 						var bnt_rev_firmado_true =" <button "+estadoBtn+" type='button' value="+child.id+" class='btn btn-default btn-sm btn_change_status' style='color:#777'>Quitar revisado</button>"
 						var bnt_return_actestado_child =" <button "+estadoBtn+" type='button' id="+child.actestado_id+" value="+child.id+" class='btn btn-warning btn-sm btn_change_status' style='color:#ffffff'>Volver a correcciones</button>"
 						
+						if((value.user.name == 'docente' || value.user.name == 'estudiante') && (estado_exp != 1 && estado_exp !=  3)){
+							btn_editar_child = '';
+							btn_eliminar_child = '';
+							btn_revisar_child = '';
+							btn_edit_revision_child = '';
+							bnt_rev_firmado_false = '';
+				
+						}
 
                 		if (child.actdocnomgen!=''){
 							rutadescarga= "/actpdfdownload/"+child.id+"/estudiante";

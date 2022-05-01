@@ -1,4 +1,5 @@
 @foreach ($asignacion->autorizaciones as $autorizacion)
+
     <tr>
 <td>
 {{$autorizacion->nombre_estudiante}}

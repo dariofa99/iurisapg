@@ -130,7 +130,7 @@ if ($request['orgntsid']!=3) {
                    'estidnumber'=>$nota->estidnumber,
                    'periodo'=>$nota->periodo->prddes_periodo,
                    'segmento'=>$nota->segmento->segnombre, 
-                   'segmento_id'=>$nota->segmento->segmento_id,  
+                   'segmento_id'=>$nota->segmento->id,  
                    'created_at'=>Carbon::parse($nota->created_at), 
                   'updated_at'=>Carbon::parse($nota->updated_at),                 
                  ];

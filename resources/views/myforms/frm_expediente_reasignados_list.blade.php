@@ -53,12 +53,14 @@ Reasignaciones
               {{ $asignacion->created_at }}
             </td>
             <td>
-              {!! link_to_route('expedientes.edit', $title = 'Ir al Caso', $parameters = $asignacion->expediente->id, $attributes = ['class'=>'btn btn-success btn-sm btn-edit-le']) !!}
+              {!! link_to_route('expedientes.edit', $title = 'Ir al Caso', $parameters = $asignacion->asigexp_id, $attributes = ['class'=>'btn btn-success btn-sm btn-edit-le']) !!}
             </td>
           </tr>
         @endforeach
       </tbody>
     </table>
+
+    {{ $expreasignados->appends(request()->query())->links() }}
     </div>
   </div>
 </div>

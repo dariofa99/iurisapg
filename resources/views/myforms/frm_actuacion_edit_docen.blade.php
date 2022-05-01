@@ -26,19 +26,16 @@
 	<div class="col-md-6">
 		<div class="form-group">
 			{!!Form::label('Código expediente') !!}
-			{!!Form::text('actexpid',   $expediente->expid , ['id' => 'actexpid', 'class' => 'form-control', 'readonly' ]); !!}
+			{!!Form::text('actexpid', $expediente->expid, ['id' => 'actexpid', 'class' => 'form-control', 'readonly' ]); !!}
 		</div>
-	</div> 
-
- 
+	</div>  
 	<div class="col-sm-6">
-		{!!Form::label('Fecha creación: ') !!}
-		  
+		{!! Form::label('Fecha creación: ') !!}		  
 		<div class="input-group">
-		      <div class="input-group-addon">
-		        <i class="fa fa-calendar"></i>
-		      </div>
-		      {!!Form::text('actfecha', fechaActual(), ['id'=>'actfecha', 'class' => 'form-control', 'required' => 'required','data-inputmask'=>"'alias': 'yyyy/mm/dd'" , 'data-mask', 'readonly' ] ); !!}
+		<div class="input-group-addon">
+		    <i class="fa fa-calendar"></i>
+		</div>
+		{!!Form::text('actfecha', fechaActual(), ['id'=>'actfecha', 'class' => 'form-control', 'required' => 'required','data-inputmask'=>"'alias': 'yyyy/mm/dd'" , 'data-mask', 'readonly' ] ); !!}
 		</div>
 		 <!-- /.input group -->
 	</div>
@@ -72,6 +69,8 @@
 										'102' => 'Realizar correcciones',
 										
 										'104' => 'Aprobar',
+
+										'212' => 'Anular',
 									],
 
 			 null, ['id'=>'actestado','placeholder' => 'Selecciona...', 'class' => 'form-control required', 'required' => 'required' ]); !!}
@@ -187,6 +186,8 @@
 			{!! link_to('#', 'Actualizar', $attributes = array('id'=>'btn_act_edit_docen', 'type'=>'button', 'class'=>'btn btn-primary'), $secure=null)!!}
 		</div>
 	</div>
+	@else
+	No existe un periodo o un segmento activo
 @endif
 	{!!Form::close()!!}
 

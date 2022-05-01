@@ -2,7 +2,7 @@
 <div class="shadow">
 @include('myforms.components_exp.frm_datos_gen')
 
-</div>
+</div> 
     <!--cont_data_req-->
     <div @if(currentUser()->hasRole('estudiante')) id="cont_data_req" @endif>
         <div class="row">
@@ -38,7 +38,6 @@
 						<div class="form-group"> 
 							{!!Form::label('Departamento: ') !!}
 							<label class="lab-ast-req" title="Campo obligatorio"> * </label>
-
 							{!!Form::select('expdepto_id',$deptos,$expediente->expdepto_id, ['placeholder' => 'Selecciona...', 'class' => 'form-control required', 'required' => 'required','onblur'=>'comprDato("form_expediente_user_edit")','data-name'=>'Departamento',$disabled ]); !!}
 						</div>
 					</div>

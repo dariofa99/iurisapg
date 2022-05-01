@@ -121,7 +121,7 @@ class NotaExtController extends Controller
      */
     public function store(Request $request)
     {
-        //return response()->json($request->all());
+       // return response()->json($request->all());
         if($request->ajax()){
         $user =  User::where('idnumber',$request->estidnumber)->first();
         $user->origen = 5;
@@ -133,15 +133,15 @@ class NotaExtController extends Controller
            
             //return response()->json(['oficina'=>$request->all()]);
             $data = [
-                //'ntaaplicacion'=>$request->ntaaplicacion,
+                'ntaaplicacion'=>$request->ntaaplicacion,
                 'ntaconocimiento'=>$request->ntaconocimiento,
-                //'ntaetica'=>$request->ntaetica,
+                'ntaetica'=>$request->ntaetica,
                 'ntaconcepto'=>$request->ntaconcepto,
                 'orgntsid'=>$request->orgntsid,
                 'segid'=>$request->segid,
                 'perid'=>$request->perid,
                 'tpntid'=>$request->has('definitiva') ? 1 : $request->tpntid,
-                'expidnumber'=>$request->expid,
+                //'expidnumber'=>$request->expid,
                 'estidnumber'=>$request->estidnumber,
                 'extidnumber'=>auth()->user()->idnumber, 
                 'tbl_org_id'=>$request->oficina_id,
@@ -308,20 +308,36 @@ return response()->json($data);
      */
     public function update(Request $request, $id)
     {
-        //return response()->json($request->all());
+     //   return response()->json($request->all());
 
         if ($request->ajax()) {
-            if($request->ntaconocimientoid!=null){
+            if($request->nota_aplicacionid!=null){
                // return response()->json($nota);
-                $nota = NotaExt::find($request->ntaconocimientoid);
-                $nota->nota = str_replace('._','.0',$request['ntaconocimiento']);
+                $nota = NotaExt::find($request->nota_aplicacionid);
+                $nota->nota = str_replace('._','.0',$request['nota_aplicacion']);
                 $nota->extidnumber = auth()->user()->idnumber;
                 if($request->has('definitiva'))  $nota->tpntid = 1;
                 $nota->save();
             }
-            if($request->ntaconceptoid!=null){
-                $nota = NotaExt::find($request->ntaconceptoid);
-                $nota->nota = $request->ntaconcepto;
+            if($request->nota_conocimientoid!=null){
+                // return response()->json($nota);
+                 $nota = NotaExt::find($request->nota_conocimientoid);
+                 $nota->nota = str_replace('._','.0',$request['nota_conocimiento']);
+                 $nota->extidnumber = auth()->user()->idnumber;
+                 if($request->has('definitiva'))  $nota->tpntid = 1;
+                 $nota->save();
+             }
+             if($request->nota_eticaid!=null){
+                // return response()->json($nota);
+                 $nota = NotaExt::find($request->nota_eticaid);
+                 $nota->nota = str_replace('._','.0',$request['nota_etica']);
+                 $nota->extidnumber = auth()->user()->idnumber;
+                 if($request->has('definitiva'))  $nota->tpntid = 1;
+                 $nota->save();
+             }
+            if($request->nota_conceptoid!=null){
+                $nota = NotaExt::find($request->nota_conceptoid);
+                $nota->nota = $request->nota_concepto;
                 $nota->extidnumber = auth()->user()->idnumber;
                 if($request->has('definitiva'))  $nota->tpntid = 1;
                 $nota->save();
@@ -372,12 +388,14 @@ return response()->json($data);
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function delete(Request $request)
+    public function destroy(Request $request)
     {
-        /* $nota = DB::table('notas')
-            ->where('notas.expidnumber',$id)
-            ->delete(); */
-            if ($request->ajax()) {
+        //return response()->json($request->all());
+            $nota = DB::table('notas_ext')
+            ->where('estidnumber',$request->idnumber)
+            ->where('tbl_org_id',$request->tbl_org_id)
+            ->delete(); 
+           /*  if ($request->ajax()) {
                 $expediente = Expediente::find($request->exp_id);
                 foreach ($request->nota as $key_1 => $nota_r) {
                     foreach ($request->nota_id as $key_2 => $nota_id) {
@@ -388,12 +406,12 @@ return response()->json($data);
                     }
                     
                 }    
-                
+                 
     
                 return response()->json($nota);
-            }    
+            }    */
 
 
-        return response()->json($request->all());
+        return response()->json($nota);
     }
 }

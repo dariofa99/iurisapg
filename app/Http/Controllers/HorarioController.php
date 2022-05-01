@@ -75,6 +75,17 @@ public function calendario($tipo)
     //hace el vector con los dias de la semana que estan en la fecha dada
 
     $dt3 = Carbon::parse($fecha_i);
+
+    if ($dt3->dayOfWeek == Carbon::SATURDAY) {//si la fecha se establece en horario fuera del laboral 
+      $dt3 = $dt3->addDay(2);
+      $fecha = strtotime ( '+2 day' , strtotime ( $fecha ) ) ;
+      $fecha = date ( 'Y-m-d' , $fecha );
+    } elseif ($dt3->dayOfWeek == Carbon::SUNDAY) {//si la fecha se establece en horario fuera del laboral
+      $dt3 = $dt3->addDay();
+      $fecha = strtotime ( '+1 day' , strtotime ( $fecha ) ) ;
+      $fecha = date ( 'Y-m-d' , $fecha );
+    }
+
     if ($dt3->dayOfWeek == Carbon::MONDAY) {
       for ($i=0; $i <= 4; $i++) {
         $fecha2[$i]=$fecha;
@@ -755,7 +766,6 @@ public function calendario($tipo)
     }
     public function consultach($color,$horario,$fecha)
 {
-
     $fecha = Carbon::parse($fecha)->format('Y-m-d H:i:s');
       $asistencia= DB::table('asistencia')
                 ->join('users',  'users.idnumber','=','asistencia.astid_estudent')
@@ -785,6 +795,7 @@ public function calendario($tipo)
                         ->where('users.cursando_id', '=' , $curso2);})
                         ->where('sedes.id_sede',session('sede')->id_sede)
     ->orderBy('users.cursando_id', 'asc')
+    ->orderBy('users.idnumber', 'asc')
                 ->get();
                 //dd($turnos);
            return response()->json(

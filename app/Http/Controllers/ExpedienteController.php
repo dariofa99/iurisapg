@@ -62,7 +62,7 @@ array_map('unlink', glob(public_path('act_temp/'.currentUser()->id.'___*')));//e
         //$fechaini=$request->get('fechaini');
         //$fechafin=$request->get('fechafin'); 
 	      $numpaginate='100';
-
+ 
       }
 
       if (currentUser()->hasRole("estudiante")) {
@@ -92,7 +92,7 @@ array_map('unlink', glob(public_path('act_temp/'.currentUser()->id.'___*')));//e
               ->where('expidnumberest', '=', currentUser()->idnumber)
               ->where('asignacion_caso.asigest_id', '=', currentUser()->idnumber)
               ->where('asignacion_caso.activo',1)
-              ->where('sedes.id_sede',session('sede')->id_sede)
+              ->where('sedes.id_sede',session('sede')->id_sede) 
               ->orderBy(DB::raw("FIELD(expestado_id,'3','1','4','2','5')"))
               ->orderBy(DB::raw("asignacion_caso.created_at"), 'desc')
               ->groupBy ('asignacion_caso.asigexp_id')  
@@ -536,9 +536,10 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
         $asignacion_caso->save();
       if ($request['exptipoproce_id']==1) {     
         //solo para consultas de asesoria   
-        $expediente->asigDocente($asignacion_caso);          
+        $expediente->asigDocente($asignacion_caso);  // no tienen en cuenta la rama  del derecho
+        //$expediente->asigDocenteSeguimiento($asignacion_caso, $expediente->exptipoproce_id); // si tiene en cuenta la rama del derecho        
       }else{
-        $expediente->asigDocenteSeguimiento($asignacion_caso, $expediente->exptipoproce_id);
+        $expediente->asigDocenteSeguimiento($asignacion_caso, $expediente->exptipoproce_id); // si tiene en cuenta la rama del derecho
       }
       if ($request->has('solicitud_id')) {     
         //si viene desde solicitudes
@@ -800,13 +801,14 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
              
             $asignacion_caso->fecha_asig = $date->subDays(15)->format('Y-m-d');
             }
-            $expediente->asigDocente($asignacion_caso); 
+            $expediente->asigDocente($asignacion_caso); // no tiene en cuenta la rama del derecho  
+            //$expediente->asigDocenteSeguimiento($asignacion_caso, $expediente->exptipoproce_id); // si tiene en cuenta la rama del derecho  
            }            
          }
         }else if($request->exptipoproce_id==2){          
           if($expediente->getDocenteAsig()->idnumber!='Sin asignar'){
            $asignacion_caso->asig_docente()->delete();   
-           $expediente->asigDocenteSeguimiento($asignacion_caso, $expediente->exptipoproce_id);        
+           $expediente->asigDocenteSeguimiento($asignacion_caso, $expediente->exptipoproce_id);     // si tiene en cuenta la rama del derecho     
          }
         }
        }
@@ -836,7 +838,8 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
          if ($expediente->exptipoproce_id==3) {
            return Redirect::to('/defensas/oficio/'.$expediente->expid.'/edit');
          } 
-        return Redirect::to('expedientes/'.$expediente->expid.'/edit');
+         return redirect()->back();
+        //return Redirect::to('expedientes/'.$expediente->expid.'/edit');
        }
        return response()->json($expediente);        
     }
@@ -898,7 +901,9 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
             $expedientes= Expediente::leftjoin('sede_expedientes','sede_expedientes.expediente_id','=','expedientes.id')
 ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
 ->where('sedes.id_sede',session('sede')->id_sede)
-->Criterio($request->data,$request->tipo_busqueda)->orderBy(DB::raw("FIELD(expestado_id,'4','1','2','3')"))->orderBy(DB::raw("created_at"), 'desc')->paginate($numpaginate);
+->Criterio($request->data,$request->tipo_busqueda)
+->orderBy(DB::raw("FIELD(expestado_id,'4','1','2','3')"))
+->orderBy(DB::raw("expedientes.created_at"), 'desc')->paginate($numpaginate);
             
             $numEx= Expediente::leftjoin('sede_expedientes','sede_expedientes.expediente_id','=','expedientes.id')
             ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
@@ -938,7 +943,8 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
             $expedientes= Expediente::leftjoin('sede_expedientes','sede_expedientes.expediente_id','=','expedientes.id')
             ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
             ->where('sedes.id_sede',session('sede')->id_sede)
-            ->Criterio($request->data,$request->tipo_busqueda)->orderBy(DB::raw("created_at"), 'desc')->paginate($numpaginate);
+            ->Criterio($request->data,$request->tipo_busqueda)
+            ->orderBy(DB::raw("expedientes.created_at"), 'desc')->paginate($numpaginate);
             $numEx= Expediente::leftjoin('sede_expedientes','sede_expedientes.expediente_id','=','expedientes.id')
             ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
             ->where('sedes.id_sede',session('sede')->id_sede)
@@ -947,11 +953,11 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
             $expedientes= Expediente::leftjoin('sede_expedientes','sede_expedientes.expediente_id','=','expedientes.id')
             ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
             ->where('sedes.id_sede',session('sede')->id_sede)
-            ->orderBy(DB::raw("created_at"), 'desc')->paginate($numpaginate);
+            ->orderBy(DB::raw("expedientes.created_at"), 'desc')->paginate($numpaginate);
             $numEx= Expediente::leftjoin('sede_expedientes','sede_expedientes.expediente_id','=','expedientes.id')
             ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
             ->where('sedes.id_sede',session('sede')->id_sede)
-            ->orderBy('created_at', 'desc')->count();
+            ->orderBy('expedientes.created_at', 'desc')->count();
           }
 
       }
@@ -1026,7 +1032,7 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
        $user = $this->getUsers();
       
 
-      return view('myforms.frm_expediente_replace',compact('user','estudiantes'));
+      return view('myforms.frm_expediente_replace',compact('user'));
      }
 
      public function anteriorEstudiante(Request $request){
@@ -1205,8 +1211,8 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
 
      public function casosreasig(){
 
-      $expreasignados = AsignacionCaso::where('ref_asig_id',2)->get();
-
+      $expreasignados = AsignacionCaso::where('ref_asig_id',2)->paginate(100);
+//dd($expreasignados);
       return view('myforms.frm_expediente_reasignados_list',compact('expreasignados'));
      }
     public function selectest($texcon)

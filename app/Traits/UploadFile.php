@@ -18,14 +18,12 @@ trait UploadFile
 
         \Storage::disk($this->disk)->put($file_route, file_get_contents($docum->getRealPath() ) );
         $complet_path = \Storage::disk($this->disk)->url($file_route);
-
         $file = new \App\File();
         $file->original_name = $docum->getClientOriginalName();   
         $file->encrypt_name = $file_name;  
         $file->path = $complet_path; 
         $file->size = $size;             
         $file->save();
-
         return $file;
     }
 

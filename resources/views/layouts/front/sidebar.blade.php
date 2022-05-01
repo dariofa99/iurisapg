@@ -85,7 +85,7 @@
             </li> 
           @endforeach
              
-        
+         
            
           </ul>
         </li>
@@ -127,7 +127,23 @@
 
 
 
-
+@if(currentUser()->can("crear_conciliaciones"))           
+        <li class="treeview">        
+                  <a href="#">
+                  <i class="fa fa-hand-paper-o" aria-hidden="true"></i>
+                    <span>Conciliaciones</span>  
+                    <span class="pull-right-container">
+                      <i class="fa fa-angle-left pull-right"></i>
+                    </span>
+                  </a>
+            <ul class="treeview-menu">       
+              <li><a href="{{route("front.conciliaciones")}}"> Ver conciliaciones </a></li>   
+              {{-- <li><a href="/audiencias"> Agenda audiencias </a></li>  
+              <li><a href="{{route('reportes.create')}}"> Administrar formatos </a></li> 
+              --}}        
+            </ul>
+      </li>
+@endif
           
 
 

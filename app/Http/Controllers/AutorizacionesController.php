@@ -10,10 +10,8 @@ use PDF;
 class AutorizacionesController extends Controller
 {
     public function __construct()
-    {
-        
-        //$this->middleware('permission:edit_usuarios',   ['only' => ['edit']]);
-        $this->middleware('permission:ver_autorizaciones',   ['only' => ['index']]);
+    {        
+          $this->middleware('permission:ver_autorizaciones',   ['only' => ['index']]);
     }
 
     /**
@@ -27,6 +25,7 @@ class AutorizacionesController extends Controller
         ->where('sa.sede_id',session('sede')->id_sede)
         ->search($request)
         ->orderBy('autorizaciones.created_at','desc')->paginate(100);
+       // dd($autorizaciones);
         if($request->ajax()){
             return view('myforms.frm_autorizaciones_list_ajax',compact('autorizaciones'))->render();
         }   
@@ -121,7 +120,7 @@ class AutorizacionesController extends Controller
         if($request->has('estado') and $request->vista == 'autorizaciones'){
             $autorizaciones = Autorizacion::join('sede_autorizaciones as sa','sa.autorizacion_id','=','autorizaciones.id')
             ->where('sa.sede_id',session('sede')->id_sede)
-            ->orderBy('created_at','desc')->paginate(100);
+            ->orderBy('autorizaciones.created_at','desc')->paginate(100);
             $view = view('myforms.frm_autorizaciones_list_ajax',compact('autorizaciones'))->render();
         }else{
             $view = view('myforms.components_exp.frm_autorizaciones_ajax',compact('asignacion'))->render();

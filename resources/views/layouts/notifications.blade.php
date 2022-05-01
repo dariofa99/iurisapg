@@ -35,8 +35,7 @@
                       
                     </a>
                   </li>
-                  <!-- end message -->
-                  
+                  <!-- end message -->                  
                 @endforeach
 
                
@@ -52,19 +51,15 @@
           <li class="dropdown user user-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               
-  <img src="{{asset($user->image)}}" alt="User Image" class="user-image">
+  <img src="{{asset('/thumbnails/'.$user->image)}}" alt="User Image" class="user-image">
              
               <span class="hidden-xs">{{  $user->name  }}</span>
             </a>
             <ul class="dropdown-menu">
               <!-- User image -->
               <li class="user-header">
-               <img src="{{asset('thumbnails/'.$user->image)}}" alt="User Image" class="img-circle">
-             
-   
- 
-
-                <p>
+               <img src="{{asset('/thumbnails/'.$user->image)}}" alt="User Image" class="img-circle">
+              <p>
                   {{  $user->name  }} 
                   <small>Miembro desde {{   TiempoTrans(  $user->created_at  )   }} </small>
                 </p>

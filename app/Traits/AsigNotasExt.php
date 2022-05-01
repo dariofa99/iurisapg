@@ -14,35 +14,32 @@ trait AsigNotasExt {
       
 
   
-		Nota::create([
-                                    
+		                              Nota::create([                                    
                                     'nota'=>$cadena = str_replace('._','.0',$request['ntaconocimiento']), //cotrte1
                                     'cptnotaid'=>1, //competencia
                                     'orgntsid'=> $request['orgntsid'], //expedientes
                                     'segid'=> $request['segid'],
                                     'perid'=> $request['perid'],//id tabla asignaciones
                                     'tpntid'=> $request['tpntid'],//id tabla procedencia
-                                    'estidnumber'=> $request['estidnumber'],                                    
-                                   
+                                    'estidnumber'=> $request['estidnumber'],                        
                                     'extidnumber'=> $request['extidnumber'],
                                     'tbl_org_id'=> $request['tbl_org_id'],
                                  ]);
-/* 		Nota::create([
-                                    
+
+ 		                              Nota::create([                                    
                                     'nota'=> str_replace('._','.0',$request['ntaaplicacion']), //cotrte1
                                     'cptnotaid'=>2, //competencia
                                     'orgntsid'=> $request['orgntsid'], //expedientes
                                     'segid'=> $request['segid'],//id tabla asignaciones
                                     'tpntid'=> $request['tpntid'],
                                     'perid'=> $request['perid'],//id tabla procedencia
-                                  'estidnumber'=> $request['estidnumber'],                                    
-                                    'expidnumber'=> $request['expidnumber'],
-                                    'docidnumber'=> $request['docidnumber'],
+                                    'estidnumber'=> $request['estidnumber'],                        
+                                    'extidnumber'=> $request['extidnumber'],
                                     'tbl_org_id'=> $request['tbl_org_id'], 
                                  ]);
 
 
-		Nota::create([
+		                              Nota::create([
                                     
                                     'nota'=> str_replace('._','.0',$request['ntaetica']), //cotrte1
                                     'cptnotaid'=>3, //competencia
@@ -50,12 +47,11 @@ trait AsigNotasExt {
                                     'segid'=> $request['segid'],//id tabla asignaciones
                                     'tpntid'=> $request['tpntid'],
                                     'perid'=> $request['perid'],//id tabla procedencia
-                                 'estidnumber'=> $request['estidnumber'],                                    
-                                    'expidnumber'=> $request['expidnumber'],
-                                    'docidnumber'=> $request['docidnumber'],
+                                    'estidnumber'=> $request['estidnumber'],                           
+                                    'extidnumber'=> $request['extidnumber'],
                                     'tbl_org_id'=> $request['tbl_org_id'],
-                                 ]); */
-		Nota::create([
+                                 ]); 
+	                              	Nota::create([
                                     
                                     'nota'=>str_replace('._','.0',$request['ntaconcepto']), //cotrte1
                                     'cptnotaid'=>4, //competencia
@@ -63,8 +59,7 @@ trait AsigNotasExt {
                                     'segid'=> $request['segid'],//id tabla asignaciones
                                     'tpntid'=> $request['tpntid'],
                                     'perid'=> $request['perid'],//id tabla procedencia
-                                    'estidnumber'=> $request['estidnumber'],                                    
-                                 
+                                    'estidnumber'=> $request['estidnumber'],                       
                                     'extidnumber'=> $request['extidnumber'],
                                     'tbl_org_id'=> $request['tbl_org_id'],
                                  ]);
@@ -266,7 +261,6 @@ trait AsigNotasExt {
     if($totaln>0){
        $suma = 0;     
         foreach ($notas as $key => $nota) {
-          //dd($nota['nota']);
             $suma += $nota['nota'];
         }
         $promedio = $suma / $totaln;

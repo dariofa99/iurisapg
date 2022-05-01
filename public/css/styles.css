@@ -515,3 +515,86 @@ background:#F4F6F6;
 	padding:3px;
 	margin-bottom: 2px;
 }
+.item_con {
+	cursor: pointer;
+}
+.item_sp{
+	border-bottom: 1px solid #E5E8E8;
+	padding: 1px;
+
+}
+.my-fixed-item {
+    min-height: 120px;
+    width: 252px;
+    text-align: left;
+    word-wrap: break-word;
+    border: 1px solid  #ececec;
+	top:10;
+}
+.content_s{
+	height: 480px;
+	max-height:482px;
+	overflow: hidden;
+	border-bottom: 2px solid #E5E8E8;
+}
+#myFormAsigReporte select {
+	margin-bottom: 2px;
+}
+#myFormAsigReporte ul {
+	list-style: none;
+	padding: 0;
+}
+#bgtransparent{
+	position:fixed;
+	left:0;
+	top:0;
+	background-color:rgb(53, 53, 53);
+	opacity:0.6;
+	filter:alpha(opacity=60);
+	z-index: 999999;
+	
+	}
+#myReportList{
+	list-style: none;
+	padding: 0;
+	width: 100%;
+}
+#myReportList li{	
+	border: 1px solid red;
+	padding: 5;
+	width: 100%;
+	margin: 2px;
+	height: 10px;
+}
+.insert_adv{
+	margin-top: 3px;;
+}
+.content_hechos_pretenciones{
+	margin-top: 13px;
+}
+
+.content_he_pret{
+	
+	padding: 4px;
+	margin-top: 1px;
+} 
+.hecho_pret{
+	border: 1px solid red;
+	width: 1000px !important;
+	padding: 0px 295px 0px 295px;
+	
+}
+
+.btn_hepr{
+	margin: 1px 3px 0px 3px;
+	border-bottom: 1px solid rgb(132, 182, 247);
+}
+.but_mar{
+	margin-left: 2px;
+	border-bottom: 1px solid rgb(132, 177, 230);
+	color: rgb(132, 177, 230);
+}
+
+.swal2-popup.swal2-toast .swal2-title {
+	font-size: 1.4em !important;
+}

@@ -56,6 +56,12 @@ return [
             'url' => 'app/log_files',
         ],
 
+        'conc_status_files' => [
+            'driver' => 'local',
+            'root' => storage_path('app/con_estados_files'),
+            'url' => 'app/con_estados_files',
+        ],
+
         'conciliacion_files' => [
             'driver' => 'local',
             'root' => storage_path('app/conciliacion_files'),
@@ -80,10 +86,14 @@ return [
         ],
         'profile_files' => [
             'driver' => 'local',
-            'root' => public_path('app/profile_files'),
-            'url' => 'app/profile_files',
+            'root' => public_path('thumbnails'),
+            'url' => 'thumbnails',
         ],
-
+        'pdf_reporte_files' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/files_reportes'),
+            'url' => 'files_reportes',
+        ],
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

@@ -1,7 +1,7 @@
 {!!Form::model($expediente, ['route'=>['expedientes.update', $expediente->id], 'method'=>'PUT','id'=>'form_expediente_edit'])!!}
 <div class="shadow">
 @include('myforms.components_exp.frm_datos_gen')
-
+ 
 
 </div>
     <!--cont_data_req-->

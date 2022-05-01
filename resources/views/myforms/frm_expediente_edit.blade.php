@@ -41,31 +41,31 @@ Editar
  
  <div class="nav-tabs-custom"> 
 		<ul class="nav nav-tabs">
-		<li  class="active"><a href="#tab_office" data-toggle="tab">Oficina virtual</a></li>
+		<li  class="active"><a href="#tab_office" class="urlactive" data-toggle="tab">Oficina virtual</a></li>
 	
 		@if(!currentUser()->hasRole("solicitante"))
-		  <li><a href="#tab_1" data-toggle="tab">Datos del caso</a></li>
+		  <li><a href="#tab_1" class="urlactive" data-toggle="tab">Datos del caso</a></li>
 	
-		  <li><a href="#tab_2" class="tab-btn-show-notas" data-toggle="tab">Actuaciones</a></li>
+		  <li><a href="#tab_2" class="tab-btn-show-notas urlactive" data-toggle="tab">Actuaciones</a></li>
 		  @if($expediente->exptipoproce_id == 2)
-		  <li><a href="#tab_3" class="tab-btn-show-notas" data-toggle="tab">Cita o req. a solicitante</a></li> 
+		  <li><a href="#tab_3" class="tab-btn-show-notas urlactive" data-toggle="tab">Cita o req. a solicitante</a></li> 
 		  @endif
-		  <li><a href="#tab_4" class="tab-btn-show-notas" data-toggle="tab">Cierre de caso</a></li>
-		  <li><a href="#tab_5" class="tab-btn-show-notas"  data-toggle="tab">Calificaciones</a>
+		  <li><a href="#tab_4" class="tab-btn-show-notas urlactive" data-toggle="tab">Cierre de caso</a></li>
+		  <li><a href="#tab_5" class="tab-btn-show-notas urlactive"  data-toggle="tab">Calificaciones</a>
 		  </li>
 		  @if( (count($expediente->asignaciones)>1 || (currentUser()->hasRole('amatai') or currentUser()->hasRole('diradmin') or currentUser()->hasRole('coordprac') or currentUser()->hasRole('dirgral'))) and $expediente->expestado_id!=2)
 		  <li>
-			  <a href="#tab_6" class="tab-btn-show-notas" data-toggle="tab">Reasignar Caso</a>
+			  <a href="#tab_6" class="tab-btn-show-notas urlactive" data-toggle="tab">Reasignar Caso</a>
 		  </li>
 		  @endif
-		   <li><a href="#tab_7" data-toggle="tab">Citaciones</a></li>
+		   <li><a href="#tab_7" class="urlactive" data-toggle="tab">Citaciones</a></li>
 		@endif
 		   @if(currentUser()->hasRole("solicitante"))
 		   <li class="active"><a href="#tab_8" data-toggle="tab">Caso</a><li>
  			@endif
-		   {{-- <li><a href="#tab_9" data-toggle="tab">Quejas</a>
+		   {{-- <li><a href="#tab_9" class="urlactive" data-toggle="tab">Quejas</a>
 		  </li> --}}
-		   <li><a href="#tab_10" data-toggle="tab">Autorizaciones</a>
+		   <li><a href="#tab_10" class="urlactive" data-toggle="tab">Autorizaciones</a>
 		  </li>
 		</ul> 
 		

@@ -12,6 +12,8 @@
   {!! Html::style('bootstrap/css/bootstrap.min.css') !!}
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{ asset('plugins/fontawesome-free/css/all.min.css') }}">
+  
   <!-- Ionicons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
   <!-- Theme style -->
@@ -89,8 +91,11 @@
   <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
   <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
   <![endif]-->
+  @stack('styles')
+
+
 </head>
-<body class="hold-transition skin-purple fixed {{(Request::is('graficas') ? 'sidebar-collapse' : '' )}}">
+<body class="hold-transition skin-purple fixed {{((Request::is('graficas') || isset($ocultar_menu))? 'sidebar-collapse' : '' )}}">
 
 
 
@@ -506,6 +511,9 @@ function getDateServer(){
 <!-- SweetAlert2 -->
   <script src="{{asset('plugins/sweetalert2/sweetalert2.min.js')}}"></script>
   <script src="{{asset('plugins/toastr/toastr.min.js')}}"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+
 <!-- /propios -->
 {!! Html::script('scripts_serv.js?v=3')!!}
 {!! Html::script('js/AdminRoles.js?v=3')!!}
@@ -520,6 +528,20 @@ function getDateServer(){
 <div id="wait" style="display:none; position: absolute; width: 100%;min-height: 100%;height: auto;position: fixed;top:0; left:0;background-color: rgba(236, 240, 245, 0.8);" ><img src="{{asset('img/logo2.png')}}" id="load" width="67" height="71" style="margin-top:18%;margin-left:48%;padding:2px;" /><br><span style="margin-top:18%;margin-left:48%;padding:2px;color:#848484;font-size: 16px;">Cargando...<span></div>
 
 <script>
+  $(document).ready(function (){
+    $('.onlynumber').keyup(function (){
+      this.value = (this.value + '').replace(/[^0-9]/g, '');
+    });
+
+  $(':text[title]').tooltip({
+      placement: "right",
+      trigger: "focus"
+  });
+
+  });
+
+
+
   document.addEventListener('DOMContentLoaded', function () {
     var mySelect = $('#first-disabled2');
 

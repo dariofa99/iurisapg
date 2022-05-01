@@ -46,15 +46,15 @@ Estado
 <td>
 <a href="/expedientes/{{$autorizacion->asignacion->asigexp_id}}/edit" class="btn btn-success btn-sm btn_detalles_autorizacion">
 Ir al caso</a>
-<button data-id="{{$autorizacion->id}}" data-estado="{{$autorizacion->estado}}" class="btn btn-{{$autorizacion->estado ? 'default':'warning'}} btn-sm btn_change_estado_autorizacion">
+<button data-id="{{$autorizacion->autorizacion_id}}" data-estado="{{$autorizacion->estado}}" class="btn btn-{{$autorizacion->estado ? 'default':'warning'}} btn-sm btn_change_estado_autorizacion">
 {{$autorizacion->estado ? 'Quitar Autorizado':'Autorizar'}}
 </button>
 @if($autorizacion->estado)
-<a href="/autorizaciones/descargar/{{$autorizacion->id}}" target="_blank" class="btn btn-success btn-sm btn_print_autorizacion">
+<a href="/autorizaciones/descargar/{{$autorizacion->autorizacion_id}}" target="_blank" class="btn btn-success btn-sm btn_print_autorizacion">
 Descargar</a>
 @endif
 </td>
-</tr>
+</tr> 
 @endforeach
 </tbody>
 </table>
