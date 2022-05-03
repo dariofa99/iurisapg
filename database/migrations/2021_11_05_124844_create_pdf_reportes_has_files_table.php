@@ -16,6 +16,7 @@ class CreatePdfReportesHasFilesTable extends Migration
         Schema::create('pdf_reportes_has_files', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('seccion');
+            $table->longText('configuracion');
             $table->bigInteger('pdf_reporte_id')->unsigned();
             $table->foreign('pdf_reporte_id')->references('id')->on('pdf_reportes')->onDelete('cascade')
             ->onUpdate('cascade');

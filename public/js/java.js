@@ -2343,10 +2343,10 @@ return false;
                     status_id: $(this).val(),
                     conciliacion_id:$("#conciliacion_id").val()
                 };
-                getPdfReportesConciliacion(request);
+               // getPdfReportesConciliacion(request);
             }
-        }
-    );
+        });
+
      myPopupWindow = window;
     $("#myModal_create_estado").on("click", ".btn_edit_con_pdf", function (e) {
         e.preventDefault();

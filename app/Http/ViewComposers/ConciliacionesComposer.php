@@ -27,7 +27,8 @@ class ConciliacionesComposer
 	public function compose(View $view)
 	{
 
-		$types_status = TablaReferencia::where(['categoria'=>'type_status','tabla_ref'=>'conciliaciones'])
+		$types_status = TablaReferencia::where(['categoria'=>'type_status',
+		'tabla_ref'=>'conciliaciones'])
 		->where('ref_nombre','<>','Sin definir')
 		->pluck('ref_nombre','id'); 
 		$types_users = TablaReferencia::where(['categoria'=>'type_user_conciliacion',

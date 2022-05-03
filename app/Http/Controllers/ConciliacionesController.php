@@ -64,18 +64,19 @@ class ConciliacionesController extends Controller
      */
     public function create()
     {
-        $periodo = Periodo::where('estado','1')->first();
+        $periodo = Periodo::where('estado','1')
+        ->first();
         $conciliacion = Conciliacion::create([
             'fecha_radicado'=>date('Y-m-d'),
             'num_conciliacion'=>"0000-00",
-            'categoria_id'=>175,
-            'estado_id'=>177,
+            'categoria_id'=>173,
+            'estado_id'=>174,
             'periodo_id'=> $periodo->id,
             'user_id'=>auth()->user()->id
         ]);
 
         $conciliacion->usuarios()->attach(auth()->user()->id,[
-            'tipo_usuario_id'=>183
+            'tipo_usuario_id'=>199
         ]);
 
         return redirect('/conciliaciones/'.$conciliacion->id.'/edit');
@@ -145,7 +146,7 @@ class ConciliacionesController extends Controller
 
     
 
-    if($conciliacion->estado_id==179){
+    if($conciliacion->estado_id==194){
         $estado = $conciliacion->estados()->where('type_status_id',$conciliacion->estado_id)->orderBy("created_at","desc")->first();
         $today =   Carbon::now();     
         $estadoFecha = Carbon::parse($estado->created_at);    
@@ -156,11 +157,11 @@ class ConciliacionesController extends Controller
              ->get(); 
             $estado = ConciliacionEstado::create([
                 "concepto"=>"Dias vencidos",
-                "type_status_id"=>182,
+                "type_status_id"=>180,
                 "user_id"=>auth()->user()->id,
                 "conciliacion_id"=>$conciliacion->id,
             ]);
-            $conciliacion->estado_id = 182;
+            $conciliacion->estado_id = 180;
             $conciliacion->save();
             if(count($pdfs)>1000000){                   
                 foreach ($pdfs as $key_1 => $pdf_repor) {
@@ -212,7 +213,6 @@ class ConciliacionesController extends Controller
             }
         }
     }
-  
     $numusers=$conciliacion->usuarios->count();
     $audiencia = AudienciaConciliacion::where('id_conciliacion',$conciliacion->id)->first();
     $salaalterna = SalasAlternasConciliacion::where(['idnumber'=>\Auth::user()->idnumber,"id_conciliacion"=>$conciliacion->id])->first();
@@ -269,7 +269,7 @@ class ConciliacionesController extends Controller
        $estado = ConciliacionEstado::create($request->all());
        $conciliacion = Conciliacion::find($request->conciliacion_id);
        $conciliacion->estado_id = $request->type_status_id;
-       if($request->type_status_id == 180 )  $conciliacion->auto_admisorio = intval($conciliacion->auto_admisorio)+1;
+       if($request->type_status_id == 181 )  $conciliacion->auto_admisorio = intval($conciliacion->auto_admisorio)+1;
         if($request->type_status_id == 178 ){
             $periodo = Periodo::where('estado','1')->first();      
             $year = Date('Y');
@@ -450,7 +450,7 @@ class ConciliacionesController extends Controller
        }
         return response()->json($request->all());
     }
-
+ 
     public function storeAnexo(Request $request){
         $conciliacion = Conciliacion::find($request->conciliacion_id);
         if($request->file('conciliacion_file')!=''){          

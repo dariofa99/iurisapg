@@ -81,7 +81,7 @@ class PdfReportesController extends Controller
 
 
     public function loadPdfPreview(Request $request){
-        return dd($request->all());
+      //  return dd($request->all());
         array_map('unlink', glob(public_path('pdf_temp/*')));//elimina los archivos que el 
         $reporte = PdfReporte::find($request->id);
         if($request->reporte){
@@ -145,6 +145,7 @@ class PdfReportesController extends Controller
         return response()->json($asignacionReporte);
     }
     public function create(){
+        //dd("Ss");
         $conciliaciones = Conciliacion::all();
         $reportes = PdfReporte::all();
         $conciliacion = new Conciliacion();
