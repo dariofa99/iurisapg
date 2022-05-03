@@ -54,7 +54,12 @@ class Nota extends Model
         return $this->belongsTo(TipoNota::class, 'tpntid', 'id');
     }
 
-    public function docente_eva()
+    public function origen()
+    {
+        return $this->belongsTo(OrigenNota::class, 'orgntsid', 'id');
+    }
+    
+        public function docente_eva()
     {
         return $this->belongsTo(User::class, 'docidnumber', 'idnumber');
     }

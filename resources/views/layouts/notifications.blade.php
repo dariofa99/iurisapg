@@ -1,7 +1,7 @@
 
            <li class="dropdown messages-menu">
             <a id="{{(count($user->unreadNotifications)>0 ? 'btn_read_notifications':'btn_read' )}}" href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <i class="fa fa-bell-o"></i>
+              <i class="fa fa-bell"></i>
               <span id="lbl_notify_count" class="label label-danger" style="display:{{(count($user->unreadNotifications)<=0 ? 'none':'block' )}}">
               {{count($user->unreadNotifications)}}
               </span>

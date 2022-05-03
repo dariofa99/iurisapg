@@ -11,7 +11,7 @@
                                 <option   @if(array_key_exists($user->id, $tipos)  and $tipos[$user->id] == $key_id ) selected   @endif value="{{$key_id }}">{{$type_firma_user}} </option>
                             @endforeach
                             </select>   
-                            
+                             
                             @if(array_key_exists($user->id, $tipos_estados)  and $tipos_estados[$user->id] == 1 ) <small>
                            <i>
                             Ya se firmó el documento 
@@ -21,11 +21,11 @@
                         <td>
                             <input type="hidden" disabled id="input_selustipofirm-{{$user->id}}" name="tipo_firmante[]">
                             <input type="hidden" disabled id="input_selusfirm-{{$user->id}}" name="user_id[]">
-                            <input @if(array_key_exists($user->id, $tipos_estados)  and $tipos_estados[$user->id] == 1 ) disabled   @endif {{ (in_array($user->id,$ids) and (array_key_exists($user->id, $tipos)  and $tipos[$user->id] == 216 ))  ? "checked" : "disabled"}} data-userid="{{$user->id}}" id="check_selusfirm-{{$user->id}}" class="check_selusfirm" data-oldnew="{{ in_array($user->id,$ids) ? "old" : "new"}}" value="{{$user->id}}" type="checkbox" name="user_email_id[]">
+                            <input @if(array_key_exists($user->id, $tipos_estados)  and $tipos_estados[$user->id] == 1 ) disabled   @endif {{ (in_array($user->id,$ids) and (array_key_exists($user->id, $tipos)  and $tipos[$user->id] == 209 ))  ? "checked" : "disabled"}} data-userid="{{$user->id}}" id="check_selusfirm-{{$user->id}}" class="check_selusfirm" data-oldnew="{{ in_array($user->id,$ids) ? "old" : "new"}}" value="{{$user->id}}" type="checkbox" name="user_email_id[]">
 
                         </td>
                         <td style="display: none" class="volver_enviar_mail">
-                            <input class="check_selusvolverfirm" {{ (in_array($user->id,$ids) and (array_key_exists($user->id, $tipos)  and $tipos[$user->id] == 216 ))? "checked" : "disabled"}} data-oldnew="{{ in_array($user->id,$ids) ? "old" : "new"}}" value="{{$user->id}}" type="checkbox" name="email_user_id[]">
+                            <input class="check_selusvolverfirm" {{ (in_array($user->id,$ids) and (array_key_exists($user->id, $tipos)  and $tipos[$user->id] == 209 ))? "checked" : "disabled"}} data-oldnew="{{ in_array($user->id,$ids) ? "old" : "new"}}" value="{{$user->id}}" type="checkbox" name="email_user_id[]">
                         </td>
                         
         </tr>

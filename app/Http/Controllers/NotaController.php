@@ -105,13 +105,24 @@ class NotaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function notas_ver(Request $request)
     {
+        $user = User::where('idnumber',auth()->user()->idnumber)->first();
+        if(currentUser()->hasRole("estudiante")){
+            $user = User::where('idnumber',auth()->user()->idnumber)->first();
+        }elseif(currentUser()->can("ver_notas_estudiante")){
+            if($request->has('idnumber')){
+                $user = User::where('idnumber',$request->idnumber)->first();
+            }
+            
+        }
 
+        $notas = $user->getNotas($request);
+      
+       return view("myforms.notas_ver.index",compact('user','notas'));
 
-
-
-    }
+       
+   }
 
     /**
      * Store a newly created resource in storage.

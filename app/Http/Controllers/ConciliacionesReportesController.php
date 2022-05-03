@@ -46,7 +46,7 @@ class ConciliacionesReportesController extends Controller
            $ids[] = $user->id;
            $tipos[$user->id] =  $user->pivot->tipo_usuario_id;
            $tipos_estados[$user->id] =  $user->pivot->firmado;
-            if($user->pivot->tipo_usuario_id == 216 and $user->pivot->firmado == 0) $all_firmas = false;
+            if($user->pivot->tipo_usuario_id == 209 and $user->pivot->firmado == 0) $all_firmas = false;
         }
         //return response()->json($estados);
         $conciliacion = Conciliacion::find($request->conciliacion_id);
@@ -78,12 +78,14 @@ class ConciliacionesReportesController extends Controller
             $user->token = $us->token;
             $user->codigo = $us->codigo;
             Mail::to($user)->send(new Firma($user));
+            return response()->json($user);
         }
         return response()->json($users);
     }
 
     function setFirmantes(Request $request){
-       // return response()->json($request->all());
+       
+        //return response()->json($request->all());
         $pdf_rpd = PdfReporteDestino::find($request->estado_id);
         if($request->delete_users_id){
             $query = DB::table("pdf_reportes_users")
@@ -106,6 +108,7 @@ class ConciliacionesReportesController extends Controller
                 $codigo = Str::random(5);
                 $user =  $pdf_rpd->users()->attach($id,[
                     'tipo_usuario_id'=>$request->tipo_firmante[$key],
+                    'tipo_firma_id'=>$request->tipo_firmante[$key],
                     'conciliacion_id'=>$request->conciliacion_id,
                     'token'=>$token,
                     'codigo'=>$codigo
@@ -120,7 +123,7 @@ class ConciliacionesReportesController extends Controller
            
             }else{
                 //return response()->json($user);
-                if($user->tipo_usuario_id != $request->tipo_firmante[$key] and $request->tipo_firmante[$key] == 216 ){
+                if($user->tipo_usuario_id != $request->tipo_firmante[$key] and $request->tipo_firmante[$key] == 209 ){
                     $us = User::find($id);
                     $us->token = $user->token;
                     $us->codigo = $user->codigo;

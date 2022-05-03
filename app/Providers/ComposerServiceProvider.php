@@ -23,6 +23,11 @@ class ComposerServiceProvider extends ServiceProvider
             'myforms.conciliaciones.*',    
         ],'App\Http\ViewComposers\ConciliacionesComposer'); 
 
+        
+        View::composer([
+            'myforms.notas_ver.*',    
+        ],'App\Http\ViewComposers\NotasComposer');
+        
         View::composer([
             'myforms.frm_expediente_create',
             'myforms.frm_expediente_edit',

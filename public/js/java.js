@@ -2750,7 +2750,7 @@ return false;
 
     $("#myFormAsigFirmaPdf").on("change",".select_type_firma",function name(e) {
         console.log($(this).val());
-        if($(this).val()!='216' && $(this).val()!=''){           
+        if($(this).val()!='209' && $(this).val()!=''){           
             $("#check_selusfirm-"+$(this).attr("data-userid")).prop("disabled",true);
             $("#check_selusfirm-"+$(this).attr("data-userid")).prop("checked",false);
             $("#input_selusfirm-"+$(this).attr("data-userid")).val($(this).attr("data-userid"));
@@ -2901,7 +2901,7 @@ function getFirmantes(request) {
                 $("#btn_gene_pdf").show()
             }else{
                 $("#btn_gene_pdf").hide()
-            }
+            } 
             if(res.data.users.length > 0 ){
                 $("#btn_select_volver_enviar_email").show();
                  }else{
@@ -3210,7 +3210,7 @@ function  conciliacionUserStore(request) {
 				type: 'success', 
 				timer: 2000,               
             });
-           // window.location.reload(true)
+            window.location.reload(true)
 		    $('#msg-success').fadeIn();	 
 
 		},
@@ -3244,7 +3244,7 @@ function  conciliacionUserUpdate(request,id) {
 				type: 'success', 
 				timer: 2000,               
             });
-           // window.location.reload(true)
+            window.location.reload(true)
 		    $('#msg-success').fadeIn();	 
 
 		},
