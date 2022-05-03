@@ -4,12 +4,12 @@
     @if($conciliacion->getUser(199)->hasRole('estudiante') || currentUser()->hasRole('amatai'))
     @if(currentUser()->hasRole('estudiante') || currentUser()->hasRole('amatai'))
     @if($conciliacion->estado_id==174 || $conciliacion->estado_id==176)
-    <option value="213"> Enviar a revisión </option>
+    <option value="175"> Enviar a revisión </option>
     @endif
     @endif
 
     @if(auth()->user()->hasRole('docente') || currentUser()->hasRole('diradmin') || currentUser()->hasRole('amatai'))
-    @if($conciliacion->estado_id==213)
+    @if($conciliacion->estado_id==175)
     <option value="176"> Corregir </option>
     <option value="177"> Aprobado por docente </option>
     @endif

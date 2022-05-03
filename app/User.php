@@ -80,7 +80,7 @@ class User extends Authenticatable
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new MyResetPassword($token));
-    }
+    } 
     public function tipo_conciliacion()
     {
        return $this->belongsToMany(TablaReferencia::class,'conciliacion_has_user','user_id','tipo_usuario_id')

@@ -3244,7 +3244,7 @@ function  conciliacionUserUpdate(request,id) {
 				type: 'success', 
 				timer: 2000,               
             });
-            window.location.reload(true)
+           // window.location.reload(true)
 		    $('#msg-success').fadeIn();	 
 
 		},

@@ -1,7 +1,6 @@
 <div class="row" align="center">
     <div class="col-md-12">
-        <h4> <strong>ELEMENTOS JURÍDICOS</strong>   </h4>
-       
+        <h4> <strong>ELEMENTOS JURÍDICOS</strong> </h4>      
     </div>
 </div>
 
@@ -30,14 +29,14 @@
 <div class="col-md-12">
     <div class="form-group">  
         <label style="display: block; margin-bottom:10px"> Hechos   
-    @if(($conciliacion->getUser(183)->hasRole('estudiante') and (currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-            || (!$conciliacion->getUser(183)->hasRole('estudiante') and (currentUserInConciliacion($conciliacion->id,['autor']) || currentUser()->hasRole('amatai'))))
-         <button type="button" data-tipo="193" class="btn btn-primary btn-sm pull-right btn_add_conc_he_con">Agregar hecho</button>
+    @if(($conciliacion->getUser(199)->hasRole('estudiante') and (currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
+            || (!$conciliacion->getUser(199)->hasRole('estudiante') and (currentUserInConciliacion($conciliacion->id,['autor']) || currentUser()->hasRole('amatai'))))
+         <button type="button" data-tipo="206" class="btn btn-primary btn-sm pull-right btn_add_conc_he_con">Agregar hecho</button>
     @endif
     </label>
-    <div id="content_hechos_pretensiones-193" class="content_hechos_pretensiones">
+    <div id="content_hechos_pretensiones-206" class="content_hechos_pretensiones">
         @include('myforms.conciliaciones.componentes.hechos_pretenciones_ajax',[
-            'tipo_id'=>193
+            'tipo_id'=>206
         ]) 
     </div>
     </div>
@@ -50,13 +49,13 @@
             <label style="display: block; margin-bottom:10px">Pretensiones
                 @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
             || ((currentUserInConciliacion($conciliacion->id,['autor']))))
-                <button type="button" data-tipo="194" class="btn btn-primary btn-sm pull-right btn_add_conc_he_con"> Agregar pretensión</button>       
+                <button type="button" data-tipo="207" class="btn btn-primary btn-sm pull-right btn_add_conc_he_con"> Agregar pretensión</button>       
             @endif
             
             </label>
-            <div id="content_hechos_pretensiones-194" class="content_hechos_pretensiones">
+            <div id="content_hechos_pretensiones-207" class="content_hechos_pretensiones">
                 @include('myforms.conciliaciones.componentes.hechos_pretenciones_ajax',[
-                    'tipo_id'=>194
+                    'tipo_id'=>207
                 ]) 
             </div>
            
@@ -68,14 +67,14 @@
     <div class="col-md-12">
         <div class="form-group" >
             <label style="display: block; margin-bottom:10px">Acuerdos
-                @if(($conciliacion->getUser(183)->hasRole('estudiante') and (currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-            || (!$conciliacion->getUser(183)->hasRole('estudiante') and (currentUserInConciliacion($conciliacion->id,['autor']) || currentUser()->hasRole('amatai'))))
-                <button type="button" data-tipo="200" class="btn btn-primary btn-sm pull-right btn_add_conc_he_con"> Agregar Acuerdo</button>       
+                @if(($conciliacion->getUser(199)->hasRole('estudiante') and (currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
+            || (!$conciliacion->getUser(199)->hasRole('estudiante') and (currentUserInConciliacion($conciliacion->id,['autor']) || currentUser()->hasRole('amatai'))))
+                <button type="button" data-tipo="208" class="btn btn-primary btn-sm pull-right btn_add_conc_he_con"> Agregar Acuerdo</button>       
             @endif
             </label>
-            <div id="content_hechos_pretensiones-200" class="content_hechos_pretensiones">
+            <div id="content_hechos_pretensiones-208" class="content_hechos_pretensiones">
                 @include('myforms.conciliaciones.componentes.hechos_pretenciones_ajax',[
-                    'tipo_id'=>200
+                    'tipo_id'=>208
                 ]) 
             </div>
            

@@ -24,7 +24,7 @@ class CreatePdfReportesUsersTable extends Migration
             $table->foreign('conciliacion_id')->references('id')->on('conciliaciones');
             $table->bigInteger('pdf_reporte_id')->unsigned(); // 
             $table->foreign('pdf_reporte_id')->references('id')->on('pdf_reportes_destinos');
-            $table->boolval('firmado')->default(0);
+            $table->boolean('firmado')->default(0);
             $table->string('token',100)->nullable();
             $table->string('codigo',100)->nullable();
             $table->integer('user_id')->unsigned(); // 

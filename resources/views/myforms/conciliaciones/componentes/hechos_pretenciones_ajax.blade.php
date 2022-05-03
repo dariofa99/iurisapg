@@ -9,7 +9,7 @@
 
     <div class="btn-group" style="display: block">
       &nbsp; &nbsp;
-      @if($tipo_id=='194')
+      @if($tipo_id=='207')
       <a href="#" data-id="{{$hecho->id}}" data-estado_id="{{$hecho->estado_id}}"  class="btn_estado_hepr pull-right btn_hepr"> Estado </a>
       @endif
       <a href="#"  data-id="{{$hecho->id}}" class="btn_editar_hepr pull-right btn_hepr"> Editar </a> 
@@ -25,4 +25,4 @@
       </div>
 </div>
        
-@endforeach 
+@endforeach  
