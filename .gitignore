@@ -2,6 +2,7 @@
 /public/act_temp
 /public/storage
 /storage
+storage/*
 /storage/*.key
 /vendor
 .env

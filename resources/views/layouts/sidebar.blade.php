@@ -160,6 +160,9 @@
               <li><a href="/expediactuacion">Actuaciones Pendientes</a></li>
              @endif
 
+             @if(currentUser()->hasRole("amatai"))
+             <li><a href="/expediactuacion">Actuaciones Pendientes</a></li>
+            @endif
            
           </ul>
         </li>
