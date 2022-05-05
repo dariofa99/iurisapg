@@ -17,7 +17,7 @@
 
                 <div class="card-body">    
                <h1>
-                   Firmado correcatamente
+                   Firmado correctamente
                </h1>
                 <hr>
                  

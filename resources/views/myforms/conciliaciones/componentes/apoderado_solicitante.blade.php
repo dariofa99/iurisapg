@@ -1,5 +1,5 @@
 @php
-$user = $conciliacion->getUser(187);
+$user = $conciliacion->getUser(196);
 @endphp
 <div class="row">
     <div class="col-md-12">
@@ -12,7 +12,7 @@ $user = $conciliacion->getUser(187);
            @endif
            @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
            || ((currentUserInConciliacion($conciliacion->id,['autor'])))) 
-                <button type="button" @if($user->idnumber!=null) data-user="{{$user->idnumber}}" @endif data-section="apoderado_solicitante" data-type="187" class="btn btn-primary btn-sm btn_asinar_usuario_conciliacion pull-right">  
+                <button type="button" @if($user->idnumber!=null) data-user="{{$user->idnumber}}" @endif data-section="apoderado_solicitante" data-type="196" class="btn btn-primary btn-sm btn_asinar_usuario_conciliacion pull-right">  
                     <i class="fa fa-plus"> </i> {{$user->idnumber!=null ? 'Actualizar' : 'Agregar'}} 
                 </button>
             @endif

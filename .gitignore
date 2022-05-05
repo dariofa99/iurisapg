@@ -1,5 +1,6 @@
 /node_modules
 /public/act_temp
+/public/act_temp/*.*
 /public/storage
 /storage
 storage/*
