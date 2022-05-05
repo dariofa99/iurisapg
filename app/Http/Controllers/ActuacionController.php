@@ -31,19 +31,19 @@ class ActuacionController extends Controller
                 if ($user_doc =='docente') {
                   $url = 'app/files_actuaciones/'.$actuacion->actdocnomgen_docente;
                   $rutaDeArchivo = storage_path($url);
-                  $filename = currentUser()->id.'___'.$actuacion->actdocnomgen_docente;
+                  $filename = currentUser()->id.'___'.$actuacion->actdocnompropio_docente;
                   $filedes=$actuacion->actdocnompropio_docente;
                 }
                 if ($user_doc=='estudiante') {
                    $url = 'app/files_actuaciones/'.$actuacion->actdocnomgen;
                    $rutaDeArchivo = storage_path($url);
-                   $filename = currentUser()->id.'___'.$actuacion->actdocnomgen;
+                   $filename = currentUser()->id.'___'.$actuacion->actdocnompropio;
                    $filedes=$actuacion->actdocnompropio;
                 }
                //dd($rutaDeArchivo);
-                 copy( $rutaDeArchivo, public_path("act_temp/".$filedes));
+                 copy( $rutaDeArchivo, public_path("act_temp/".$filename));
 
-                return redirect("act_temp/".$filedes); 
+                return redirect("act_temp/".$filename); 
 
 
 /*

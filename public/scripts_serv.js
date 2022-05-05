@@ -665,6 +665,7 @@ function Mostrar(btn,child_estado,modal){
 	var label = '';
 	$("#btn_enviar_actuacion").text('Agregar Actuación');
 	$("#actestado_id2").val(101);
+	$("#wait").show()
 	$.get(route, function(res){
 		console.log(res)
 		$("#myform_act_edit_docente")[0].reset();
@@ -722,6 +723,7 @@ function Mostrar(btn,child_estado,modal){
 		
        llenarModalDetails(res);
        $("#"+modal).modal('show');
+	   $("#wait").hide()
 
 	});
 
