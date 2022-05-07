@@ -76,7 +76,7 @@ class NotaController extends Controller
             ->get() as $key_2 => $act) {
                $notas_act[] = $act->get_nota_corte('etica'); 
             }
-           // $notas['notas_act'] =  $notas_act;
+           // $notas['notas_act'] =  $notas_act; 
             foreach ($asignacion->expediente->requerimientos()->where('reqidest',$request->id)->get() as $key_2 => $req) {
                 $notas_req[] = $req->get_nota_corte('etica');
              }
@@ -94,7 +94,7 @@ class NotaController extends Controller
         foreach ($notas as $expediente => $notas) {
          dd($notas);
         }*/ 
-        
+       // dd("wordpress-258963147");
         $periodos = Periodo::all();
         
         return view('report.notas.frm_notas_list',compact('periodos'));
@@ -510,22 +510,27 @@ return response()->json($data);
        $notas_periodo = [];
        if($request->segmento_id){
         foreach ($users as $key_2 => $user) {
+            //if($user->idnumber=="1004133867"){
+                //  dd($nota_caso);
+              
             $to_excel = []; 
             $to_excel[] = $user->idnumber;
             $to_excel[] = $user->full_name;
             $to_excel[] = $user->ref_nombre;
-            $nota_us = $this->getNotas($user,$request->segmento_id );
+            $nota_us = $this->getNotas($user,$request->segmento_id);
             foreach ($nota_us as $key_3 => $not) {
                 $to_excel[]=$not;
             }
             $notas_periodo[] = $to_excel;
-        }        
+        //}      
+    }  
         return $notas_periodo;
        }else{
         $segmentos = Segmento::join('sede_segmentos as sg','sg.segmento_id','=','segmentos.id')
         ->where('sg.sede_id',session('sede')->id_sede)
         ->where('perid',$request->periodo_id)->get();
             foreach ($users as $key_2 => $user) {
+              //  if($user->idnumber=="1004133867"){
                     $final = 0;
                     $to_excel = []; 
                     $to_excel[] = $user->idnumber;
@@ -550,6 +555,9 @@ return response()->json($data);
                         $to_excel[]= $final;
                     }
                     $notas_periodo[] = $to_excel;   
+
+               // }
+
                 }
                 
                 /*  */
@@ -568,35 +576,41 @@ return response()->json($data);
                         DB::raw("SELECT `estidnumber`, AVG(`nota`) as nota
                         FROM `notas` JOIN expedientes on notas.expidnumber=expedientes.expid        
                         WHERE `segid` = $segmento AND `cptnotaid` != 4 AND expedientes.exptipoproce_id != '3'
+                      and estidnumber = $user->idnumber
                         GROUP BY `estidnumber`"));
 
                     $nota_defensas = DB::select(DB::raw(
                         "SELECT `estidnumber`, AVG(`nota`)  as nota FROM `notas`
                         JOIN expedientes on notas.expidnumber=expedientes.expid 
                         WHERE `segid` = $segmento AND `cptnotaid` != 4 AND expedientes.exptipoproce_id = '3'
+                        and estidnumber = $user->idnumber
                         GROUP BY `estidnumber`"));
 
                     $notas_oficina = DB::select(DB::raw(
                         "SELECT `estidnumber`, AVG(`nota`) as nota FROM `notas_ext`       
                         WHERE `segid` = $segmento AND `cptnotaid` != 4  
+                        and estidnumber = $user->idnumber
                         GROUP BY `estidnumber`"));
         
           $data_user = [];
           
-          $has_ncaso="";
+          $has_ncaso=false;
           $nota_final = 0;
          
-          if(count($nota_caso)>0) $has_ncaso = array_search($user->idnumber, array_column($nota_caso, 'estidnumber'));
-            if($has_ncaso!=""){
+          if(count($nota_caso)>0) $has_ncaso = (array_search($user->idnumber, array_column($nota_caso, 'estidnumber')));
+          //dd(($has_ncaso));
+            if(is_numeric($has_ncaso)){               
               $nota_c = round($nota_caso[$has_ncaso]->nota,1);
               $nota_final += ($nota_c * 0.4);
             }else{
               $nota_c = "N/A";              
               
             }
-            $has_ndefensa="";
+            
+           
+            $has_ndefensa=false;
             if(count($nota_defensas)>0) $has_ndefensa = array_search($user->idnumber, array_column($nota_defensas, 'estidnumber'));
-            if($has_ndefensa!=""){
+            if(is_numeric($has_ndefensa)){
               $nota_d = round($nota_defensas[$has_ndefensa]->nota,1); 
               $nota_final += ($nota_d * 0.2);
             }else{
@@ -609,9 +623,9 @@ return response()->json($data);
             if(is_numeric($nota_c))$nota_final += ($nota_c * 0.2);
 
 
-            $has_nota_ofi = "";
+            $has_nota_ofi = false;
             if(count($notas_oficina)>0) $has_nota_ofi = array_search($user->idnumber, array_column($notas_oficina, 'estidnumber'));
-            if($has_nota_ofi!=""){
+            if(is_numeric($has_nota_ofi)){
               $nota_ofi = round($notas_oficina[$has_nota_ofi]->nota,1);
               $nota_final += ($nota_ofi * 0.2);
             }else{

@@ -243,7 +243,7 @@ Route::post('requerimientos/update/{id}',  'RequerimientoController@updateReq');
 
 
 //notas // Calificaciones
-Route::resource('notas', 'NotaController');
+Route::resource('notas', 'NotaController'); 
 Route::post('/notas/update', 'NotaController@updateNota');
 Route::get('/notas/ver/estudiante', 'NotaController@notas_ver');
 Route::post('/notas/delete', 'NotaController@delete'); 
