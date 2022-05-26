@@ -2348,7 +2348,7 @@ return false;
         });
 
      myPopupWindow = window;
-    $("#myModal_create_estado").on("click", ".btn_edit_con_pdf", function (e) {
+    $("#myReportPdfList").on("click", ".btn_edit_con_pdf", function (e) {
         e.preventDefault();
         var url = $(this).attr("href");
         var bgdiv = $("<div>").attr({
@@ -6605,9 +6605,32 @@ function updateBiblioteca() {
 }
 
 function ingresarNotas() {
+
     errors = validateForm("myform_add_nota_final_expedientes");
 
+        var notaapl = $("#myform_add_nota_final_expedientes input[name=ntaaplicacion]").val()
+        var notacon = $("#myform_add_nota_final_expedientes input[name=ntaconocimiento]").val()
+        var notaet = $("#myform_add_nota_final_expedientes input[name=ntaetica]").val()
+
+        if(notaapl > 5 || notacon > 5 || notaet > 5){
+            toastr.error("Por favor verifíque que no haya notas superiores a 5.0", "", {
+                positionClass: "toast-top-right",
+                timeOut: "6000",
+            });
+            errors = 1;
+        }
+        
+        if(isNaN(notaapl) || isNaN(notacon) || isNaN(notaet)){
+            toastr.error("Por favor verifíque que no haya notas con espacios o caracteres extraños", "", {
+                positionClass: "toast-top-right",
+                timeOut: "6000",
+            });
+            errors = 1;
+        }
+
     if (errors <= 0) {
+        
+
         var data = $("#myform_add_nota_final_expedientes").serialize();
         var route = "/notas";
         $.ajax({
