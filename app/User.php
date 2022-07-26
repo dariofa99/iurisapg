@@ -82,20 +82,18 @@ class User extends Authenticatable
     {
         $this->notify(new MyResetPassword($token));
     } 
-    public function tipo_conciliacion()
-    {
+    public function tipo_conciliacion()    {
        return $this->belongsToMany(TablaReferencia::class,'conciliacion_has_user','user_id','tipo_usuario_id')
        ->withPivot('user_id','tipo_usuario_id','conciliacion_id')->withTimestamps();
     } 
-    public function tipo_pdf_firmante()
-    {
-       return $this->belongsToMany(TablaReferencia::class,'pdf_reportes_users','user_id','tipo_usuario_id')
-       ->withPivot('user_id','tipo_usuario_id','conciliacion_id','token','codigo')->withTimestamps();
+    public function tipo_pdf_firmante()    {
+       return $this->belongsToMany(TablaReferencia::class,'pdf_reportes_users','user_id','tipo_firma_id')
+       ->withPivot('user_id','tipo_usuario_id','conciliacion_id','token','codigo','tipo_firma_id')->withTimestamps();
     }  
     public function conciliaciones()
     {
        return $this->belongsToMany(Conciliacion::class,'conciliacion_has_user','user_id','conciliacion_id')
-       ->withPivot('user_id','tipo_usuario_id','conciliacion_id')->withTimestamps();
+       ->withPivot('user_id','tipo_usuario_id','conciliacion_id','estado_id')->withTimestamps();
     } 
 
     public function estado_civil()
@@ -113,6 +111,10 @@ class User extends Authenticatable
     public function notas()
     {
         return $this->hasMany(Nota::class, 'estidnumber', 'idnumber');
+    }
+    public function notas_ext()
+    {
+        return $this->hasMany(NotaExt::class, 'estidnumber', 'idnumber');
     }
 
     public function aditional_data()
@@ -281,19 +283,36 @@ class User extends Authenticatable
     }
 
     public function getNotas($request){
-        $notas = $this->notas()
-        ->whereDate('notas.created_at','>','2021-10-17')
-        ->where(function($query) use ($request){
-                if($request->has('segid') and $request->segid != ''){
-                        return $query->where('segid',$request->segid);
-                }
-        })
-   
-        ->orderBy('notas.created_at','desc')
-       // ->orderBy('notas.orgntsid','desc')
-       // ->orderBy('notas.cptnotaid','asc')
-        
-        ->get();
+        if($request->origen and $request->origen=='conciliaciones'){
+            $notas = $this->notas_ext()
+            ->whereDate('notas_ext.created_at','>','2021-10-17')
+            ->where(function($query) use ($request){
+                    if($request->has('segid') and $request->segid != ''){
+                            return $query->where('segid',$request->segid);
+                    }
+            })
+       
+            ->orderBy('notas_ext.created_at','desc')
+           // ->orderBy('notas.orgntsid','desc')
+           // ->orderBy('notas.cptnotaid','asc')
+            
+            ->get();
+        }else{
+            $notas = $this->notas()
+            ->whereDate('notas.created_at','>','2021-10-17')
+            ->where(function($query) use ($request){
+                    if($request->has('segid') and $request->segid != ''){
+                            return $query->where('segid',$request->segid);
+                    }
+            })
+       
+            ->orderBy('notas.created_at','desc')
+           // ->orderBy('notas.orgntsid','desc')
+           // ->orderBy('notas.cptnotaid','asc')
+            
+            ->get();
+        }
+      
 
 
       //  dd($notas);
@@ -306,10 +325,7 @@ class User extends Authenticatable
          
             foreach ($notas as $key => $nota) { 
                 if(!isset($origen[$nota->tbl_org_id])){
-                    $origen[$nota->tbl_org_id] = [                
-                       // "tabla"=>$nota->tbl_org_id,
-                        
-                    ]; 
+                    $origen[$nota->tbl_org_id] = []; 
                 }
                
                
@@ -317,7 +333,7 @@ class User extends Authenticatable
                  $data = [
                        'id'=> $nota->id,
                        'nota'=>$nota->nota,
-                       'expediente'=> $nota->expidnumber,
+                       'expediente'=> $nota->expidnumber != null ? $nota->expidnumber: Conciliacion::where('id',$nota->tbl_org_id)->first()->num_conciliacion,
                        'tipo'=>$nota->tipo_nota->tpntnombre,
                        'tipo_id'=>$nota->tipo_nota->id,
                        'concepto_nota'=>$nota->concepto->cpntnombre,
@@ -329,36 +345,18 @@ class User extends Authenticatable
                        'periodo'=>$nota->periodo->prddes_periodo,
                        'segmento'=>$nota->segmento->segnombre, 
                        'segmento_id'=>$nota->segmento->id,  
+                       'tbl_org_id'=>$nota->tbl_org_id,  
                        'created_at'=>Carbon::parse($nota->created_at), 
                       'updated_at'=>Carbon::parse($nota->updated_at),                 
                      ];
    
                  if ($nota->cptnotaid==1){
-                       $n_conocimiento[] = $data;
-                       ($origen[$nota->tbl_org_id][] = [
-                        'id'=>$data['id'],
-                        'nota'=>$data['nota'],
-                        'expediente'=>$data['expediente'],
-                        'tipo'=>$data['tipo'],
-                        'tipo_id'=>$data['tipo_id'],
-                        'concepto_nota'=>$data['concepto_nota'],
-                        'concepto_nota_id'=>$data['concepto_nota_id'],
-                        'origen_nota'=>$data['origen_nota'],
-                        'docidnumber'=>$data['docidnumber'], 
-                        'docevname'=>$data['docevname'], 
-                        'estidnumber'=>$data['estidnumber'],
-                        'periodo'=>$data['periodo'],
-                        'segmento'=>$data['segmento'],
-                        'segmento_id'=>$data['segmento_id'], 
-                        'created_at'=>$data['created_at'], 
-                        'updated_at'=>$data['updated_at'],           
-                       ]
-                    );
+                       $n_conocimiento[] = $data;                    
                
                  } 
                   if ($nota->cptnotaid==2){
                    $n_aplicacion[] =  $data;
-                   $origen[$nota->tbl_org_id][] = [
+                  /*  $origen[$nota->tbl_org_id][] = [
                     'nota'=>$data['nota'],
                     'id'=>$data['id'],
                     'expediente'=>$data['expediente'],
@@ -376,19 +374,12 @@ class User extends Authenticatable
                     'created_at'=>$data['created_at'], 
                     'updated_at'=>$data['updated_at'], 
     
-                   ];
-         
-
-                
+                   ];    */       
                   } 
                   if ($nota->cptnotaid==3){
                    $n_etica[] =  $data;
-                   if($nota->orgntsid == 3){
-                       $ind = 0;
-                   }else{
-                    $ind = 2;
-                   }
-                   $origen[$nota->tbl_org_id][] = [
+                   
+                 /*   $origen[$nota->tbl_org_id][] = [
                         'nota'=>$data['nota'],
                         'id'=>$data['id'],
                         'expediente'=>$data['expediente'],
@@ -405,19 +396,15 @@ class User extends Authenticatable
                         'segmento_id'=>$data['segmento_id'], 
                         'created_at'=>$data['created_at'], 
                         'updated_at'=>$data['updated_at'],
-                    ];
+                    ]; */
 
              
                   
                   }
                   if ($nota->cptnotaid==4){
                    $n_concepto[] =  $data;
-                   if($nota->orgntsid == 3){
-                    $ind = 1;
-                }else{
-                 $ind = 3;
-                }
-                $origen[$nota->tbl_org_id][]  = [
+                  
+            /*     $origen[$nota->tbl_org_id][]  = [
                         'nota'=>$data['nota'],
                         'id'=>$data['id'],
                         'expediente'=>$data['expediente'],
@@ -434,11 +421,29 @@ class User extends Authenticatable
                         'segmento_id'=>$data['segmento_id'], 
                         'created_at'=>$data['created_at'], 
                         'updated_at'=>$data['updated_at'],
-                ];
-
-                
+                ]; */               
               
             } 
+
+            ($origen[$nota->tbl_org_id][] = [
+                'id'=>$data['id'],
+                'nota'=>$data['nota'],
+                'expediente'=>$data['expediente'],
+                'tipo'=>$data['tipo'],
+                'tipo_id'=>$data['tipo_id'],
+                'concepto_nota'=>$data['concepto_nota'],
+                'concepto_nota_id'=>$data['concepto_nota_id'],
+                'origen_nota'=>$data['origen_nota'],
+                'docidnumber'=>$data['docidnumber'], 
+                'docevname'=>$data['docevname'], 
+                'estidnumber'=>$data['estidnumber'],
+                'periodo'=>$data['periodo'],
+                'segmento'=>$data['segmento'],
+                'segmento_id'=>$data['segmento_id'], 
+                'tbl_org_id'=>$data['tbl_org_id'],
+                'created_at'=>$data['created_at'], 
+                'updated_at'=>$data['updated_at'],           
+               ]);
             
            }
         }

@@ -58,6 +58,17 @@
             }
             
         ],
+
+        'conciliaciones':[
+            {
+                'value':'Estado',
+                'option_value':'estado'
+            }        
+            
+           
+            
+        ],
+
         'actuaciones':[
             {
                 'value':'Estado',
@@ -98,6 +109,7 @@
 
     $(".generate_graf").on('change',search_data);
 
+   
 
 function insert_options_select(){
     var select_principal = $("#select_table");
@@ -124,7 +136,16 @@ function insert_options_select(){
                     option += '<option value="'+options.requerimientos[i].option_value+'">'+options.requerimientos[i].value+'</option>';
                 }
     $("#check_hab_cruce").prop('disabled',true);
-    $("#check_hab_cruce").prop('checked',false);                         
+    $("#check_hab_cruce").prop('checked',false);    
+
+    }
+    if (select_principal.val()=='conciliaciones') {               
+        for (var i = 0; i <= options.conciliaciones.length - 1; i++) {
+            option += '<option value="'+options.conciliaciones[i].option_value+'">'+options.conciliaciones[i].value+'</option>';
+        }  
+        $("#check_hab_cruce").prop('disabled',true);
+        $("#check_hab_cruce").prop('checked',false);
+                        
     }
     select.html('');
     select.append(option);

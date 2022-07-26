@@ -54,6 +54,7 @@
     </div>
 
     @foreach($conciliacion->getUserForm('solicitante','socio_economica') as $key => $question)
+    
     <div class="col-md-3">
         <div class="form-group">
             <label > {{$question->name}}</label>

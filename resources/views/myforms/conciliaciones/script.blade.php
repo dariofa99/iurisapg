@@ -7,7 +7,7 @@
                 alert('Error al iniciar videollamada comuníquese con el administrador');
                 return;
             }
-            var dispNme = 'Luis';
+            var dispNme = '{{Auth::user()->name}} {{Auth::user()->lastname}}';
             if (!dispNme) {
                 dispNme = "Nuevo usuario";
             }
@@ -16,7 +16,7 @@
             StartMeeting(meeting_id,dispNme,nameroom);
         }
     }
-    $(function(){
+    $(function(){  
         $("#btn_iniciar_videollamada").on('click', function () {
             $(this).prop( "disabled", true );
             $('.iniciar_videollamada').css('display','block')

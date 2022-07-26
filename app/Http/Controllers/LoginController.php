@@ -68,7 +68,7 @@ class LoginController extends Controller
     { 
        // dd($request->all());
         if(is_numeric($request['user_name'])){
-            $clave = 'idnumber';
+            $clave = 'idnumber'; 
         }else{
             $emailErr=0;
             $email = $this->test_input($request['user_name']);

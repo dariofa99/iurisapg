@@ -8,14 +8,15 @@ class PdfReporte extends Model
 {
     use UploadFile;
 
-    public $disk = 'pdf_reporte_files';
+    public $disk = 'pdf_reporte_files'; 
     protected $table = 'pdf_reportes';
 
     protected $fillable = [
         'reporte',
         'report_keys',
         'nombre_reporte',
-        'configuraciones'
+        'configuraciones',
+        'is_copy'
     ];
 
     public function destino()

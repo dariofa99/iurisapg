@@ -12,11 +12,11 @@ trait PdfReport {
             $json = (json_decode($reporte_keys));             
             $bodytag = $reporte;       
             if(count($json)>0){
-               //dd($json);
+              // dd($json);
                 foreach ($json as $key => $data) { 
-                    //dd($data );
+                   // dd($data );
                     foreach ($conciliacion->usuarios()->where('tipo_usuario_id',$data->user_type)->get() as $key_2 => $user) {
-                      
+                       // dd($user );
                        if($data->table=='users'){
                            $label = $data->short_name;
                            $value = $user->$label;
@@ -33,15 +33,17 @@ trait PdfReport {
                     }     
                     if($data->table=='conc_hechos_preten'){
                        // dd($data );
-                        $id = $data->short_name == 'hechos' ? 193 : 194;
+                        $id = $data->short_name == 'hechos' ? 206 : 207;
                         $hechos = $conciliacion->hechos_pretensiones()->where('tipo_id',$id)->get();
                         if(count($hechos)>0){
                             $hechos_cadena = "<ul class='list_hp'>";
                             foreach ($hechos as $key => $hp) {
-                               $hechos_cadena .= '<li> '.$hp->descripcion.' </li>';                            }
-                                $hechos_cadena .= "</ul>";
-                                $bodytag = str_replace($data->name, $hechos_cadena, $bodytag);
+                               $hechos_cadena .= '<li>'.$hp->descripcion.'</li>';                            
+                            }
+                            $hechos_cadena .= "</ul>";
+                            $bodytag = str_replace($data->name, $hechos_cadena, $bodytag);
                           //  $bodytag .= $hechos_cadena;
+                          //dd($bodytag );
                            
                         } 
                    }elseif ($data->table=='conciliacion_audiencias') {

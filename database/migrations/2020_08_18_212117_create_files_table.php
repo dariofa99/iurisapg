@@ -15,6 +15,7 @@ class CreateFilesTable extends Migration
     {
         Schema::create('files', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('hash',150)->nullable(); 
             $table->string('original_name')->nullable();  
             $table->string('encrypt_name')->nullable();   
             $table->string('path')->nullable();  

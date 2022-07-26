@@ -18,7 +18,8 @@ class CreatePdfReportesTable extends Migration
             $table->string('nombre_reporte');   
             $table->longText('reporte');   
             $table->longText('report_keys');  
-            $table->longText('configuraciones');          
+            $table->longText('configuraciones');  
+            $table->boolean('is_copy')->default('0');  
             $table->timestamps();
        
         }); 

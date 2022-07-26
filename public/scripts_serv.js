@@ -148,10 +148,16 @@ console.log(estado_exp)
 			textodescarga="Sin Archivo";
 			btnDescargaArchivoEs = "<label>"+textodescarga+"</label>";
 		}
- 
-		//Botones
 		var btn_detalles = "<button "+estadoBtn+" type='button' value="+value.parent.id+"  OnClick='Mostrar(this,0,\"myModal_act_details\")' class='btn btn-success btn-sm'> Detalles </button>";
 		var btn_editar = " <button "+estadoBtn+" type='button' value="+value.parent.id+"  OnClick='Mostrar(this,0,\"myModal_act_edit\");' class='btn btn-primary btn-sm'  > Editar </button> ";
+		
+		//Botones
+		if(value.parent.actcategoria_id==223 && value.parent.conciliaciones.length > 0){			
+		  btn_detalles = "<a style='margin-left:2px' "+estadoBtn+" target='_blank' href='/conciliaciones/"+value.parent.conciliaciones[0].id+"/edit' value="+value.parent.id+" class='btn btn-success btn-sm'> Detalles </a>";
+		}
+		if(value.parent.actcategoria_id==223 && (value.parent.actestado_id==176 || value.parent.actestado_id==174) && value.parent.conciliaciones.length > 0){			
+			btn_editar = "<a style='margin-left:2px' "+estadoBtn+" target='_blank' href='/conciliaciones/"+value.parent.conciliaciones[0].id+"/edit' value="+value.parent.id+" class='btn btn-primary btn-sm'> Editar </a>";
+		}
 		var btn_eliminar = " <button "+estadoBtn+" type='button' value="+value.parent.id+"  OnClick='eliminarAct(this);' class='btn btn-danger btn-sm'  >Eliminar</button> " ;
 		var btn_revisar = " <button "+estadoBtn+" type='button' value="+value.parent.id+"  OnClick='Mostrar(this,0,\"myModal_act_edit_docen\");' class='btn btn-primary btn-sm'> Revisar </button> ";
     	var btn_ag_correccion = " <button "+estadoBtn+" type='button' value="+value.parent.id+"  OnClick='Mostrar(this,"+value.parent.actestado_id+",\"myModal_act_add_revision\");' class='btn btn-primary btn-sm' data-titulo_modal='Nueva actuación'> Ag. Corrección </button> ";
@@ -299,7 +305,7 @@ console.log(estado_exp)
 
 			}else if(value.parent.actestado_id=='140'){
 				//enviado por docente	
-					color='purple';
+				color='purple';
 				if (value.user.name == 'estudiante') {		
 					const btn_ag_correccion = " <button " + estadoBtn + " type='button' value=" + value.parent.id + "  OnClick='Mostrar(this," + value.parent.actestado_id + ",\"myModal_act_add_revision\");' class='btn btn-primary btn-sm' > Agr. Actuación </button> ";
 					btnsParent = btn_detalles + btn_ag_correccion;
@@ -326,7 +332,95 @@ console.log(estado_exp)
 					//btnsParent += btn_eliminar;
 				}
 	
-				}else if(actestado_id=='0'){
+				}else if(value.parent.actestado_id==174){
+					//sin radicar
+					color='#4FEFEE';
+					if (value.user.name == 'estudiante') {		
+						//const btn_ag_correccion = " <button " + estadoBtn + " type='button' value=" + value.parent.id + "  OnClick='Mostrar(this," + value.parent.actestado_id + ",\"myModal_act_add_revision\");' class='btn btn-primary btn-sm' > Agr. Actuación </button> ";
+						btnsParent = btn_editar;
+					
+					}
+					if (value.user.name == 'docente') {						
+						btnsParent = btn_detalles; 					
+					}
+					 if (value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
+						btnsParent = btn_detalles;
+						//btnsParent += btn_editar;
+						btnsParent += btn_eliminar;
+						//btnsParent += bnt_rev_anexo_true;
+						//btnsParent += btn_revisar;
+						//btnsParent += btn_eliminar;
+					}
+
+			}else if(value.parent.actestado_id==175){
+					
+					color='#4FEFEE';
+					if (value.user.name == 'estudiante') {		
+						//const btn_ag_correccion = " <button " + estadoBtn + " type='button' value=" + value.parent.id + "  OnClick='Mostrar(this," + value.parent.actestado_id + ",\"myModal_act_add_revision\");' class='btn btn-primary btn-sm' > Agr. Actuación </button> ";
+						btnsParent = btn_detalles + btn_editar;;
+					
+					}
+					if (value.user.name == 'docente') {						
+						btnsParent = btn_detalles + btn_revisar; 					
+					}
+					 if (value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
+						btnsParent = btn_detalles;
+						//btnsParent += btn_editar;
+						btnsParent += btn_eliminar;
+						//  btnsParent += bnt_rev_anexo_true;
+						//btnsParent += btn_revisar;
+						//btnsParent += btn_eliminar;
+					}
+
+			}else if(value.parent.actestado_id==176){
+					
+				color='#4FEFEE';
+				if (value.user.name == 'estudiante') {		
+					//const btn_ag_correccion = " <button " + estadoBtn + " type='button' value=" + value.parent.id + "  OnClick='Mostrar(this," + value.parent.actestado_id + ",\"myModal_act_add_revision\");' class='btn btn-primary btn-sm' > Agr. Actuación </button> ";
+					btnsParent = btn_detalles + btn_editar;;
+				
+				}
+				if (value.user.name == 'docente') {						
+					btnsParent = btn_detalles; 					
+				}
+				 if (value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
+					btnsParent = btn_detalles;
+					//btnsParent += btn_editar;
+					btnsParent += btn_eliminar;
+					//  btnsParent += bnt_rev_anexo_true;
+					//btnsParent += btn_revisar;
+					//btnsParent += btn_eliminar;
+				}
+
+		}else if(value.parent.actestado_id==177){
+					
+				color='#4FEFEE';
+				if (value.user.name == 'estudiante') {		
+					//const btn_ag_correccion = " <button " + estadoBtn + " type='button' value=" + value.parent.id + "  OnClick='Mostrar(this," + value.parent.actestado_id + ",\"myModal_act_add_revision\");' class='btn btn-primary btn-sm' > Agr. Actuación </button> ";
+					btnsParent = btn_detalles ;
+				
+				}
+				if (value.user.name == 'docente') {					
+					if (value.children.length<=0) {					
+						btnsParent = btn_detalles;
+						if (value.user.idnumber==value.parent.actusercreated) {
+							//btnsParent += btn_editar + btn_eliminar;
+						}           	
+					}else{
+						btnsParent = btn_detalles;            
+				}
+					
+				 }
+				 if (value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
+					btnsParent = btn_detalles;
+					//btnsParent += btn_editar;
+					btnsParent += btn_eliminar;
+					//  btnsParent += bnt_rev_anexo_true;
+					//btnsParent += btn_revisar;
+					//btnsParent += btn_eliminar;
+				}
+
+		}else if(actestado_id=='0'){
 				actuacion_estado='.';
 				color='blue';
 				estadoBtn = '';
@@ -583,13 +677,14 @@ con++;
                 }
 		var dias = getDiffdays(value.parent.fecha_limit, value.parent.actfecha);
 		var color_bg = getDiffdaysColor(value.parent.fecha_limit, value.parent.actfecha,value.parent.id)   
-		if(dias<0 || value.children.length > 0){
+		if((dias<0 || value.children.length > 0) || (value.parent.actcategoria_id == 223)){
+			//alert(value.parent.actcategoria_id )
 			dias = value.parent.fecha_limit;	
 			color_bg = 'bg-gray';
 		} 
 		
 				tabla.prepend("<tr role='row' class='odd row-parent'><td>"+ value.parent.actnombre +
-				"</td><td>"+value.parent.actdescrip+"</td><td><span class='pull-center badge bg-"+color+"'>"+
+				"</td><td>"+value.parent.actdescrip+"</td><td><span style='background-color:"+color+"' class='pull-center badge'>"+
 				value.ref_nombre + "</span></td><td><span class='badge "+color_bg+"'>" +
 					dias + "</span></td><td>"+btnDescargaArchivoEs+"</td><td width='28%'> "+btnsParent+"</td></tr>"); 
 
@@ -659,7 +754,7 @@ function hideBtn(id){
 /* Envia id de actuacion */
 
 function Mostrar(btn,child_estado,modal){
-	// alert(modal)
+	 //alert(modal)
 	
 	var route = "/actuaciones/"+btn.value+"/edit" ;
 	var label = '';
@@ -667,7 +762,7 @@ function Mostrar(btn,child_estado,modal){
 	$("#actestado_id2").val(101);
 	$("#wait").show()
 	$.get(route, function(res){
-		console.log(res)
+		//console.log(res)
 		$("#myform_act_edit_docente")[0].reset();
 		hideElement('addNotasAct', 'class');
 		if (child_estado=='104') {
@@ -720,7 +815,12 @@ function Mostrar(btn,child_estado,modal){
 		
 		$("#act_id").val(res.id);
 		//$("#lbl_type_actadd").text()
-		
+		if(res.actcategoria_id==223){
+			$("#myform_act_edit_docente #actestado option[value='212']").attr('disabled', true); 
+		}else{
+			$("#myform_act_edit_docente #actestado option[value='212']").attr('disabled', false); 
+		}
+	
        llenarModalDetails(res);
        $("#"+modal).modal('show');
 	   $("#wait").hide()
@@ -847,7 +947,25 @@ $("#btn_act_edit_docen").click(function(){
 		$("#formAddNotas .form-control").removeClass('required');
 	}
 	var errors = validateForm('myform_act_edit_docente'); 
-//console.log(errors)
+	var notaapl = $("#myform_act_edit_docente input[name='ntaaplicacion']").val();
+	var notacon = $("#myform_act_edit_docente input[name='ntaconocimiento']").val();
+	var notaet =  $("#myform_act_edit_docente input[name='ntaetica']").val();
+	
+	if(notaapl > 5 || notacon > 5 || notaet > 5){
+		toastr.error("Por favor, verifíque que no haya notas superiores a 5.0", "", {
+			positionClass: "toast-top-right",
+			timeOut: "6000",
+		});
+		errors = 1;
+	}
+	
+	if(isNaN(notaapl) || isNaN(notacon) || isNaN(notaet)){
+		toastr.error("Por favor, verifíque que no haya notas con espacios o caracteres extraños", "", {
+			positionClass: "toast-top-right",
+			timeOut: "6000",
+		});
+		errors = 1;
+	}
 	if (errors<=0) {
 	var value = $("#idact").val();
 	var mydata = "#myform_act_edit_docente";
@@ -1327,8 +1445,7 @@ function searchReq(id){
 		if (res.requerimiento.notas!=null && res.requerimiento.notas!='') {
 			var notas = JSON.parse(res.requerimiento.notas); 
 			$("#lbl_not_etireq").text(notas.ntaetica);
-			$("#ntaconcepto_req").text(notas.ntaconcepto);
-			
+			$("#ntaconcepto_req").text(notas.ntaconcepto);			
 
 			showElement('cont_notas_req');
 			} 
@@ -1845,7 +1962,7 @@ function validateForm(form){
 	$("#"+form+" .required").each(function(index,obj){
 		if ($(this).attr('disabled')!='disabled') {
 			if ($(this).val() =='') {
-	  			errors.push('El campo '+$(this).attr('data-name')+' es obligatorio');
+	  			errors.push('El campo '+$(this).attr('name')+' es obligatorio');
 	  			$(this).css({'background':'#FDEDEC','border':'1px solid #EAEDED'});
 	  			$(this).attr('placeholder','Requerido');
 	  			//console.log($(this));
@@ -1854,6 +1971,27 @@ function validateForm(form){
 	  			$(this).css({'background':'#fff','border':'1px solid #EAEDED'});
 	  			//$(this).attr('placeholder','Requerido');
 	  			////console.log($(this).getAttribute('class'));
+	  		}	
+		}
+  		  			
+  	});
+  	return errors 	
+} 
+
+function validateNotas(form){	
+	var errors = [];
+	$("#"+form+" .val_nota").each(function(index,obj){
+		if ($(this).attr('disabled')!='disabled') {
+			if ($(this).val() !='' && $(this).val()>5) {
+	  			errors.push('El campo '+$(this).attr('name')+' es mayor que 5');
+	  			$(this).css({'background':'#FDEDEC','border':'1px solid #33FF90'});
+	  			$(this).attr('placeholder','Requerido');
+	  			//console.log($(this));
+	  		}else if ($(this).val() !='' && isNaN($(this).val())) {	  			
+	  			$(this).css({'background':'#fff','border':'1px solid #33FF90'});
+				errors.push('El campo esta mal diligenciado');
+				$(this).css({'background':'#FDEDEC','border':'1px solid #33FF90'});
+	  			$(this).attr('placeholder','Requerido');	  		
 	  		}	
 		}
   		  			

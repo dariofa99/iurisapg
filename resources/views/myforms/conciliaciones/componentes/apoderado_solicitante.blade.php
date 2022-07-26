@@ -5,16 +5,20 @@ $user = $conciliacion->getUser(196);
     <div class="col-md-12">
         <h4 align="center">
             <strong>APODERADO DE LA PARTE SOLICITANTE</strong>
-            @if($user->idnumber!=null) 
-            <button type="button" data-user="{{$user->idnumber}}" data-pivot="{{$user->pivot->id}}" class="btn btn-danger btn-sm btn_delete_usuario_conciliacion pull-right">  
-                <i class="fa fa-trash"> </i>
-            </button>
-           @endif
+          
            @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-           || ((currentUserInConciliacion($conciliacion->id,['autor'])))) 
+           || ((currentUserInConciliacion($conciliacion->id,['autor','auxiliar','conciliador'])))) 
+          @if(($conciliacion->estado_id==174 || $conciliacion->estado_id==176 || $conciliacion->estado_id==194))
                 <button type="button" @if($user->idnumber!=null) data-user="{{$user->idnumber}}" @endif data-section="apoderado_solicitante" data-type="196" class="btn btn-primary btn-sm btn_asinar_usuario_conciliacion pull-right">  
                     <i class="fa fa-plus"> </i> {{$user->idnumber!=null ? 'Actualizar' : 'Agregar'}} 
                 </button>
+
+                @if($user->idnumber!=null) 
+                <button type="button" data-user="{{$user->idnumber}}" data-pivot="{{$user->pivot->id}}" class="btn btn-danger btn-sm btn_delete_usuario_conciliacion pull-right">  
+                    <i class="fa fa-trash"> </i>
+                </button>
+               @endif
+           @endif    
             @endif
         </h4>
 

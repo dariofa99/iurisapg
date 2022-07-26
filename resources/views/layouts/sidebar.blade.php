@@ -229,7 +229,7 @@
      
 <!---->
  {{-----------------------------------menu conciliaciones----------------------------------------}}
-@if(currentUser()->can("crear_conciliaciones"))           
+@if(currentUser()->can("ver_conciliaciones"))           
           <li class="treeview">        
                     <a href="#">
                     <i class="fa fa-hand-paper-o" aria-hidden="true"></i>

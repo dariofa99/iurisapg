@@ -12,9 +12,10 @@ use App\TablaReferencia;
 use App\Conciliacion;
 use App\AudienciaConciliacion;
 use App\SalasAlternasConciliacion;
+use App\Sede;
 use Facades\App\Facades\NewPush;
 use App\User;
-
+use Illuminate\Support\Facades\Auth;
 
 class AudienciaController extends Controller
 {
@@ -73,37 +74,41 @@ class AudienciaController extends Controller
                     $conciliacion = Conciliacion::find($id_conciliacion);
                     $usuario = $conciliacion->usuarios->where('idnumber',$request->idnumber)->first();
                     if ($usuario) {
+                        Auth::login($usuario);
+                        $sede = Sede::find($usuario->sedes[0]->id_sede);             
+                        if($sede)session(["sede"=>$sede]);                        
                         if ($usuario->idnumber == $request->idnumber) {
                             $salaalterna = SalasAlternasConciliacion::where(['idnumber'=>$request->idnumber,"id_conciliacion"=>$id_conciliacion])->first();
                             $sala_alterna_url = "";
                             if ($salaalterna) {
                                 $sala_alterna_url=$request->root()."/audiencia"."/salaalaterna"."/".$salaalterna->token_access;
-                            }
+                            } 
+                          //  dd("ss");
                             //acceso a la videollamada
                             Session::flash('message-info', 'Recuerda, la audiencia de conciliación está agendada para hoy a las '.$audiencia->hora.' si no hay nadie, espera o ingresa a la hora indicada.');
-                            return view('myforms.conciliaciones_audiencias.audiencia_inivitado',compact('usuario','id_conciliacion','sala_alterna_url'));
+                            return view('myforms.conciliaciones_audiencias.audiencia_invitado',compact('conciliacion','usuario','id_conciliacion','sala_alterna_url'));
                         }
                     }
                     //usuario no autorizado
                     Session::flash('message-danger', 'Error de acceso, la audiencia de conciliación solicitada no esta disponible en este momento, verifica el link de acceso o vuelve a ingresar tu número de cédula.');
-                    return view('myforms.conciliaciones_audiencias.frm_audiencia_inivitado_input',compact('code'));
+                    return view('myforms.conciliaciones_audiencias.frm_audiencia_invitado_input',compact('code'));
                 } else {
                     //pide num cedula
-                    return view('myforms.conciliaciones_audiencias.frm_audiencia_inivitado_input',compact('code'));
+                    return view('myforms.conciliaciones_audiencias.frm_audiencia_invitado_input',compact('code'));
                 }
             }
             if ($fecha_actual>$fecha_audiencia) {
                  //la conciliacion ya paso
                 Session::flash('message-danger', 'Error de acceso, La audiencia de conciliación solicitada no esta disponible o ya pasó, verifica el link de acceso.');
-                return view('myforms.conciliaciones_audiencias.frm_audiencia_inivitado_input',compact('code'));
+                return view('myforms.conciliaciones_audiencias.frm_audiencia_invitado_input',compact('code'));
             }
             //la conciliacion es en otra fecha futura
             Session::flash('message-danger', 'La audiencia de conciliación solicitada no esta disponible en este momento, debes ingresar en la fecha señalada. Confirma la fecha o verifica el link de acceso.');
-           return view('myforms.conciliaciones_audiencias.frm_audiencia_inivitado_input',compact('code'));
+           return view('myforms.conciliaciones_audiencias.frm_audiencia_invitado_input',compact('code'));
         } else {
             //la audiencia solicitada no existe
             Session::flash('message-danger', 'Error de acceso, la audiencia de conciliación solicitada no esta disponible, verifica el link de acceso.');
-            return view('myforms.conciliaciones_audiencias.frm_audiencia_inivitado_input',compact('code'));
+            return view('myforms.conciliaciones_audiencias.frm_audiencia_invitado_input',compact('code'));
         }
     }
 
@@ -191,12 +196,14 @@ class AudienciaController extends Controller
         $action = '';
         $conciliacion_has_user = DB::table('conciliacion_has_user')->where([
             'conciliacion_id' => $request->idconciliacion,
-            'user_id' => $user->id
+            'user_id' => $user->id,
+           
         ])->first();
 
         if ($conciliacion_has_user) {
             if ($request->idrol == '000') {
-                $delete_conciliacion_has_user = DB::table('conciliacion_has_user')->where('id', $conciliacion_has_user->id)->delete();
+                $delete_conciliacion_has_user = DB::table('conciliacion_has_user')
+                ->where('id', $conciliacion_has_user->id)->delete();
                 $state = $delete_conciliacion_has_user;
                 $action = 'delete';
             } else {
@@ -211,7 +218,8 @@ class AudienciaController extends Controller
                 $insert_conciliacion_has_user = DB::table('conciliacion_has_user')->insert([
                     'tipo_usuario_id' => $request->idrol,
                     'conciliacion_id' => $request->idconciliacion,
-                    'user_id' => $user->id
+                    'user_id' => $user->id,
+                    'estado_id'=>1
                 ]);
                 $state = $insert_conciliacion_has_user;
                 $action = 'insert';
@@ -287,8 +295,18 @@ class AudienciaController extends Controller
 
     }
 
-    public function getChangeChatRoom($chatroom) {
-        
+    public function getChangeChatRoom(Request $request,$chatroom) { 
+       // return $request->all();
+       if($request->conciliacion_id==$request->useridnumber){
+           $chatroom = "conciliacion-$request->conciliacion_id";
+        }else{
+        $user_idnumber = Auth::user()->idnumber;
+        $chatroom = "conciliacion-$request->conciliacion_id$user_idnumber$request->useridnumber";
+        if($request->useridnumber < $user_idnumber){
+            $chatroom = "conciliacion-$request->conciliacion_id$request->useridnumber$user_idnumber";
+        }
+       }
+       
         return view('myforms.conciliaciones.componentes.chat_room_ajax',compact('chatroom'))->render();
 
     }

@@ -40,7 +40,7 @@
                 <div class="card-header"><b>Bienvenido(a) a la audiencia de conciliación.</b></div>
                 <div class="card-body">
                     <label>Para ingresar debes escribir en el campo de texto tu número de cédula, recuerda que solo pueden ingresar las personas autorizadas.</label>
-                    <label>Si tienes inconvenientes para ingresar comunicate al celular: 3177814609</label>
+                    <label>Si tienes inconvenientes para ingresar comunicate al celular: 3106038006</label>
                     <form method="POST" action="/audiencia/{{$code}}" id="myLoginForm2">
                         {{ csrf_field() }}
                         @include('msg.danger')

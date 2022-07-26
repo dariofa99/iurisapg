@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\ConcHechosPretenciones;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ConcHechosPretencionesController extends Controller
 {
@@ -37,6 +38,7 @@ class ConcHechosPretencionesController extends Controller
     public function store(Request $request)
     {
         $request['estado_id'] = 1;
+        $request['user_id'] = Auth::user()->id;
         $conHP = ConcHechosPretenciones::create($request->all());
         $conciliacion = $conHP->conciliacion;
         $tipo_id = $conHP->tipo_id;

@@ -5,16 +5,20 @@
     <div class="col-md-12">
         <h4> <strong> PARTE SOLICITADA</strong>
            
-               @if($user->idnumber!=null) 
-               <button type="button" data-user="{{$user->idnumber}}" data-pivot="{{$user->pivot->id}}" class="btn btn-danger btn-sm btn_delete_usuario_conciliacion pull-right">  
-                   <i class="fa fa-trash"> </i>
-               </button>
-              @endif
+             
               @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-              || ((currentUserInConciliacion($conciliacion->id,['autor']))))     <button type="button" @if($user->idnumber!=null) data-user="{{$user->idnumber}}" @endif data-section="solicitada" data-type="197" class="btn btn-primary btn-sm btn_asinar_usuario_conciliacion pull-right">  
+              || ((currentUserInConciliacion($conciliacion->id,['autor','auxiliar','conciliador']))))  
+               @if(($conciliacion->estado_id==174 || $conciliacion->estado_id==176 || $conciliacion->estado_id==194))
+                 <button type="button" @if($user->idnumber!=null) data-user="{{$user->idnumber}}" @endif data-section="solicitada" data-type="197" class="btn btn-primary btn-sm btn_asinar_usuario_conciliacion pull-right">  
                    <i class="fa fa-plus"> </i> {{$user->idnumber!=null ? 'Actualizar' : 'Agregar'}} 
                   </button>
 
+                  @if($user->idnumber!=null) 
+                  <button type="button" data-user="{{$user->idnumber}}" data-pivot="{{$user->pivot->id}}" class="btn btn-danger btn-sm btn_delete_usuario_conciliacion pull-right">  
+                      <i class="fa fa-trash"> </i>
+                  </button>
+                 @endif
+                 @endif
                @endif   
                </h4>
        
@@ -144,11 +148,13 @@
             @endif</label>
         <input class="form-control form-control-sm insert_adv" data-name="desde_cuando_comenzo_conflicto"  data-section="{{$section}}" required  type="text"
         @if($conciliacion->getStaticDataVal('desde_cuando_comenzo_conflicto',$section)) value="{{$conciliacion->getStaticDataVal('desde_cuando_comenzo_conflicto',$section)->value}}" @endif
-        @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
-         disabled 
-         class="form-control form-control-sm"
-        @else 
+       
+        @if(currentUserInConciliacion($conciliacion->id,['solicitada','autor','auxiliar']) and ($conciliacion->estado_id==174|| $conciliacion->estado_id==176 || $conciliacion->estado_id==194))
         class="form-control form-control-sm insert_adv"
+        @else 
+        disabled 
+        class="form-control form-control-sm"
+        
          @endif>
 
     </div>

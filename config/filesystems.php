@@ -68,8 +68,14 @@ return [
             'url' => 'app/conciliacion_files',
         ],
 
-        'solicitud_files' => [
+        'reportes_files' => [
             'driver' => 'local',
+            'root' => public_path('app/conciliacion_files'),
+            'url' => 'app/conciliacion_files',
+        ],
+
+        'solicitud_files' => [
+            'driver' => 'local', 
             'root' => storage_path('app/solicitud_files'),
             'url' => 'app/solicitud_files',
         ],

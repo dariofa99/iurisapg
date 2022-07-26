@@ -25,8 +25,13 @@ class PdfReporteDestino extends Model
     public function users()
     {
         return $this->belongsToMany(User::class,'pdf_reportes_users','pdf_reporte_id')
-        ->withPivot('pdf_reporte_id','tipo_firma_id','conciliacion_id','tipo_usuario_id','user_id','token','codigo','firmado')
+        ->withPivot('revocado','pdf_reporte_id','tipo_firma_id','conciliacion_id','tipo_usuario_id','user_id','token','codigo','firmado')
         ->withTimestamps();
+    } 
+
+    public function temporales()
+    {
+        return $this->hasMany(ConciliacionPdfTemporal::class,'reporte_pdf_id','reporte_id');
     } 
    
 }

@@ -55,13 +55,9 @@
                     </div>
 
 
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="description">Mensajes privados para conciliador</label>
-                                <textarea name="comentario" class="form-control" rows="5" ></textarea>
-                            </div>
-                        </div>
+                    <div class="iniciar_videollamada">
+                        <input type="hidden" id="conciliacion_id" value="{{$conciliacion->id}}">
+                        @include('myforms.conciliaciones.conciliacion_audiencia_chat')
                     </div>
 
 
@@ -79,18 +75,20 @@
 @push('scripts')
 
 <!-- aqui van los scripts de cada vista -->
+{!! Html::script('js/audiencia_conciliacion.js?v=1')!!}
 <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 <script src="https://meet.jit.si/external_api.js"></script>
 {!! Html::script('js/config_jitsi.js?v=3')!!}
 <script src="https://iurisapp.udenar.edu.co/plugins/new-push/io.js?v=1"></script>
 <script src="https://iurisapp.udenar.edu.co/js/newpush.js?v=1"></script>
+
 <script>
 
 
 
 
-    function startvideollamada() {
+    function startvideollamada() { 
 
         if (numsalasvideollamada == 0) {
             var meeting_id = '{{ hash("sha256", md5($id_conciliacion), FALSE) }}'

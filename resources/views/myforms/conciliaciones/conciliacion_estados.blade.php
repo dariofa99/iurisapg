@@ -10,7 +10,7 @@
 
 </div>
     <div class="col-md-3">
-        <input type="button" value="Descargar todos los formatos" class="btn btn-primary btn-block btn-sm" id="btn_download_all_pfd">
+        <input type="button" value="Descargar todos los documentos" class="btn btn-primary btn-block btn-sm" id="btn_download_all_pfd">
     </div>
 </div>
 

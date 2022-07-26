@@ -36,6 +36,7 @@
         @endif 
 
         @elseif($view and $view=='update_temp')
+        
         <div id="cont_temp">
             @if($reporte->is_temp)
             <input type="hidden" name="is_temp" value="{{$reporte->id}}">
@@ -63,17 +64,20 @@
     <div class="row">
         <div class="col-md-7">
     <br>
+
+    @if($view and $view!='update_temp')
+
             <button type="submit" class="btn btn-primary btn-sm" style="margin: 2px"><i class="fa fa-save"> </i> 
                 @if($view and $view=='store')
                 Guardar 
                 @elseif($view=='update') 
                 Actualizar 
-                @else 
-                Actualizar plantilla @endif
+                @endif
             </button> 
+    @endif
             @if($view and $view=='update_temp')
             <button type="button" id="btnGuardarPdfTemp" class="btn btn-success btn-sm" style="margin: 2px"><i class="fa fa-save"> </i> 
-                 Guardar temporal 
+                 Guardar cambios 
             </button>
             
            
@@ -83,9 +87,9 @@
            </button> 
             @endif
 
-            @if($view=='update' || $view=='update_temp')
+            @if($view=='update')
             <button type="button" @if(isset($reporte) and !$reporte->is_temp and $view=='update_temp') style="display:none"  @endif id="btnDeletePdfTemp" class="btn btn-danger btn-sm" style="margin: 2px"><i class="fa fa-trash"> </i> 
-                Eliminar temporal
+                Eliminar
              </button>
             @endif
 
@@ -148,7 +152,7 @@
         </div>
             <div class="content_values_{{$view}}" style="display: block" id="solicitante_{{$view}}">
                 @include('myforms.conciliaciones.componentes.reportes_values',[
-                    'tipo_usuario_id'=>185,
+                    'tipo_usuario_id'=>205,
                     'parte'=>'solicitante',
                     'view'=>"solicitante_values",
                     'mySummernote'=>$mySummernote,
@@ -158,7 +162,7 @@
 
             <div class="content_values_{{$view}}" style="display: none" id="rep_legal_solicitante_{{$view}}">
                 @include('myforms.conciliaciones.componentes.reportes_values',[
-                    'tipo_usuario_id'=>186,
+                    'tipo_usuario_id'=>195,
                     'parte'=>'rep_legal_solicitante',
                     'view'=>"solicitante_rep_legal_values",
                     'mySummernote'=>$mySummernote,
@@ -168,7 +172,7 @@
             </div>
             <div class="content_values_{{$view}}" style="display: none" id="apoderado_solicitante_{{$view}}">
                 @include('myforms.conciliaciones.componentes.reportes_values',[
-                    'tipo_usuario_id'=>187,
+                    'tipo_usuario_id'=>196,
                     'parte'=>'apoderado_solicitante',
                     'view'=>"solicitante_rep_legal_values",
                     'mySummernote'=>$mySummernote,                    
@@ -178,7 +182,7 @@
 
             <div class="content_values_{{$view}}" style="display: none" id="solicitada_{{$view}}">
                 @include('myforms.conciliaciones.componentes.reportes_values',[
-                    'tipo_usuario_id'=>188,
+                    'tipo_usuario_id'=>197,
                     'parte'=>'solicitada',
                     'view'=>"solicitante_values",
                     'mySummernote'=>$mySummernote,
@@ -188,7 +192,7 @@
 
             <div class="content_values_{{$view}}" style="display: none" id="rep_legal_solicitada_{{$view}}">
                 @include('myforms.conciliaciones.componentes.reportes_values',[
-                    'tipo_usuario_id'=>189,
+                    'tipo_usuario_id'=>198,
                     'parte'=>'rep_legal_solicitada',
                     'view'=>"solicitante_rep_legal_values",
                     'mySummernote'=>$mySummernote,                    
@@ -219,6 +223,7 @@
                 
 
     </div>
+
       
     
     </div>

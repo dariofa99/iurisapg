@@ -2,17 +2,83 @@
 
 
 @section('titulo_general')
-Inicio
+Hola!!  {{  currentUser()->name  }}  bienvenido a <strong>Iuris </strong>!! 
 @endsection
 
 @section('titulo_area')
-Pantalla Bienvenida
+
 @endsection
 
 
 @section('area_forms')
 
-<h2>Hola!!  {{  currentUser()->name  }}  bienvenido a <strong>Iuris </strong>!! </h2>
+
+
+<div class="contain">
+    <div class="row">
+        <div class="col-md-4 col-xl-3">
+            <div class="card bg-c-blue order-card">
+                <div class="card-block">
+                    <h4 class="m-b-20">Estudiantes que menos han ingresado</h4>
+                    <h2 class="text-right"><i class="fa fa-users f-left"></i><span><a style="color: aliceblue" href="/dashboard/search?type=users_not_session">486</a></span></h2>
+                   {{--  <p class="m-b-0">Completed Orders<span class="f-right">351</span></p> --}}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 col-xl-3">
+            <div class="card bg-c-green order-card">
+                <div class="card-block">
+                    <h4 class="m-b-20">Estudiantes con menos interacciones</h4>
+                    <h2 class="text-right"><i class="fa fa-user-times f-left"></i><span>486</span></h2>
+                   {{--  <p class="m-b-0">Completed Orders<span class="f-right">351</span></p> --}}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 col-xl-3">
+            <div class="card bg-c-yellow order-card">
+                <div class="card-block">
+                    <h4 class="m-b-20">Estudiantes con mas casos evaluados por sistema</h4>
+                    <h2 class="text-right"><i class="fa fa-clipboard f-left"></i><span>486</span></h2>
+                   {{--  <p class="m-b-0">Completed Orders<span class="f-right">351</span></p> --}}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 col-xl-3">
+            <div class="card bg-c-pink order-card">
+                <div class="card-block">
+                    <h4 class="m-b-20">Estudiantes con notas mas bajas</h4>
+                    <h2 class="text-right"><i class="fa fa-credit-card f-left"></i><span>486</span></h2>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 col-xl-3">
+          <div class="card bg-c-yellow order-card">
+              <div class="card-block">
+                  <h4 class="m-b-20">Casos con menos asesorias registradas por docentes</h4>
+                  <h2 class="text-right"><i class="fa fa-credit-card f-left"></i><span>486</span></h2>
+                  
+              </div>
+          </div>
+      </div>
+
+      <div class="col-md-4 col-xl-3">
+        <div class="card bg-c-green order-card">
+            <div class="card-block">
+                <h4 class="m-b-20">Casos sin actuaciones</h4>
+                <h2 class="text-right"><i class="fa fa-credit-card f-left"></i><span>486</span></h2>
+                
+            </div>
+        </div>
+    </div>
+	</div>
+</div>
+
+
+
 @if((count($sedes)>=2 and count(Auth::user()->sedes)<=0) || auth()->user()->can('cambiar_sede'))
 @if(!auth()->user()->can('cambiar_sede'))
   <div class="row">

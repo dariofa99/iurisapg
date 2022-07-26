@@ -108,7 +108,8 @@ class ExpedienteUserController extends Controller
                  //   if($userc_con <= 0 ){
                         $conciliacion = Conciliacion::find($request->conciliacion_id);
                         $conciliacion->usuarios()->attach($user->id,[
-                            'tipo_usuario_id'=>$request->tipo_usuario_id
+                            'tipo_usuario_id'=>$request->tipo_usuario_id,
+                            'estado_id'=>1
                         ]);
                   //  }
                 
@@ -161,6 +162,7 @@ class ExpedienteUserController extends Controller
      */
     public function update(Request $request, $id)
     {
+       // dd($request->all());
         $user= User::find($id);
         if($request->has('reference_data_id')){   
         foreach ($request->reference_data_id as $key => $rd_id) {
@@ -260,7 +262,9 @@ class ExpedienteUserController extends Controller
         $user->sedes()->sync(session('sede')->id_sede);
       }
         
-        if($request->ajax()){            
+        if($request->ajax()){  
+            if($request->has('conciliacion_id') and $user->active == 1) $request['active'] = 1; 
+            if($request->has('conciliacion_id') and $user->cursando_id != 1) $request['cursando_id'] = $user->cursando_id;   
             $user->fill($request->all());           
             $result=$user->save();             
             $response=[];
@@ -287,14 +291,17 @@ class ExpedienteUserController extends Controller
                 $response['view'] = view("myforms.components_exp.frm_oficina_virtual",compact('expediente'))->render();
             }
         }
-      // dd($request->all());
+      //dd($request->all());
         if($request->has('conciliacion_id')) {
             $userc_con = count($user->conciliaciones()->where([
-                'conciliacion_id'=>$request->conciliacion_id,'tipo_usuario_id'=>$request->tipo_usuario_id])->get());
+                'conciliacion_id'=>$request->conciliacion_id,
+                'tipo_usuario_id'=>$request->tipo_usuario_id])
+                ->get());
                 $conciliacion = Conciliacion::find($request->conciliacion_id);
                 if($userc_con <= 0 ){                   
                     $conciliacion->usuarios()->attach($user->id,[
-                        'tipo_usuario_id'=>$request->tipo_usuario_id
+                        'tipo_usuario_id'=>$request->tipo_usuario_id,
+                        'estado_id'=>1
                     ]);
                 }
             

@@ -14,11 +14,12 @@
             @endif</label>
         <input  data-name="cuantia_indeterminada_determinada"  data-section="{{$section}}" required  type="text"
         @if($conciliacion->getStaticDataVal('cuantia_indeterminada_determinada',$section)) value="{{$conciliacion->getStaticDataVal('cuantia_indeterminada_determinada',$section)->value}}" @endif
-        @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
+        @if(currentUserInConciliacion($conciliacion->id,['autor','auxiliar'])  and ($conciliacion->estado_id==174 || $conciliacion->estado_id==176 || $conciliacion->estado_id==194 ))
+        class="form-control  insert_adv"
+            @else 
             disabled 
             class="form-control"
-            @else 
-                class="form-control  insert_adv"
+                
             @endif>
 
     </div>
@@ -30,8 +31,10 @@
     <div class="form-group">  
         <label style="display: block; margin-bottom:10px"> Hechos   
     @if(($conciliacion->getUser(199)->hasRole('estudiante') and (currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-            || (!$conciliacion->getUser(199)->hasRole('estudiante') and (currentUserInConciliacion($conciliacion->id,['autor']) || currentUser()->hasRole('amatai'))))
+            || ((currentUserInConciliacion($conciliacion->id,['autor','auxiliar','conciliador']) || currentUser()->hasRole('amatai'))))
+             @if(($conciliacion->estado_id==174 || $conciliacion->estado_id==176 || $conciliacion->estado_id==194))
          <button type="button" data-tipo="206" class="btn btn-primary btn-sm pull-right btn_add_conc_he_con">Agregar hecho</button>
+         @endif
     @endif
     </label>
     <div id="content_hechos_pretensiones-206" class="content_hechos_pretensiones">
@@ -48,10 +51,11 @@
         <div class="form-group" >
             <label style="display: block; margin-bottom:10px">Pretensiones
                 @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-            || ((currentUserInConciliacion($conciliacion->id,['autor']))))
+            || ((currentUserInConciliacion($conciliacion->id,['autor','auxiliar','conciliador']))))
+             @if(($conciliacion->estado_id==174 || $conciliacion->estado_id==176 || $conciliacion->estado_id==194))
                 <button type="button" data-tipo="207" class="btn btn-primary btn-sm pull-right btn_add_conc_he_con"> Agregar pretensión</button>       
             @endif
-            
+            @endif
             </label>
             <div id="content_hechos_pretensiones-207" class="content_hechos_pretensiones">
                 @include('myforms.conciliaciones.componentes.hechos_pretenciones_ajax',[
@@ -63,21 +67,4 @@
     </div>
 </div>
 <hr>
-<div class="row">
-    <div class="col-md-12">
-        <div class="form-group" >
-            <label style="display: block; margin-bottom:10px">Acuerdos
-                @if(($conciliacion->getUser(199)->hasRole('estudiante') and (currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-            || (!$conciliacion->getUser(199)->hasRole('estudiante') and (currentUserInConciliacion($conciliacion->id,['autor']) || currentUser()->hasRole('amatai'))))
-                <button type="button" data-tipo="208" class="btn btn-primary btn-sm pull-right btn_add_conc_he_con"> Agregar Acuerdo</button>       
-            @endif
-            </label>
-            <div id="content_hechos_pretensiones-208" class="content_hechos_pretensiones">
-                @include('myforms.conciliaciones.componentes.hechos_pretenciones_ajax',[
-                    'tipo_id'=>208
-                ]) 
-            </div>
-           
-        </div>
-    </div>
-</div>
+

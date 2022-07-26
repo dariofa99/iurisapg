@@ -19,10 +19,10 @@ class PdfReportesController extends Controller
     use PdfTrait;
 
     public function loadPdf($conciliacion,$reporte,$estado=null){
-       // dd("");
+        //dd("");
         $conciliacion = Conciliacion::find($conciliacion);
         $reporte = PdfReporte::find($reporte);
-       // dd($reporte);
+       // dd($conciliacion);
         $pdf_temp = ConciliacionPdfTemporal::where(function ($query) use ($conciliacion,$reporte,$estado){
             if($estado==null){
                 return $query->where([
@@ -115,7 +115,8 @@ class PdfReportesController extends Controller
         $fileName =  time().'.'. 'pdf' ;
         $pdf->save($path . '/' . $fileName);
         return response()->json([
-            'url'=>'/pdf_temp' . '/' . $fileName
+            'url'=>'/pdf_temp' . '/' . $fileName,
+            
         ]);    
     }
     }
@@ -145,10 +146,11 @@ class PdfReportesController extends Controller
         return response()->json($asignacionReporte);
     }
     public function create(){
-        //dd("Ss");
+        
         $conciliaciones = Conciliacion::all();
-        $reportes = PdfReporte::all();
-        $conciliacion = new Conciliacion();
+        $reportes = PdfReporte::where('is_copy',0)
+        ->get();;
+        $conciliacion = new Conciliacion();       
         return view('myforms.conciliaciones.reportes.edit',compact('conciliaciones','reportes','conciliacion'));
    }
     public function store(Request $request){
@@ -162,7 +164,7 @@ class PdfReportesController extends Controller
             $file = $co_reporte->uploadFile($request->file('encabezado_file'),'/pdf_reportes_'.$co_reporte->id);
             $co_reporte->files()->attach($file,[
                 'seccion'=>'encabezado' ,
-                'configuracion'=>$configuracion          
+                'configuracion'=>$configuracion           
                 ]);                    
 		}
         if($request->file('pie_file')!=''){     

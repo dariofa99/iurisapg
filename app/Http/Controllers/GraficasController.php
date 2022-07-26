@@ -21,6 +21,14 @@ protected $delimiter  = ';';
         return view('myforms.frm_reportes_graficas');
     }
     
+    public function getFilters()
+    { 
+        $data = [];
+
+        
+        return view('myforms.frm_reportes_graficas');
+    }
+    
 
 
   public function search_data(Request $request){
@@ -3176,6 +3184,28 @@ protected $delimiter  = ';';
           ]; 
         $consulta = $consulta_2;       
   }
+
+  if ($request->table=='conciliaciones') {
+    if ($request->fecha_ini!='' and $request->fecha_fin!='') {
+      $consulta = DB::table('conciliaciones')
+      ->join('referencias_tablas','referencias_tablas.id','=','conciliaciones.estado_id')
+      ->select('referencias_tablas.id as id','referencias_tablas.ref_nombre as label',
+       DB::raw('COUNT(estado_id) as value'))
+       ->whereDate('conciliaciones.created_at','>=',$request->fecha_ini)
+       ->whereDate('conciliaciones.created_at','<=',$request->fecha_fin)
+      ->groupBy('conciliaciones.estado_id')
+      ->get();
+
+                       
+       }else{            
+     $consulta = DB::table('conciliaciones')
+           ->join('referencias_tablas','referencias_tablas.id','=','conciliaciones.estado_id')
+           ->select('referencias_tablas.id as id','referencias_tablas.ref_nombre as label',
+            DB::raw('COUNT(estado_id) as value'))
+           ->groupBy('conciliaciones.estado_id')
+           ->get();
+       }      
+ }
 
 
       $data = ['consulta'=>$consulta];

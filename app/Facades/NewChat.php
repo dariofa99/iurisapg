@@ -33,7 +33,7 @@ class NewChat
             'correo'=>$this->correo,
             'imagen'=>$this->imagen,
             'can_write'=>$this->can_write
-            ];
+        ];
          //   dd($data_chat);
          $data_chat= json_encode($data_chat);
          $data_chat = base64_encode($data_chat);
@@ -44,7 +44,7 @@ class NewChat
 
     public function username($username){
         $this->username = $username;            
-         return $this;
+         return $this; 
     }
 
     public function room($room){

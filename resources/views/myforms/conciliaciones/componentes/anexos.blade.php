@@ -8,10 +8,9 @@
 </div>
     </div>
     <div class="col-md-2 col-md-offset-10">
-        @if(($conciliacion->estado_id!=177 and $conciliacion->estado_id!=179)  and !auth()->user()->can('act_conciliacion'))
-             @else 
-             @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-             || ((currentUserInConciliacion($conciliacion->id,['autor']))))
+        @if(($conciliacion->estado_id==174 || $conciliacion->estado_id==176 || $conciliacion->estado_id==194))
+            @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
+                || ((currentUserInConciliacion($conciliacion->id,['autor','auxiliar']))))
             <button type="button" id="btn_create_document" class="btn btn-primary btn-sm pull-right">Agregar anexo</button>
             @endif
         @endif
@@ -27,6 +26,9 @@
                 </th>
                 <th>
                     Archivo
+                </th>
+                <th>
+                    Subido por
                 </th>
                 <th>
                     Acciones

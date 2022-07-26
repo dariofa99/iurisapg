@@ -1,1 +1,1 @@
-{!! \Facades\App\Facades\NewChat::room($chatroom)->render() !!}
+{!! \Facades\App\Facades\NewChat::room($chatroom)->render() !!} 

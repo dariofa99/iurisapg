@@ -26,7 +26,7 @@ Route::resource('logout', 'LogoutController');
 Route::get('terminosycondiciones', function () {
   return view('auth.terminosycondiciones');
 });
-
+Route::get('conciliaciones/download/file/{file_id}', 'ConciliacionesController@downloadFile'); 
 Route::get('videos', function () {
   return view('videos');
 });
@@ -34,13 +34,19 @@ Route::get('videos', function () {
 Route::get('audiencia/{code}','AudienciaController@ExternoSalaAudiencia');
 Route::post('audiencia/{code}','AudienciaController@ExternoSalaAudiencia');
 Route::get('audiencia/salaalaterna/{code}','AudienciaController@getSalaAlternaAudciencia');
-
 Route::get('/firmar/digital/{token}', 'ConciliacionesFirmasController@firmaVerify');
+Route::get('/firmar/pdf/verify/{token}', 'ConciliacionesFirmasController@showFormVerifyDocument');
 Route::get('/firmar/digital/confirm/{token}/{codigo}', 'ConciliacionesFirmasController@firmaConfirm');
-
+Route::post('/firmar/pdf/verify', 'ConciliacionesFirmasController@storeReportDescargado')->name("store.rpdescargado");
+Route::get('/firmar/pdf/verify/show/{token}', 'ConciliacionesFirmasController@showVerifyDocument')->name("show.documents");
 Route::post('/firmar/digital/', 'ConciliacionesFirmasController@tokenVerify')->name('firmar.verify');
 Route::post('/firmar/ok', 'ConciliacionesFirmasController@firmaAccept')->name('firma.ok');
 Route::get('/firmar/digital/show/doc', 'ConciliacionesFirmasController@showFirmaAccept')->name('firmar.accept');
+Route::get('/firmar/get/status', 'ConciliacionesFirmasController@getStatus');
+Route::get('/firmar/digital/revocar/{token}/{codigo}', 'ConciliacionesFirmasController@firmaRevocar');
+Route::post('/firmar/revocar/ok', 'ConciliacionesFirmasController@firmaRevocarOk');
+Route::get('/firmar/revocar/get/status', 'ConciliacionesFirmasController@getFirmaRevocar');
+
 ///rutas que requieren atenticación
 Route::group(['middleware' => ['auth']], function() {
  
@@ -55,6 +61,7 @@ Route::post('/citaciones/search/forday', 'CitacionEstudiantesController@searchCi
 
 
 Route::resource('notifications', 'NotificationsController');
+Route::get('dashboard/search', 'HomeController@search');
 
 Route::resource('users', 'MyusersController');
 Route::get('users/confirm/email/{token}', 'MyusersController@confirm_email');
@@ -184,7 +191,7 @@ Route::post('expedientes/buscarexpasig/', 'ExpedienteController@searchExpAsig');
 Route::get('expediente/createstream/{id}', 'ExpedienteController@createStream'); 
 Route::get('expediente/sharestream/{id}', 'ExpedienteController@shareStream');  
 
-
+Route::post('expedientes/asignar/conciliacion', 'ExpedienteController@asigConciliacion'); 
  
 //Ediar usuarios desde Expedientes
 Route::resource('expuser', 'ExpedienteUserController');
@@ -276,6 +283,7 @@ Route::get('/descargar/documento/{id}','CaseLogController@downloadFileLog');
 //Conciliaciones
 Route::resource('conciliaciones', 'ConciliacionesController');
 Route::post('conciliaciones/insert/data', 'ConciliacionesController@insertData');
+Route::post('conciliaciones/generate/documents', 'ConciliacionesController@generateDocuments'); 
 Route::post('conciliaciones/insert/estado', 'ConciliacionesController@insertEstado'); 
 Route::post('conciliaciones/insert/comentario', 'ConciliacionesController@insertComentario'); 
 Route::get('conciliaciones/delete/comentario', 'ConciliacionesController@deleteComentario'); 
@@ -284,7 +292,7 @@ Route::post('conciliaciones/update/comentario', 'ConciliacionesController@update
 Route::post('conciliaciones/store/anexo', 'ConciliacionesController@storeAnexo');
 Route::get('conciliaciones/delete/anexo', 'ConciliacionesController@deleteAnexo');
 Route::post('conciliaciones/update/anexo', 'ConciliacionesController@updateAnexo');
-Route::get('conciliaciones/download/file/{file_id}', 'ConciliacionesController@downloadFile'); 
+//Route::get('conciliaciones/download/file/{file_id}', 'ConciliacionesController@downloadFile'); 
 Route::get('conciliaciones/delete/estado', 'ConciliacionesController@deleteEstado');
 Route::get('conciliaciones/edit/estado', 'ConciliacionesController@editEstado');
 Route::get('audiencias', 'AudienciaController@calendarAudiencias');
@@ -293,6 +301,11 @@ Route::get('conciliaciones/get/estado/pdf', 'ConciliacionesController@getEstados
 Route::get('conciliacion/user/{idnumber}', 'ConciliacionesController@getUser');
 Route::get('conciliacion/detalles/user/{idnumber}', 'ConciliacionesController@getDetallesUser');
 Route::get('conciliacion/delete/user', 'ConciliacionesController@deleteUser');
+Route::get('conciliaciones/get/status/files', 'ConciliacionesController@getEstadosFiles');
+Route::post('conciliaciones/store/conc/shared/files', 'ConciliacionesController@storeSharedConcFiles');
+Route::post('conciliaciones/asignar/expediente', 'ConciliacionesController@asigExpediente');
+Route::get('conciliacion/sancionar/user', 'ConciliacionesController@sancionarUser');
+
 Route::post('conciliacion/audiencia/create', 'AudienciaController@audienciaCreate');
 Route::get('conciliacion/users/salasalternasaudiencia/{id}/{cont}', 'AudienciaController@getSalasAudiencia');
 Route::post('conciliacion/create/salasalternasaudiencia', 'AudienciaController@postSalasAudienciaCreate');
@@ -321,6 +334,7 @@ Route::get('conciliacion/reportes/get', 'ConciliacionesReportesController@getPdf
 Route::get('pdf/reportes/editar/temporal/{reporte}/{conciliacion}/{estado}', 'ConciliacionesReportesController@editReporteTemporal');
 Route::get('conciliacion/reporte/firmantes', 'ConciliacionesReportesController@getFirmantes');
 Route::post('conciliacion/reporte/firmantes', 'ConciliacionesReportesController@setFirmantes');
+Route::post('conciliacion/reporte/revocar/firmas', 'ConciliacionesReportesController@revocarFirmas');
 Route::post('conciliacion/reporte/firmantes/reenviar/mails', 'ConciliacionesReportesController@reenviarMails');
 //Conciliaciones
 Route::resource('conciliaciones/hechos/pretenciones', 'ConcHechosPretencionesController');
@@ -373,8 +387,10 @@ Route::group(['middleware' =>'front'], function() {
 
 Route::group(['prefix' =>'oficina'], function() { 
   Route::get('solicitante/conciliaciones','FrontController@conciliaciones')->name("front.conciliaciones");
+  Route::get('solicitante/conciliaciones/solicitud','FrontController@conciliaciones_solicitud')->name("front.conciliaciones.solicitud");
   Route::get('solicitante/conciliaciones/{id}/edit','FrontController@conciliacion_edit')->name("front.conciliacion.edit");
- 
+  Route::get('solicitante/conciliaciones/create','FrontController@conciliacion_store')->name("front.conciliacion.store");
+
   Route::resource('solicitante','FrontController');
   Route::get('solicitante/solicitud/{id}','FrontController@solicitud_show');
   

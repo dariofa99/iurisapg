@@ -83,6 +83,11 @@ class Expediente extends Model
        // Carbon::setlocale('es');
     }
 
+    public function conciliaciones(){
+        return $this->belongsToMany(Conciliacion::class,'conc_has_exp','exp_id','conciliacion_id')
+        ->withPivot('id','conciliacion_id','exp_id','type_status_id','user_id')->withTimestamps(); 
+     }  
+
     public function estudiante()
     {
         return $this->belongsTo(User::class, 'expidnumberest', 'idnumber');
@@ -104,7 +109,7 @@ class Expediente extends Model
 
      public function requerimientos(){
       return $this->hasMany(Requerimiento::class, 'reqexpid', 'expid');
-    }
+    } 
  
     public function actuacion()
     {
@@ -223,9 +228,7 @@ class Expediente extends Model
           
         }
     } elseif (count($docentes)>0) {
-        foreach ($docentes as $key => $docente) {
-        
-    
+        foreach ($docentes as $key => $docente) {   
                $asignacion = new AsigDocenteCaso();
                $asignacion->docidnumber =  $docente->idnumber;
                $asignacion->asig_caso_id = $asignacion_caso->id;
@@ -322,7 +325,7 @@ class Expediente extends Model
       
 
     
-    }
+    }  
 
     function getDocenteAsig(){
         $asig = $this->getAsignacion();  
@@ -569,6 +572,11 @@ class Expediente extends Model
              ['actestado_id','<>','136'],
              ['actestado_id','<>','138'],
              ['actestado_id','<>','139'], 
+             ['actestado_id','<>','174'],
+             ['actestado_id','<>','175'], 
+             ['actestado_id','<>','176'], 
+             ['actestado_id','<>','177'], 
+             ['actestado_id','<>','178'], 
              ['actidnumberest',$this->expidnumberest] ,
              ['actexpid',$this->expid]
          ])

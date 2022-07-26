@@ -9,7 +9,7 @@
 	@endslot
 
     @slot('cols')
-		col-md-6 col-md-offset-3
+		col-md-8 col-md-offset-2
 	@endslot 
 	@slot('body')
 	<div class="row" id="content_user_pdf_list" >
@@ -19,8 +19,8 @@
                     <th>
                         Nombre 
                     </th>
-                    <th>
-                        Descargar
+                    <th colspan="5">
+                        Acciones
                     </th>
                  </thead>
                 <tbody>
@@ -43,22 +43,20 @@
                 <button type="submit" id="btn_enviar_email"  class="btn btn-primary btn-sm">Enviar y Guardar</button>
            
                 <button type="button" id="btn_cancelar_asig_user" class="btn btn-default btn-sm ">Cancelar</button>
-               
                 
-              
+                @if(currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai'))
+                <button type="button" data-status_id="0" data-reporte_id="0" id="btn_generar_pdf" class="btn btn-success btn-sm btn_gene_pdf">Generar documento</button>
+                <button type="button" id="btn_revocar_firmas" data-estado_id="0" data-reporte_id="0" class="btn btn-danger btn-sm  btn_revocar_firmas"> Revocar firmas</button>
 
-           
+                @endif
                
-            
-               
-                <button type="button" id="btn_gene_pdf" class="btn btn-success btn-sm ">Generar documentos</button>
-              
 
             </div>
             <div class="col-md-3">
                 <button type="button" id="btn_select_volver_enviar_email" class="btn btn-warning btn-sm">Volver a envíar E-mail</button>
                 <button type="button" style="display: none" id="btn_volver_enviar_email"  class="btn btn-primary btn-sm">
-                    Reenviar emails</button>
+                    Reenviar emails
+                </button>
 
             </div>
             <div class="col-md-12">

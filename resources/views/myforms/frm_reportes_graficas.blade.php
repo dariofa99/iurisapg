@@ -20,8 +20,10 @@ Reportes
     'expedientes'=>'Expedientes',
     'actuaciones'=>'Actuaciones',
     'requerimientos'=>'Requerimientos',
+    'conciliaciones'=>'Conciliaciones',
     ],null,['class'=>'form-control generate_graf','id'=>'select_table']) !!}
  
+
   </div>
   <div class="col-md-1"><br>
     <label for="">Hab. Rango</label>

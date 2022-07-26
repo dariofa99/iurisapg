@@ -25,4 +25,10 @@ class HomeController extends Controller
     {
         return view('home');
     }
+
+    public function search(Request $request)
+    {
+        if($request->has('type') and $request->type = "estudiante")
+        return view('myforms.frm_result_consultas_home');
+    }
 }

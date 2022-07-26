@@ -34,6 +34,7 @@ class Actuacion extends Model
                             'actdocencpto',
                             'actdocenfechamod',
                             'actestado_id',
+                            'actcategoria_id',
                             'notas',
                             'fecha_limit',
                             'actdocnomgen',
@@ -60,6 +61,11 @@ class Actuacion extends Model
     public function revisionesExp(){
          return $this->belongsToMany(Expediente::class,'revisiones_actuacion','rev_actid','rev_actexpid')->withPivot('rev_actexpid','parent_rev_actid','rev_actid');
     }
+
+    public function conciliaciones(){
+        return $this->belongsToMany(Conciliacion::class,'conc_has_exp','actuacion_id','conciliacion_id')
+        ->withPivot('actuacion_id','conciliacion_id');
+   }
 
     public function docente_update(){
        return $this->belongsTo(User::class, 'actuserupdated','idnumber');

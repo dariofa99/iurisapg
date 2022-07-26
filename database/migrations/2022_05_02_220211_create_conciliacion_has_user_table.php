@@ -21,7 +21,9 @@ class CreateConciliacionHasUserTable extends Migration
             $table->foreign('conciliacion_id')->references('id')->on('conciliaciones'); //Tipo de asistencia: asistencia, permiso, reposicion 
             $table->integer('user_id')->unsigned(); // 
             $table->foreign('user_id')->references('id')->on('users'); //Tipo de asistencia: asistencia, permiso, reposicion 
-            $table->timestamps(); 
+            $table->integer('estado_id')->unsigned(); // 
+            $table->foreign('estado_id')->references('id')->on('referencias_tablas'); //Tipo de asistencia: asistencia, permiso, reposicion 
+           $table->timestamps(); 
         });
 
         Schema::create('conciliacion_has_files', function (Blueprint $table) {
@@ -35,9 +37,14 @@ class CreateConciliacionHasUserTable extends Migration
             ->onDelete('cascade')->onUpdate('cascade');
             $table->integer('type_status_id')->unsigned();
             $table->foreign('type_status_id')->references('id')->on('referencias_tablas')
-            ->onDelete('cascade')->onUpdate('cascade');            
+            ->onDelete('cascade')->onUpdate('cascade');   
+            $table->integer('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users')
+            ->onDelete('cascade')->onUpdate('cascade');         
             $table->timestamps();
         });
+
+     
 
     }
 

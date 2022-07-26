@@ -16,11 +16,11 @@ function currentUser()
 function currentUserInConciliacion($conciliacion,$roles)
 {
     $role = auth()->user()->tipo_conciliacion()->where('conciliacion_id',$conciliacion)->get();
-    //dd($role);
+   // dd($role);
     if(is_array($roles)){
         foreach ($role as $key => $rol) {   
             
-            if(in_array(strtolower($rol->ref_nombre),$roles)){
+            if(in_array(strtolower($rol->ref_value),$roles)){
                 return true;
            }
         } 
@@ -205,7 +205,7 @@ function fechaFortatoPer($criterio)
 function idAleatorio($criterio)
 {       
     
-    return $id;
+    return $criterio;
 
 }
 

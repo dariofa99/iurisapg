@@ -16,7 +16,7 @@ $(document).ready(function(){
 });
 
 $("#wait").css("display", "block");
-const Toast = Swal.mixin({
+const Toast = Swal.mixin({ 
     toast: true,
     position: "top-end",
     showConfirmButton: false,
@@ -27,7 +27,7 @@ $(document).ready(function (e) {
     var summernote = $(".summernote");
     items_delete = [];
     summernote.summernote({
-        /* toolbar: [
+        /*toolbar: [
             // [groupName, [list of button]]
             ["style", ["bold", "italic", "underline", "clear"]],
             ["font", ["strikethrough", "superscript", "subscript"]],
@@ -1399,14 +1399,80 @@ return false;
     $("#myform_asig_nota_ext").on("submit", function (e) {
         var request = $(this).serialize();
        
-        if ($("#myform_asig_nota_ext input[name=typesub]").val() == "store") {
-            storeNotaExt(request);
+        var notaapl = $("#myform_asig_nota_ext input[name='ntaaplicacion']").val();
+        var notacon = $("#myform_asig_nota_ext input[name='ntaconocimiento']").val();
+        var notaet =  $("#myform_asig_nota_ext input[name='ntaetica']").val();
+       
+        var errors = validateForm("myform_asig_nota_ext")
+        if(notaapl > 5 || notacon > 5 || notaet > 5){
+            toastr.error("Por favor, verifíque que no haya notas superiores a 5.0", "", {
+                positionClass: "toast-top-right",
+                timeOut: "6000",
+            });
+            errors = 1;
         }
-        if ($("#myform_asig_nota_ext input[name=typesub]").val() == "update") {
-            var id = $("#myform_asig_nota_ext input[name=estidnumber]").val();
-            oficinaUpdateNota(request, id);
+        
+        if(isNaN(notaapl) || isNaN(notacon) || isNaN(notaet)){
+            toastr.error("Por favor, verifíque que no haya notas con espacios o caracteres extraños", "", {
+                positionClass: "toast-top-right",
+                timeOut: "6000",
+            });
+            errors = 1;
         }
+
+        if(errors <= 0){
+            if ($("#myform_asig_nota_ext input[name=typesub]").val() == "store") {
+                storeNotaExt(request);
+            }
+            if ($("#myform_asig_nota_ext input[name=typesub]").val() == "update") {
+                var id = $("#myform_asig_nota_ext input[name=estidnumber]").val();
+                oficinaUpdateNota(request, id);
+            }
+        }
+      
         e.preventDefault();
+    });
+
+    $("#myform_asig_nota_conciliacion").on("submit", function (e) {        var request = $(this).serialize();
+       
+        var errors = validateForm("myform_asig_nota_conciliacion");
+        var errors2 = validateNotas("myform_asig_nota_conciliacion");        
+        if(errors.length <= 0){
+            if(errors2.length<=0){
+                if ($("#myform_asig_nota_conciliacion input[name=typesub]").val() == "store") {
+                     storeNotaExt(request);
+                 }
+                 if ($("#myform_asig_nota_conciliacion input[name=typesub]").val() == "update") {
+                     var id = $("#myform_asig_nota_conciliacion input[name=estidnumber]").val();
+                     oficinaUpdateNota(request, id);
+                 }
+            }else{
+                toastr.error("Por favor, verifíque que no haya notas superiores a 5, con espacios o caracteres extraños", "", {
+                    positionClass: "toast-top-right",
+                    timeOut: "6000",
+                });
+            }
+           
+        }
+      
+        e.preventDefault();
+      /*   if(notaapl > 5 || notacon > 5 || notaet > 5){
+            toastr.error("Por favor, verifíque que no haya notas superiores a 5.0", "", {
+                positionClass: "toast-top-right",
+                timeOut: "6000",
+            });
+            errors = 1;
+        }
+        
+        if(isNaN(notaapl) || isNaN(notacon) || isNaN(notaet)){
+            toastr.error("Por favor, verifíque que no haya notas con espacios o caracteres extraños", "", {
+                positionClass: "toast-top-right",
+                timeOut: "6000",
+            });
+            errors = 1;
+        } */
+
+      
     });
 
     $("#myform_asig_nota_ext").on("change", "#chk_change_nota", function (e) {
@@ -1530,7 +1596,6 @@ return false;
         var request = new FormData($(this)[0]);
         request.append("exp_id", $("#expediente_id").val());
         updateDocumentos(request, id);
-        console.log(request);
         e.preventDefault();
     });
 
@@ -2130,6 +2195,41 @@ return false;
             }
         });
     });
+    $(".btn_sancionar_usuario_conciliacion").on("click", function (e) {
+        var data_pivot = $(this).attr("data-pivot");
+        var request = {'pivot':data_pivot,'estado_id':224}
+        Swal.fire({
+            title: "Esta seguro de sancionar al usuario?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si, sancionar!",
+            cancelButtonText: "No, cancelar",
+        }).then((result) => {
+            if (result.value) {
+                sancionarConciliacionUser(request);
+            }
+        });
+    });
+
+    $(".btn_quitsancion_usuario_conciliacion").on("click", function (e) {
+        var data_pivot = $(this).attr("data-pivot");
+        var request = {'pivot':data_pivot,'estado_id':1}
+        Swal.fire({
+            title: "Esta seguro de quitar sanción al usuario?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si, quitar!",
+            cancelButtonText: "No, cancelar",
+        }).then((result) => {
+            if (result.value) {
+                sancionarConciliacionUser(request);
+            }
+        });
+    });
     
 
     $("#myModal_conc_user_create").on("blur",'input[name=idnumber]',function (e) {
@@ -2163,7 +2263,22 @@ return false;
             //var request = $(this).serialize() +  "&conciliacion_id=" +   $("#conciliacion_id").val();
             var request = new FormData($(this)[0]);
             request.append("conciliacion_id", $("#conciliacion_id").val());
-            storeConciliacionEstado(request);
+            var type_status_id = $("#myformCreateEstado select[name=type_status_id]").val()
+            if(type_status_id == 181){
+                var audiencia = $("#conciliacion_audiencia_id").val()
+                if(audiencia==undefined){
+                    toastr.error(
+                        "No se puede admitir la conciliación porque no hay una audiencia habilitada",
+                        "Error",
+                        { positionClass: "toast-top-right", timeOut: "50000" }
+                    );
+                }else{
+                    storeConciliacionEstado(request);
+                }
+            }else{
+                storeConciliacionEstado(request);
+            }
+            //
             e.preventDefault();
         }
     );
@@ -2271,6 +2386,7 @@ return false;
         getEstadosReportesPdf(request);*/
 
         var request = {
+            conc_estado_id: $(this).attr("data-id"),
             tabla_destino: "conciliaciones",
             status_id: $(this).attr("data-estado_id"),
             conciliacion_id:$("#conciliacion_id").val()
@@ -2295,6 +2411,7 @@ return false;
         );
         var id = $("#myFormEditPdfReporte select[name=id]").val();
         if(id==undefined)id = $("#myFormEditPdfReporte input[name=id]").val();
+        //alert(id)
         if (request) updatePdfReporte(request, id);
         e.preventDefault();
     });
@@ -2397,40 +2514,25 @@ return false;
         var request = serializePdf(
             "myFormEditPdfReporte",
             "summernote_update"
-        );
-        console.log(request);
+        );       
         var id = $("#myFormEditPdfReporte select[name=id]").val();
         if(id==undefined)id = $("#myFormEditPdfReporte input[name=id]").val();
         if (request){
-            var is_temp = $("#myFormEditPdfReporte input[name=is_temp]").val()
+            updateConPdfTemporal(request,id)               
+           /*  var is_temp = $("#myFormEditPdfReporte input[name=is_temp]").val()
             if(is_temp){
                 updateConPdfTemporal(request,is_temp)
             }else{
                 createConPdfTemporal(request, id);
-            }
-           
+            } */           
         }
-
         e.preventDefault();
 
       
     });
     $("#btnCancelPdfTemp").on("click",function (e) {
-        Swal.fire({
-            title: 'Esta seguro que desea cancelar?',
-            text: "No se guardaran los cambios!",
-            type: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Si, cancelar!',
-            cancelButtonText: 'No, mantener abierta!'
-          }).then((result) => {
-            if (result.value) {              
-                myPopupWindow.close();   
-                $("#bgtransparent").remove();         
-            }
-          });   
+        myPopupWindow.close();   
+        $("#bgtransparent").remove();  
     });
 
     $("#btnDeletePdfTemp").on("click",function (e) {
@@ -2439,14 +2541,14 @@ return false;
             var id = $("#myFormEditPdfReporte select[name=id]").val();
         }
         Swal.fire({
-            title: 'Esta seguro que desea eliminar el registro temporal?',
+            title: 'Esta seguro que desea eliminar el formato?',
             text: "No se podrá revertir los cambios!",
             type: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Si, Eliminar!',
-            cancelButtonText: 'No, mantener abierta!'
+            cancelButtonText: 'No, Cancelar!'
           }).then((result) => {
             if (result.value) {              
                 deleteConPdfTemporal(id)
@@ -2605,9 +2707,9 @@ return false;
                 a.target = "_blank";   
                 a.click();                
             }           
-        });
+        }); 
        // descargarAllPdfConcEstado(request)
-        console.log(request);
+       
      });
 
 
@@ -2642,7 +2744,18 @@ return false;
 
      $(".btn_add_usuario_notas").on("click",function (e) {
          e.preventDefault();
-         $("#myform_asig_nota_ext input[name='estidnumber']").val($(this).attr("data-user"))
+         if($(this).attr("data-type")==203){
+            $("#content_nota_conciliador").show();
+            $("#content_nota_auxiliar").hide();
+            $("#content_nota_auxiliar input").prop("disabled",true);
+            $("#content_nota_conciliador input").prop("disabled",false);
+         }else{
+            $("#content_nota_conciliador").hide();
+            $("#content_nota_conciliador input").prop("disabled",true)
+            $("#content_nota_auxiliar").show();
+            $("#content_nota_auxiliar input").prop("disabled",false);
+         }
+         $("#myform_asig_nota_conciliacion input[name='estidnumber']").val($(this).attr("data-user"))
          $("#myModal_add_nota_conciliaciones").modal("show")
      });
 
@@ -2672,17 +2785,61 @@ return false;
 
      $(".btn_edit_notas").on("click",function (e) {
         e.preventDefault();
+        var notas = [];
+        notas.push('puntualidad','presentancion_personal');
+        if($(this).attr("data-type")==203){
+            notas.push('manejo_audiencia','analisis_formula');
+        }else{
+            notas.push('plantillas','redaccion_acta');
+        }
+        if($(this).attr("data-type")==203){
+            $("#content_nota_conciliador_edit").show();
+            $("#content_nota_auxiliar_edit").hide();
+            $("#content_nota_auxiliar_edit input").prop("disabled",true);
+            $("#content_nota_conciliador_edit input").prop("disabled",false);
+         }else{
+            $("#content_nota_conciliador_edit").hide();
+            $("#content_nota_conciliador_edit input").prop("disabled",true)
+            $("#content_nota_auxiliar_edit").show();
+            $("#content_nota_auxiliar_edit input").prop("disabled",false);
+         }
         var request = {
             'idnumber':$(this).attr("data-user"),
             'origen':5,
-            'oficina_id':$("#conciliacion_id").val()
+            'oficina_id':$("#conciliacion_id").val(),
+            'notas':notas
         }
-        getNotasExt(request)
+       // console.log(notas);
+       getNotasConciliacion(request)
      });
 
      $("#myform_edit_nota_ext").on("submit",function(e) {
          var request = $(this).serialize();
-        updateNotasExt(request)
+        var notaapl = $("#myform_edit_nota_ext input[name='nota_aplicacion']").val();
+        var notacon = $("#myform_edit_nota_ext input[name='nota_conocimiento']").val();
+        var notaet =  $("#myform_edit_nota_ext input[name='nota_etica']").val();
+        var errors = 0;
+        var errors = validateForm("myform_edit_nota_ext")
+        if(notaapl > 5 || notacon > 5 || notaet > 5){
+            toastr.error("Por favor verifíque que no haya notas superiores a 5.0", "", {
+                positionClass: "toast-top-right",
+                timeOut: "6000",
+            });
+            errors = 1;
+        }
+        
+        if(isNaN(notaapl) || isNaN(notacon) || isNaN(notaet)){
+            toastr.error("Por favor verifíque que no haya notas con espacios o caracteres extraños", "", {
+                positionClass: "toast-top-right",
+                timeOut: "6000",
+            });
+            errors = 1;
+        }
+
+        if(errors <= 0){
+            updateNotasExt(request)
+        }
+        
          e.preventDefault();
      });
 
@@ -2705,7 +2862,7 @@ return false;
                 request.push({name:'delete_users_id[]', value: element})
             });            
         }
-        console.log(request);
+       
         setFirmantes(request);
         e.preventDefault()
      });
@@ -2716,7 +2873,7 @@ return false;
      });
 
      var users_delete = {};
-     $("#table_list_pdf_users").on("change",'.check_selusfirm',function (e) {
+     $("#table_list_pdf_users").on("change",'.check_selusfirm',function (e) {        
          if(!$(this).is(":checked") && $(this).attr("data-oldnew") == 'old' && users_delete.indexOf($(this).val()) == -1){
            users_delete.push($(this).val());
          }else{
@@ -2725,11 +2882,52 @@ return false;
      });
 
      $("#table_list_pdf_users").on("change",'.select_type_firma',function (e) {
-        if($(this).val() == '' && $(this).attr("data-oldnew") == 'old' && users_delete.indexOf($(this).attr("data-userid")) == -1){
-          users_delete.push($(this).attr("data-userid"));
-        }else if($(this).attr("data-oldnew") == 'old'  && users_delete.indexOf($(this).attr("data-userid")) != -1){
-           users_delete.splice(users_delete.indexOf($(this).attr("data-userid")),1);            
+       // $(".input_type_user").prop("disabled",true)
+        
+
+        if($(this).val()!='209' && $(this).val()!=''){           
+            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("disabled",true);
+            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("checked",false);
+            $("#input_selusfirm-"+$(this).attr("data-userid")).val($(this).attr("data-id"));
+            $("#input_selusfirm-"+$(this).attr("data-userid")).prop("disabled",false);
+
+            $("#input_selustipofirm-"+$(this).attr("data-userid")).val($(this).val());
+            $("#input_selustipofirm-"+$(this).attr("data-userid")).prop("disabled",false);
+
+            $("#input_tipouser-"+$(this).attr("data-userid")).prop("disabled",false);
+
+        }else if ($(this).val()==''){
+            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("disabled",true);
+            $("#input_selusfirm-"+$(this).attr("data-userid")).val("");
+            $("#input_selusfirm-"+$(this).attr("data-userid")).prop("disabled",true);
+            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("checked",false);
+
+            $("#input_selustipofirm-"+$(this).attr("data-userid")).val("");
+            $("#input_selustipofirm-"+$(this).attr("data-userid")).prop("disabled",true);
+
+            $("#input_tipouser-"+$(this).attr("data-userid")).prop("disabled",true);
+        }else{
+            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("disabled",false);
+            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("checked",true);
+
+            $("#input_selusfirm-"+$(this).attr("data-userid")).val($(this).attr("data-id"));
+            $("#input_selusfirm-"+$(this).attr("data-userid")).prop("disabled",false);
+
+            $("#input_selustipofirm-"+$(this).attr("data-userid")).val($(this).val());
+            $("#input_selustipofirm-"+$(this).attr("data-userid")).prop("disabled",false);
+
+            $("#input_tipouser-"+$(this).attr("data-userid")).prop("disabled",false);
+
         }
+
+        if($(this).val() == '' && $(this).attr("data-oldnew") == 'old' && users_delete.indexOf($(this).attr("data-userid")) == -1){
+            users_delete.push($(this).attr("data-userid"));
+           // alert($(this).attr("data-userid"))
+            $("#input_tipouser-"+$(this).attr("data-userid")).prop("disabled",false)
+          }else if($(this).attr("data-oldnew") == 'old'  && users_delete.indexOf($(this).attr("data-userid")) != -1){
+             users_delete.splice(users_delete.indexOf($(this).attr("data-userid")),1);  
+             $("#input_tipouser-"+$(this).attr("data-userid")).prop("disabled",false)           
+          }
         
     });
 
@@ -2750,39 +2948,12 @@ return false;
 
     $("#myFormAsigFirmaPdf").on("change",".select_type_firma",function name(e) {
         console.log($(this).val());
-        if($(this).val()!='209' && $(this).val()!=''){           
-            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("disabled",true);
-            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("checked",false);
-            $("#input_selusfirm-"+$(this).attr("data-userid")).val($(this).attr("data-userid"));
-            $("#input_selusfirm-"+$(this).attr("data-userid")).prop("disabled",false);
-
-            $("#input_selustipofirm-"+$(this).attr("data-userid")).val($(this).val());
-            $("#input_selustipofirm-"+$(this).attr("data-userid")).prop("disabled",false);
-
-        }else if ($(this).val()==''){
-            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("disabled",true);
-            $("#input_selusfirm-"+$(this).attr("data-userid")).val("");
-            $("#input_selusfirm-"+$(this).attr("data-userid")).prop("disabled",true);
-            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("checked",false);
-
-            $("#input_selustipofirm-"+$(this).attr("data-userid")).val("");
-            $("#input_selustipofirm-"+$(this).attr("data-userid")).prop("disabled",true);
-
-        }else{
-            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("disabled",false);
-            $("#check_selusfirm-"+$(this).attr("data-userid")).prop("checked",true);
-
-            $("#input_selusfirm-"+$(this).attr("data-userid")).val($(this).attr("data-userid"));
-            $("#input_selusfirm-"+$(this).attr("data-userid")).prop("disabled",false);
-
-            $("#input_selustipofirm-"+$(this).attr("data-userid")).val($(this).val());
-            $("#input_selustipofirm-"+$(this).attr("data-userid")).prop("disabled",false);
-
-        }
+     
     });
 
-    $("#btn_gene_pdf").on("click",function (e) {
-        console.log($(this).is(":checked"));
+    $(".btn_gene_pdf").on("click",function (e) {        
+        var status_id = $(this).attr('data-status_id');
+        var reporte_id = $(this).attr('data-reporte_id');
         Swal.fire({
             title: 'Esta seguro que desea generar los documentos?',
             text: "No se podrá revertir los cambios!",
@@ -2794,15 +2965,647 @@ return false;
             cancelButtonText: 'No, cancelar!'
           }).then((result) => {
             if (result.value) {    
-                var request = { }          
+                var request = { 
+                    "reporte_id":reporte_id,
+                    "conc_estado_id":conc_estado_id,
+                    "status_id": status_id,
+                    "conciliacion_id":$("#conciliacion_id").val()
+                }   
                 generarPdfs(request);          
             }
           }); 
     }); 
+
+    $("#myReportPdfList").on("click",".btn_gene_pdf",function (e) {
+        var status_id = $(this).attr('data-status_id');
+        var reporte_id = $(this).attr('data-reporte_id');
+        Swal.fire({
+            title: 'Esta seguro que desea generar el documento?',
+            text: "No se podrá revertir los cambios!",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, generar!',
+            cancelButtonText: 'No, cancelar!'
+          }).then((result) => {
+            if (result.value) {    
+                var request = { 
+                    "reporte_id":reporte_id,
+                    "conc_estado_id":conc_estado_id,
+                    "status_id": status_id,
+                    "conciliacion_id":$("#conciliacion_id").val()
+                }   
+                generarPdfs(request);          
+            }
+          }); 
+    });
+    $("#myFormAsigFirmaPdf").on("click",".btn_revocar_firmas",function (e) {
+        var status_id = $(this).attr('data-status_id');
+        var reporte_id = $(this).attr('data-reporte_id');
+        Swal.fire({
+            title: "Esta seguro que desea solicitar revocación de firmas?\nEsta acción solicitará mediante correo electrónico a las partes con firma electrónica la anulación de la firma.\nDeberá esperar la aceptación.",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, solicitar revocación!',
+            cancelButtonText: 'No, cancelar!'
+          }).then((result) => {
+            if (result.value) {    
+                var request = { 
+                    "reporte_id":reporte_id,
+                    "conc_estado_id":conc_estado_id,
+                    "status_id": status_id,
+                    "conciliacion_id":$("#conciliacion_id").val()
+                }   
+                revocarFirmas(request);          
+            }
+          }); 
+    })
+
+    $("#table_list_estados").on("click",'.btn_compartir_rep_pdf',function(e){
+       
+        var request = {
+            conc_estado_id: $(this).attr("data-id"),
+            tabla_destino: "conciliaciones",
+            status_id: $(this).attr("data-estado_id"),
+            conciliacion_id:$("#conciliacion_id").val()
+        }; 
+        getStatusFiles(request);  
+    })
+  
+    $("#tipo_busqueda_conciliacion").on("change",function(e){
+        var content = $(this).val()
+        disabledInputs(content)
+    });
+        var content = $("#tipo_busqueda_conciliacion").val()
+        disabledInputs(content)
+
   
 
-}); //FIn del document ready
+    $("#tbl_list_archivos_comp").on("change",'.chk_compar_con_f',function (e) {
+        var is_submit = false
+       
+        $(".chk_compar_con_f").each((chk, element) => {
+            if($(element).is(":checked")){
+                is_submit = true                
+            }            
+        });
+      
+        if(is_submit){
+            $("#btn_compcon_file").prop("disabled",false)
+        }else{
+            $("#btn_compcon_file").prop("disabled",true)
+        }
+    });
 
+    $("#myFormCompartirDocumento").on("submit",function(e){
+        var request = $(this).serialize()+"&conciliacion_id="+$("#conciliacion_id").val();
+        if($("#myFormCompartirDocumento select[name=means_id]").val()=="218"){
+            var inputs = $(".rows_mails").length
+            if(inputs <= 0){
+                toastr.error("No hay correos validos!", "", {
+                    positionClass: "toast-top-right",
+                    timeOut: "3000",
+                });
+            }else{
+                storeSharedConcFiles(request);               
+            }
+        }else{             
+            storeSharedConcFiles(request);            
+        }
+        e.preventDefault();
+      
+    });
+
+    $("#myFormCompartirDocumento select[name=category_id]").on("change",function(e){
+        $("#content_files").show()
+        $("#content_datashared").hide()
+        if($(this).val()!=214){
+            $("#myFormCompartirDocumento select[name=means_id]").prop("disabled",false)
+            var means_id = $("#myFormCompartirDocumento select[name=means_id]").val()
+            if(means_id==218){
+                 $("#content_shmail").show();
+                 $(".shared_mail").prop("disabled",false);
+                 $("#tbl_list_mail_partes").html("")
+            }else{
+                $("#content_shmail").hide();
+                 $(".shared_mail").prop("disabled",true);
+            }
+            
+        }else{
+            $("#tbl_list_mail_partes").html("")
+            $("#myFormCompartirDocumento select[name=means_id]").prop("disabled",true)
+            $("#myFormCompartirDocumento select[name=means_id]").val(218);
+            $("#content_shmail").hide();
+            $(".shared_mail").prop("disabled",true);
+            var mail = '';
+            partesConciliacionMail.forEach(element => {
+                mail += createRowMail(element);                
+            });
+            $("#tbl_list_mail_partes").html(mail)
+            $(".rows_mails").each((key,element) => {
+                $(element).attr("id","row-"+key)
+                $(element).children().attr("data-row",key)        
+            });
+            
+
+        }
+        e.preventDefault();
+    });
+
+    $("#myFormCompartirDocumento select[name=means_id]").on("change",function(e){
+        $("#content_files").show()
+        $("#content_datashared").hide()
+        $("#tbl_list_mail_partes").html("")
+        if($(this).val()==218){
+            $("#content_shmail").show();
+            $(".shared_mail").prop("disabled",false);
+       }else{
+           $("#content_shmail").hide();
+           $(".shared_mail").prop("disabled",true);
+       }
+        e.preventDefault();
+    });
+
+    $("#enlace_copiar").on("click",function (e) {
+        //var content = $("#lbl_copy").text()
+        var codigoACopiar = document.getElementById('lbl_copy');
+        var $bridge = $("<input>")
+        $("body").append($bridge);
+        $bridge.val($(codigoACopiar).text()).select();
+        document.execCommand("copy");
+        $bridge.remove();
+        toastr.success("Información copiada con éxito!", "", {
+            positionClass: "toast-top-right",
+            timeOut: "3000",
+        });
+
+        e.preventDefault();       
+    });
+    
+    $("#myFormCompartirDocumento #btn_addmail").on("click",function (e) {
+        var usermail = $("#input_email").val()
+       if(validateEmail(usermail)){
+        var mail = "";
+        mail = createRowMail(usermail);
+        $("#tbl_list_mail_partes").append(mail)
+        $(".rows_mails").each((key,element) => {
+             $(element).attr("id","row-"+key)
+             $(element).children().attr("data-row",key)        
+         });
+       }
+    
+
+        
+
+    });
+
+    $("#tbl_list_mail_partes").on("click",'.btn_delete_mail',function(e){
+        $("#row-"+$(this).attr("data-row")).remove()
+        $(".rows_mails").each((key,element) => {
+            $(element).attr("id","row-"+key)
+            $(element).children().attr("data-row",key) 
+                  
+        });
+    });
+
+    $("#content_compartidos").on("click",'.btn_show_files',function(e) {
+        var key = $(this).attr("data-key")
+        $(".content_fd").hide();
+        $("#files-"+key).show()
+    });
+
+    $("#content_compartidos").on("click",'.btn_show_data',function(e) {
+        var key = $(this).attr("data-key")
+        $(".content_fd").hide();
+        $("#data-"+key).show()
+    });
+
+    $("#table_list_pdf_users").on("click",'.check_selusvolverfirm',function (e) {
+        $("#inusre-"+$(this).attr("data-input_id")).prop('disabled',true)
+        if($(this).is(":checked")){
+            $("#inusre-"+$(this).attr("data-input_id")).prop('disabled',false)
+        }
+    });
+
+    $("#btn_radicar_conci").on("click",function(e) {
+        
+        Swal.fire({
+            title: "Esta seguro que desea radicar la conciliación?",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, radicar!',
+            cancelButtonText: 'No, cancelar!'
+          }).then((result) => {
+            if (result.value) {    
+                var request = { 
+                    "type_status_id":178,
+                    "concepto":"Radicada por solicitante",
+                    "conciliacion_id":$("#conciliacion_id").val()
+                   
+                }   
+                radicarConciliacion(request);          
+            }
+          }); 
+
+    });   
+
+    $("#btn_nueva_conciliacion").on("click",function (e) {
+    
+
+        Swal.fire({
+            title: "Esta seguro que desea asignarle una conciliación?",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, asignar!',
+            cancelButtonText: 'No, cancelar!'
+          }).then((result) => {
+            if (result.value) {    
+                var request = { 
+                    "expediente_id":$("#expediente_id").val(),
+                    "exp_idnumber":$("#expid").val()
+                   
+                }   
+                asigConcToExpediente(request);          
+            }
+          }); 
+          e.preventDefault();
+
+    });
+
+    $("#myFormAsigConcExpediente").on("submit",function(e){
+        var request = $(this).serialize()+"&conciliacion_id="+$("#conciliacion_id").val();
+        asigExpedienteToConc(request);
+        e.preventDefault()
+    })
+
+}); //Fin del document ready
+function asigExpedienteToConc(request){
+    var route = "/conciliaciones/asignar/expediente";
+    $.ajax({
+        url: route,
+        type: "POST", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {     
+
+            if(res.mensaje){
+                toastr.error(res.mensaje, "", {
+                    positionClass: "toast-top-right",
+                    timeOut: "2000",
+                });
+            }else{
+                Toast.fire({
+                    title: 'Se ha asignado con éxito.',
+                    type: 'success', 
+                    timer: 2000,               
+                });
+                window.location.reload(true)
+            }
+                  
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+
+}
+
+function asigConcToExpediente(request){
+    var route = "/expedientes/asignar/conciliacion";
+    $.ajax({
+        url: route,
+        type: "POST", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {     
+
+            if(res.mensaje){
+                toastr.error(res.mensaje, "", {
+                    positionClass: "toast-top-right",
+                    timeOut: "2000",
+                });
+            }else{
+                Toast.fire({
+                    title: 'Se ha asignado con éxito.',
+                    type: 'success', 
+                    timer: 2000,               
+                });
+                window.location.reload(true)
+            }
+                  
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+
+}
+
+
+function validateEmail(mail) 
+{
+ if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail))
+  {
+    return (true)
+  }
+  toastr.error("Correo invalido!", "", {
+    positionClass: "toast-top-right",
+    timeOut: "3000",
+});
+    return (false)
+}
+
+function createRowMail(usermail) {  
+
+        var tr =   `<div class="rows_mails" id="row-0">
+          <input type="hidden" value="${usermail}" name="shared_mail[]">                      
+            <label id="btn_delete_mail-" type="button" data-row="0" class="btn_delete_mail label label-default">
+                ${usermail} <span class="badge">x</span>
+            </label>                                 
+         </div>`;         
+         return tr
+}
+
+
+function radicarConciliacion(request){
+
+    var route = "/conciliaciones/insert/estado";
+    $.ajax({
+        url: route,
+        type: "POST", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {     
+
+            Toast.fire({
+				title: 'Se ha radicado con éxito.',
+				type: 'success', 
+				timer: 2000,               
+            });
+
+            window.location.reload(true)    
+                      
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+
+}
+
+function revocarFirmas(request){
+
+    var route = "/conciliacion/reporte/revocar/firmas";
+    $.ajax({
+        url: route,
+        type: "POST", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {     
+
+            Toast.fire({
+				title: 'Se ha enviado la solicitud.',
+				type: 'success', 
+				timer: 2000,               
+            });
+
+                     
+                      
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+
+}
+
+function storeSharedConcFiles(request) {
+    
+    var route = "/conciliaciones/store/conc/shared/files";
+    $.ajax({
+        url: route,
+        type: "POST", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {     
+
+            Toast.fire({
+				title: 'Los archivos se han compartido con éxito.',
+				type: 'success', 
+				timer: 2000,               
+            });
+
+            if(res.url){
+                $("#lbl_clave").text(res.generate.clave)
+                $("#lbl_url").text(res.url)
+                $("#content_datashared").show();
+                $("#content_files").hide();
+            }
+          
+            $("#content_compartidos").html(res.view_compartidos)
+           
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+
+}
+
+var partesConciliacionMail = []
+function getStatusFiles(request) {
+    
+    var route = "/conciliaciones/get/status/files";
+    $.ajax({
+        url: route,
+        type: "GET", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {          
+            partesConciliacionMail = []
+            $("#tbl_list_mail_partes").html("")
+            $("#tbl_list_archivos_comp").html("")
+            $("#content_shmail").hide();
+            $(".shared_mail").prop("disabled",true);
+            $("#btn_compcon_file").prop("disabled",true)
+            $("#myFormCompartirDocumento select[name=means_id]").prop("disabled",true)
+            $("#myFormCompartirDocumento select[name=means_id]").val(218);
+            $("#myFormCompartirDocumento select[name=category_id]").val(214);
+            var mail = "";
+            res.partes.forEach((user,key) => {                
+                if(!partesConciliacionMail.includes(user.email)){
+                    mail += createRowMail(user.email);
+                    partesConciliacionMail.push(user.email)
+                }
+               
+            });
+            $("#tbl_list_mail_partes").html(mail)
+            $("#tbl_list_archivos_comp").append(res.view)
+            $(".rows_mails").each((key,element) => {
+                $(element).attr("id","row-"+key)
+                $(element).children().attr("data-row",key) 
+                      
+            });
+            console.log(partesConciliacionMail);
+            $("#myFormCompartirDocumento input[name=status_id]").val(res.estado.type_status_id)
+            $("#content_compartidos").html(res.view_compartidos)         
+            $("#myModal_reportes_archivos_compartidos").modal("show")
+            $("#wait").hide();
+           
+            if(res.view==''){
+                $("#content_msg_info").show();
+                $("#myFormCompartirDocumento").hide()
+            }else{
+                $("#content_msg_info").hide();
+                $("#myFormCompartirDocumento").show()
+            }
+            
+        },
+        error: function (xhr, textStatus, thrownError) {
+            $("#wait").hide();
+        },
+    });
+
+}
+
+function generarPdfs(request) {    
+    var route = "/conciliaciones/generate/documents";
+    $.ajax({
+        url: route,
+        type: "POST", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {          
+            Toast.fire({
+				title: 'Generado con éxito.',
+				type: 'success', 
+				timer: 2000,               
+            });
+           /*  var a = document.createElement("a");
+            a.target = "_blank";
+            a.href = res.url;
+            a.click(); */
+
+            $("#content_user_pdf_firmas").hide();
+            $("#content_user_pdf_list").show();
+            $("#myModal_reportes_pdf_estados").modal("hide")
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+
+}
+
+function disabledInputs(content) {
+   
+    $(".inputs").hide()
+    $(".input-search").prop("disabled",true)
+    switch (content) {
+        case 'num_conciliacion':
+            $("#input_data_text").prop("disabled",false)
+            $("#input_text").show()
+            break;
+         case 'idnumber':
+         $("#input_text").show()
+         $("#input_data_text").prop("disabled",false)
+            break;
+         case 'estado_id':
+             $("#select_data").prop("disabled",false)
+             $("#input_select").show()
+            break;
+         case 'fecha_radicado':
+             $("#date_data").prop("disabled",false)
+             $("#input_date").show()
+                break;
+         case 'fecha_rango':
+         $("#date_data_inicio").prop("disabled",false)
+         $("#date_data_final").prop("disabled",false)
+             $("#input_date_rango").show()
+         break;
+        default:
+            break;
+    }
+}
 
 function reenviarMails(request) {
     var route = "/conciliacion/reporte/firmantes/reenviar/mails";
@@ -2865,6 +3668,7 @@ function setFirmantes(request) {
             });
             $("#content_user_pdf_firmas").hide();
             $("#content_user_pdf_list").show();
+            $("#myModal_reportes_pdf_estados").modal("hide");
           //  window.location.reload(true);
             $("#wait").hide();
         },
@@ -2897,21 +3701,46 @@ function getFirmantes(request) {
             $("#btn_volver_enviar_email").hide();
             $("#btn_enviar_email").show();
             $(".check_selusfirm").prop("disabled",true);
+            var revocarFirmas = false;
+            $("#btn_revocar_firmas").hide()
+            .attr("data-status_id","0")
+            .attr("data-reporte_id","0");
             if(res.all_firmas == true){
-                $("#btn_gene_pdf").show()
+                $("#btn_generar_pdf").show()
+                .attr("data-status_id",res.data.status_id)
+                .attr("data-reporte_id",res.data.reporte_id);              
+
+                console.log(res.data.reporte_id);
             }else{
-                $("#btn_gene_pdf").hide()
+                $("#btn_generar_pdf").hide()
+                .attr("data-status_id","0")
+                .attr("data-reporte_id","0")
             } 
+
             if(res.data.users.length > 0 ){
                 $("#btn_select_volver_enviar_email").show();
+               
+
+                res.data.users.forEach(user => {
+                    if(user.pivot.tipo_firma_id==209 && user.pivot.firmado==1 ){
+                        revocarFirmas = true;
+                        $("#btn_revocar_firmas").show()
+                        .attr("data-status_id",res.data.status_id)
+                        .attr("data-reporte_id",res.data.id);
+                    }
+                });
+
+               
+
                  }else{
-                $("#btn_select_volver_enviar_email").hide()
+                $("#btn_select_volver_enviar_email").hide();
+               
             }
+
             $("#lbl_pfd_report_name").text(res.data.reporte.nombre_reporte);
             $("#table_list_pdf_users tbody").html(res.view);
             $("#myFormAsigFirmaPdf input[name=estado_id]").val(res.data.id);
-            $("#content_user_pdf_firmas").show();
-           
+            $("#content_user_pdf_firmas").show();           
             $("#content_user_pdf_list").hide();
          
           //  window.location.reload(true);
@@ -2981,6 +3810,7 @@ function updateNotasExt(request) {
 				timer: 2000,               
             });
             $("#wait").hide();
+          // window.location.reload(true)
         },
         error: function (xhr, textStatus, thrownError) {
             /* alert(
@@ -2995,7 +3825,7 @@ function updateNotasExt(request) {
 function getNotasExt(request) {
     var route = "/notasext/1/edit";
     $.ajax({
-        url: route,
+        url: route, 
         type: "GET",
         datatype: "json",
         data: request,
@@ -3018,6 +3848,43 @@ function getNotasExt(request) {
             $("#myform_edit_nota_ext input[name='nota_conceptoid']").val(res.notas.nota_conceptoid);
             $("#myform_edit_nota_ext textarea[name='nota_concepto']").val(res.notas.nota_concepto);
            
+
+            $("#myModal_edit_nota_conciliaciones").modal("show");
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+}
+
+function getNotasConciliacion(request) {
+    var route = "/notasext/1/edit";
+    $.ajax({
+        url: route, 
+        type: "GET",
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {
+            $("#myform_edit_nota_conciliacion input").prop("disabled",true);
+            $("#myform_edit_nota_conciliacion input[name='ntaprespersonal']").val(res.presentancion_personal.nota_presentancion_personal);
+            $("#myform_edit_nota_conciliacion input[name='ntapuntualidad']").val(res.puntualidad.nota_puntualidad);
+           if(res.manejo_audiencia) $("#myform_edit_nota_conciliacion input[name='ntamanaudiencia']").val(res.manejo_audiencia.nota_manejo_audiencia);
+           if(res.analisis_formula)$("#myform_edit_nota_conciliacion input[name='ntaanalisisformulas']").val(res.analisis_formula.nota_analisis_formula);
+          
+           if(res.plantillas)$("#myform_edit_nota_conciliacion input[name='ntaplanconciliacion']").val(res.plantillas.nota_plantillas);
+           if(res.redaccion_acta) $("#myform_edit_nota_conciliacion input[name='ntaredaccacta']").val(res.redaccion_acta.nota_redaccion_acta);
+          
 
             $("#myModal_edit_nota_conciliaciones").modal("show");
             $("#wait").hide();
@@ -3154,6 +4021,38 @@ function expedienteUpdate(request,id) {
 	});
 }
 
+function sancionarConciliacionUser(request) {
+    var route = "/conciliacion/sancionar/user" ;
+	//var token = $("#token").val();
+	$.ajax({
+		url: route,
+		headers: { 'X-CSRF-TOKEN' : token },
+		type:'GET',
+		datatype: 'json',
+		data: request,
+		 beforeSend: function(xhr){
+            xhr.setRequestHeader('X-CSRF-TOKEN', $("#token").attr('content'));
+            $("#wait").show();  
+    },	
+		success:function(res){
+			//$("#wait").hide();  		
+			Toast.fire({
+				title: 'Actualizado con éxito.',
+				type: 'success', 
+				timer: 2000,               
+            });
+            window.location.reload(true)
+		   
+
+		},
+    error:function(xhr, textStatus, thrownError){
+		alert("Hubo un error con el servidor ERROR::"+thrownError,textStatus);
+		$("#wait").css("display", "none");
+    }
+
+	});
+}
+
 function deleteConciliacionUser(request) {
     var route = "/conciliacion/delete/user" ;
 	//var token = $("#token").val();
@@ -3242,9 +4141,9 @@ function  conciliacionUserUpdate(request,id) {
 			Toast.fire({
 				title: 'Usuario asignado con éxito.',
 				type: 'success', 
-				timer: 2000,               
+				timer: 5000,               
             });
-            window.location.reload(true)
+           window.location.reload(true)
 		    $('#msg-success').fadeIn();	 
 
 		},
@@ -3439,12 +4338,23 @@ function deleteConPdfTemporal(id) {
         },
         /*muestra div con mensaje de 'regristrado'*/
         success: function (response) {
-            toastr.success("Eliminado con éxito!", "", {
-                positionClass: "toast-bottom-right",
-                timeOut: "1000",
-            });
+           
+            Swal.fire({
+                title: 'Éxito',
+                text: "El reporte se ha eliminado con éxito!",
+                type: 'success',
+                showCancelButton: false,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Listo!',                
+              }).then((result) => {
+                if (result.value) {              
+                    window.location.reload(true);                            
+                }
+              });   
             //window.location.reload(true);
-           // myPopupWindow.close();   
+           // myPopupWindow.close(); 
+           window.location.reload(true);  
            $("#bgtransparent").remove(); 
             $("#wait").hide();
         },
@@ -3537,7 +4447,7 @@ function createConPdfTemporal(request,id) {
         },
     });
 }
-
+var conc_estado_id = 0;
 function getPdfReportesConciliacion(request) {
     var route = "/conciliacion/reportes/get";
     $.ajax({
@@ -3556,11 +4466,12 @@ function getPdfReportesConciliacion(request) {
             $("#alertmyReportList").hide();
             $("#content_user_pdf_firmas").hide();
             $("#content_user_pdf_list").show();
-            if (response.data.length > 0) {
+           
+                conc_estado_id = response.conc_estado_id
                 $("#myReportPdfList tbody").html(response.view);
                 //$("#myReportList tbody").html(response.view); 
                 $("#alertmyReportList").show();
-            }
+            
 
             
             $("#myModal_reportes_pdf_estados").modal("show");
@@ -3595,7 +4506,7 @@ function editAsignacionReporte(request) {
             response.forEach((element) => {
                 $("#chk_reporte_" + element.reporte_id).prop("checked", true);
             });
-            console.log(response);
+           
             $("#wait").hide();
         },
         error: function (xhr, textStatus, thrownError) {
@@ -3852,7 +4763,21 @@ function storePdfReporte(request) {
         },
         /*muestra div con mensaje de 'regristrado'*/
         success: function (res) {
-           window.location.reload(true)
+            Swal.fire({
+                title: 'Éxito',
+                text: "El formato se ha creado correctamente!",
+                type: 'info',
+                showCancelButton: false,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Listo',              
+              }).then((result) => {
+                if (result.value) {
+                    window.location.reload(true)            
+                }
+              });
+              window.location.reload(true);
+           
            $("#wait").hide();
         },
         error: function (xhr, textStatus, thrownError) {
@@ -4209,7 +5134,11 @@ function storeConciliacionEstado(request) {
         if (res.view || res.view == "") {
             $("#table_list_estados tbody").html(res.view);
         }
-        //window.location.reload(true)
+        toastr.success("Asignado con éxito!", "", {
+            positionClass: "toast-bottom-right",
+            timeOut: "1000",
+        });
+        window.location.reload(true)
         $("#myModal_create_estado").modal("hide");
         $("#wait").hide();
     });
@@ -5548,6 +6477,38 @@ function oficinaEdit(request) {
     });
 }
 
+function storeNotaExt(request) {
+    var route = "/notasext";
+    $.ajax({
+        url: route,
+        type: "POST",
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").css("display", "block");
+        },
+        success: function (res) {
+            $("#myModal_add_nota_conciliaciones").modal("hide");
+           
+            Toast.fire({
+                title: "Nota creada con éxito.",
+                type: "success",
+                timer: 2000, 
+            });
+            window.location.reload(true);
+            $("#wait").css("display", "none");
+        },
+        error: function (xhr, textStatus, thrownError) {
+            alert(
+                "Hubo un error con el servidor, consulte con el administrador"
+            );
+            $("#wait").css("display", "none");
+        },
+    });
+}
+
 function findNotas(request) {
     var route = "/notasext/" + request.idnumber + "/edit";
     $.ajax({
@@ -5656,6 +6617,7 @@ function oficinaUpdateNota(request, id) {
         success: function (res) {
             $("#myModal_asig_notas_ext").modal("hide");
             $("#wait").css("display", "none");
+            //window.location.reload(true);
         },
         error: function (xhr, textStatus, thrownError) {
             alert(
@@ -5666,36 +6628,7 @@ function oficinaUpdateNota(request, id) {
     });
 }
 
-function storeNotaExt(request) {
-    var route = "/notasext";
-    $.ajax({
-        url: route,
-        type: "POST",
-        datatype: "json",
-        data: request,
-        cache: false,
-        beforeSend: function (xhr) {
-            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
-            $("#wait").css("display", "block");
-        },
-        success: function (res) {
-            $("#myModal_asig_notas_ext").modal("hide");
-            $("#wait").css("display", "none");
-            Toast.fire({
-                title: "Nota creada con éxito.",
-                type: "success",
-                timer: 2000,
-            });
-            window.location.reload(true);
-        },
-        error: function (xhr, textStatus, thrownError) {
-            alert(
-                "Hubo un error con el servidor, consulte con el administrador"
-            );
-            $("#wait").css("display", "none");
-        },
-    });
-}
+
 
 function oficinaStore(request) {
     var route = "/oficinas";

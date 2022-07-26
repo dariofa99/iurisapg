@@ -1,7 +1,9 @@
 <select name="type_status_id" class="form-control" required>
     <option value="">Seleccione</option>
 
-    @if($conciliacion->getUser(199)->hasRole('estudiante') || currentUser()->hasRole('amatai'))
+
+    @if($conciliacion->getUser(199)->hasRole('estudiante') || $conciliacion->getUser(199)->hasRole('amatai'))
+
     @if(currentUser()->hasRole('estudiante') || currentUser()->hasRole('amatai'))
     @if($conciliacion->estado_id==174 || $conciliacion->estado_id==176)
     <option value="175"> Enviar a revisión </option>
@@ -15,19 +17,25 @@
     @endif
     @endif
 
- 
+    @endif
 
-    @else
 
-    @if(($conciliacion->getUser(199)->hasRole('estudiante') and currentUser()->hasRole('diradmin'))
-    || !$conciliacion->getUser(199)->hasRole('estudiante') and currentUserInConciliacion($conciliacion->id,['autor']))
-    @if($conciliacion->estado_id==174 || $conciliacion->estado_id==194 )
+    @if(((currentUser()->hasRole('diradmin') ||  currentUser()->hasRole('amatai'))))
+   
+    @if($conciliacion->estado_id==194 || $conciliacion->estado_id==177)
     <option value="178"> Radicar </option>
     @endif
     @endif
 
+
+
+    
+
     @if(currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai'))
+    
+    
     @if($conciliacion->estado_id==178 || $conciliacion->estado_id==194)
+   
     @if($conciliacion->estado_id!=194)
     <option value="179"> Inadmitida. Asunto no conciliable </option>
     @endif
@@ -45,14 +53,14 @@
     <option value="184"> Solicitud de desistimiento </option>
     @endif
     @if($conciliacion->estado_id!=183)
-    @if(currentUser()->hasRole('coord_centro_conciliacion') ||
-    currentUserInConciliacion($conciliacion->id,['conciliador','asistente']))
+    @if(currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai') ||
+    currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']))
     <option value="183"> Suspendida </option>
     @endif
     @endif
    
-    @if(currentUser()->hasRole('coord_centro_conciliacion') ||
-    currentUserInConciliacion($conciliacion->id,['conciliador','asistente']))
+    @if(currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai') ||
+    currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']))
     <option value="185"> Acuerdo </option>
     <option value="186"> Acuerdo parcial </option>
     <option value="187"> No acuerdo </option>
@@ -75,11 +83,10 @@
     <option value="193">Registrado en SICAB</option>
     @endif
     @endif
-    @if(currentUser()->hasRole('coord_centro_conciliacion'))
+    @if(currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai'))
     @if($conciliacion->estado_id==189)
     <option value="192">Constancia no asistencia</option>
     @endif
     @endif
 
-    @endif
 </select>

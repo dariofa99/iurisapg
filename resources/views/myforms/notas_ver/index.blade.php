@@ -23,23 +23,39 @@ Notas
 <form action="/notas/ver/estudiante" method="GET" id="myFormBuscarNotas">
     @if(auth()->user()->can('ver_notas_estudiante'))
 <div class="row">
-    <div class="col-md-4">    
+    
+    <div class="col-md-4"> 
+
             <input required type="text" value="{{Request::get('idnumber')}}" class="form-control form-control-sm" name="idnumber">      
     </div>
     
 </div>
+@else
+@if(Request::has('idnumber')) 
+<input required type="hidden" value="{{Request::get('idnumber')}}" class="form-control form-control-sm" name="idnumber"> 
+@endif
 @endif
 <div class="row">
-    <div class="col-md-4">  
+    <div class="col-md-2">  
+        Origen:  
+            <select class="form-control" name="origen" >
+                <option @if(Request::has('origen') and Request::get('origen')=='expedientes') selected @endif value="expedientes">Expedientes</option>
+                <option @if(Request::has('origen') and Request::get('origen')=='conciliaciones') selected @endif value="conciliaciones">Conciliaciones</option>
+                
+            </select>   
+    </div>   
+            <div class="col-md-2">  
         Corte:  
-            <select name="segid" >
+            <select class="form-control" name="segid" >
                 <option value="">Ver todos</option>
                 @foreach($segmentos as $key => $segmento)                
                     <option @if(Request::has('segid') and Request::get('segid')==$segmento->id) selected @endif value="{{$segmento->segmento_id}}">{{$segmento->segnombre}}</option>
                 @endforeach
-            </select>      
-    </div>
+            </select>    
+            </div>  
+   
     <div class="col-md-2">
+        <br>
         <button class="btn btn-success btn-block btn-sm" type="submit">Buscar</button>
     </div>
 </div>
@@ -54,7 +70,10 @@ Notas
                 No.
             </th>
            <th width="1%">
-               Expediente
+            @if(Request::has('origen') and Request::get('origen')=='expedientes') Expediente
+            @else
+            Conciliación
+            @endif  
             </th>
            
             <th width="1%">
@@ -85,9 +104,17 @@ Notas
                         @endphp
                     </td>
                     <td>
-                        <a href="/expedientes/{{$data[0]['expediente']}}/edit">
+                        @if(Request::has('origen') and Request::get('origen')=='expedientes')
+                        <a target="_blank" href="/expedientes/{{$data[0]['expediente']}}/edit">
                             {{$data[0]['expediente']}}
                         </a> 
+                        @else
+                        <a target="_blank" href="/conciliaciones/{{$data[0]['tbl_org_id']}}/edit">
+                            {{$data[0]['expediente']}}
+                        </a> 
+                        @endif  
+
+                      
                     </td>
 
                     <td>
@@ -174,7 +201,7 @@ Notas
             @empty
                 
             @endforelse
-            @if($contador_e>0 and Request::has('segid') and Request::get('segid')!='')
+          {{--   @if($contador_e>0 and Request::has('segid') and Request::get('segid')!='')
             <tr>
                 <td>
                     Promedio Conocimiento
@@ -205,7 +232,7 @@ Notas
                    {{ number_format((($promedio_c/$contador_c) + ($promedio_a/$contador_a) +($promedio_e/$contador_e)) /3,1,'.',' ')}} 
                 </td>
             </tr>
-            @endif
+            @endif --}}
         </tbody>
     </table>
 

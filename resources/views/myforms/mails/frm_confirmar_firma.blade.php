@@ -34,7 +34,7 @@ IURIS
 Motivo:
 </td>
 <td>
-Señor  {!! $notification->name!!} confirmar la firma del documento
+Señor  {!! $notification->name!!} {!! $notification->lastname!!} se requiere confirmar la firma del documento.
 </td>
 </tr>
 

@@ -1,10 +1,13 @@
+@if ((currentUser()->can('act_conciliacion') || (currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']))))
+           
 <div class="row">
     <div class="col-md-4">
         <h4 class="box-title">
         <label>
-            Fecha Audiencia
+            Fecha Audiencia 
         </label>
         @if ($audiencia != "")
+       
         <span class="edit_audiencia_existe">
             <h4>{{ \Carbon\Carbon::parse($audiencia->fecha)->dayName }}, {{ \Carbon\Carbon::parse($audiencia->fecha)->format("d") }} de {{ \Carbon\Carbon::parse($audiencia->fecha)->monthName }} {{ \Carbon\Carbon::parse($audiencia->fecha)->format("Y") }}</h4>
         </span>
@@ -53,20 +56,23 @@
             <label >
             &nbsp;
             </label>
-            @if ($audiencia != "")
+           
+            @if ($audiencia != "" )
             <input type="button" value="Editar" class="btn btn-warning btn-block btn-sm" id="btm_edit_date_audiencia" data-id="{{$conciliacion->id}}">
-            @endif
-            @if(((currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai'))))
-             
+            @endif 
             <input type="button" value="Guardar" class="btn btn-primary btn-block btn-sm edit_audiencia" id="btm_save_date_audiencia" data-id="{{$conciliacion->id}}" style="@if ($audiencia != '') display:none @endif">
-           @endif
             <input type="button" value="Cancelar" class="btn btn-danger btn-block btn-sm edit_audiencia" id="btm_cancel_date_audiencia" data-id="{{$conciliacion->id}}" style="display:none">
+           
+            
         </h5>
     </div>
 </div>
 <hr>
+@endif
+@if ((currentUser()->can('act_conciliacion') || (currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']))))
+           
 <div class="edit_audiencia" style="@if ($audiencia != '') display:none @endif" >
-    <div class="row" >
+{{--     <div class="row" >
         <div class="col-md-6">
             <h4 class="box-title">
                 <label>
@@ -92,15 +98,20 @@
             </table>
 
         </div>
-
-    </div>
+    </div> --}}
     <hr>
     <div class="row"  style="height: 300px; overflow-x: auto;" id="list_turno_estudiantes_conciliacion">
         @include('myforms.conciliaciones.componentes.list_turno_estudiante')
     </div>
+
+
+  
 <hr>
 </div>
+@endif 
+
 @if ($audiencia != "")
+<input type="hidden" id="conciliacion_audiencia_id" value="{{$audiencia->fecha}}">
 <div class="row" >
     <div class="input-group margin" id="content-text-stream-audiencia">
         <input type="text" id="text-stream-audiencia" class="form-control"  value="{{URL::to('/')}}/audiencia/{{$audiencia->access_code}}" readonly>
@@ -143,21 +154,32 @@
     </div>
 </div>
 
-<div class="row iniciar_videollamada" style="display:none;">
+<div class="iniciar_videollamada" style="display:none;">
+    @include('myforms.conciliaciones.conciliacion_audiencia_chat')
+</div>
+
+@if(((currentUser()->can('act_conciliacion')))
+|| (currentUserInConciliacion($conciliacion->id,['auxiliar','conciliador'])))
+@if($conciliacion->estado_id==181)
+
+<hr>
+<div class="row">
     <div class="col-md-12">
-        <div class="form-group form_store">
-            <label for="description">Chat</label>
-            <select class="form-control input-select" name="select" id="chatroomconciliacion" data-id="60" style="display: block;">
-                <option value="conciliacion-{{$conciliacion->id}}">Todos</option>
-                @foreach($conciliacion->usuarios as $key => $user)
-                <option value="conciliacion-{{$conciliacion->id}}{{$user->idnumber}}">{{$user->name}} {{$user->lastname}}</option>
-                @endforeach
-            </select>
-            <input type="hidden" id="tokenc" value="">
-            <div class="embed-responsive embed-responsive-4by3" style=" height: 400px; " id="chat-conciliacion">
-                @include('myforms.conciliaciones.componentes.chat_room_ajax',['chatroom'=>'conciliacion-'.$conciliacion->id])
-            </div> 
+        <div class="form-group" >
+              <label style="display: block; margin-bottom:10px">Acuerdos
+                   <button type="button" data-tipo="208" class="btn btn-primary btn-sm pull-right btn_add_conc_he_con"> Agregar Acuerdo</button>       
+           
+            </label>
+            <div id="content_hechos_pretensiones-208" class="content_hechos_pretensiones">
+                @include('myforms.conciliaciones.componentes.hechos_pretenciones_ajax',[
+                    'tipo_id'=>208
+                ]) 
+            </div>
+           
         </div>
     </div>
 </div>
+@endif
+@endif
+
 @endif

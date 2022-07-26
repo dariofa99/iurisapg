@@ -1,19 +1,13 @@
 @extends('layouts.front.dashboard')
 
 @section('titulo_general')
-@if(currentUser()->hasRole('solicitante'))
-    Casos
-  @else
-    Expedientes
-  @endif
 
-@endsection
 
 @section('titulo_area')
   @if(currentUser()->hasRole('solicitante'))
-    Mis Solicitudes
+   Conciliaciones
     @if(currentuser()->can('crear_conciliaciones'))
-<a href="/conciliaciones/create" class="btn btn-success">Nueva conciliación</a>
+<a href="{{route('front.conciliacion.store')}}" class="btn btn-success">Nueva conciliación</a>
 @endif    
   @else
     Listar
@@ -47,7 +41,7 @@
             Estado
         </th>
         <th>
-            Fecha
+            Fecha radicado
         </th>
         <th>
             Acciones
@@ -60,8 +54,9 @@
                 {{$conciliacion->num_conciliacion}}
             </td>
             <td>
-                @if(count($conciliacion->usuarios()->where('tipo_usuario_id',185)->get())>0)
-                {{$conciliacion->usuarios()->where('tipo_usuario_id',185)->first()->name}}
+                @if(count($conciliacion->usuarios()->where('tipo_usuario_id',205)->get())>0)
+                {{$conciliacion->usuarios()->where('tipo_usuario_id',205)->first()->name}}
+                {{$conciliacion->usuarios()->where('tipo_usuario_id',205)->first()->lastname}}
                 @else
                 Sin usuarios
                 @endif
@@ -75,10 +70,11 @@
             </td>
             
             <td>
-                {{getSmallDateWithHour($conciliacion->created_at)}}
+                {{ $conciliacion->fecha_radicado =='0000-00-00' ? "Sin fecha": getSmallDateWithHour($conciliacion->fecha_radicado)}}
             </td>
             <td>
                 <a href="{{route('front.conciliacion.edit',$conciliacion->id)}}" class="btn btn-primary">Editar</a>
+ 
             </td>
         </tr>
         @endforeach

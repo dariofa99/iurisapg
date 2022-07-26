@@ -11,6 +11,7 @@ function BindEvent(){
         $('#jitsi-meet-conf-container').empty();
         $('#container-meet').hide();
     });
+    
     $("#btnCustomMic").on('click', function () {
         apiObj.executeCommand('toggleAudio');
     });

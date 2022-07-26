@@ -63,7 +63,7 @@ class NotaExt extends Model
     }
     public function estudiante()
     {
-        return $this->belongsTo(User::class, 'docidnumber', 'idnumber');
+        return $this->belongsTo(User::class, 'estidnumber', 'idnumber');
     }
 
     public function expediente()
@@ -71,7 +71,10 @@ class NotaExt extends Model
         return $this->belongsTo(Expediente::class, 'expidnumber', 'expid');
     }
 
-
+    public function origen()
+    {
+        return $this->belongsTo(OrigenNota::class, 'orgntsid', 'id');
+    }
                       
 
 }

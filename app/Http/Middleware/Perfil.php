@@ -33,7 +33,7 @@ class Perfil
             if (($user->tel1=='' and $user->tel2 =='') || $user->tipodoc_id=='1' || $user->idnumber=='' || $user->name =='' || $user->lastname=='' || $user->fechanacimien=='' || $user->address==''  || $correo[1]=='mail.com' || $user->cursando_id=='1'  ) {
             Session::flash('message-danger', 'Recuerda! Primero necesitamos que actualices tu información personal, Correo, contraseña y curso.');
             return redirect('users/'.$user->id.'/edit');
-                       
+                        
            }elseif(Hash::check('udenarcj',$user->password)){
            Session::flash('message-danger', 'Recuerda! Falta actualizar la contraseña.');
              return redirect('users/'.$user->id.'/edit');             

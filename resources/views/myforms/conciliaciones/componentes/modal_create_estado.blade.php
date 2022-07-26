@@ -45,11 +45,11 @@
                     </div>
                     </div>
                     <div class="row" id="alertmyReportList" style="display: none">
-                        <div class="col-md-12">
+                        {{-- <div class="col-md-12">
                             <div class="alert alert-info">
                                 Debe tener en cuenta que una vez guardado el estado se generaran los archivos correspondientes en pdf y estos no se podrán modificar
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
 
 

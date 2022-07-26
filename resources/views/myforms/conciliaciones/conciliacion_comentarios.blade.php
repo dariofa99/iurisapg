@@ -1,6 +1,6 @@
 <div class="row" >
     <div class="col-md-2">
-        @if(auth()->user()->can('crea_com_conciliacion') || ((currentUserInConciliacion($conciliacion->id,['autor']))))
+        @if(auth()->user()->can('crea_comentarios_conciliacion'))
         <input type="button" id="btn_agregar_comentario" value="Agregar comentario" class="btn btn-primary btn-sm btn-block">
         @endif
     </div>

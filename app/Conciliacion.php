@@ -29,7 +29,7 @@ class Conciliacion extends Model
     public function usuarios()
     {
        return $this->belongsToMany(User::class,'conciliacion_has_user','conciliacion_id')
-       ->withPivot('user_id','tipo_usuario_id','conciliacion_id','id')->withTimestamps();
+       ->withPivot('user_id','estado_id','tipo_usuario_id','conciliacion_id','id')->withTimestamps();
     } 
 
     public function user()
@@ -81,7 +81,7 @@ class Conciliacion extends Model
 
     public function getUserQueForm($parte,$section)
     {
-        //$referece_data = DB::table('conciliacion_user_form')
+       
         $referece_data = ReferencesData::join('conciliacion_user_form  as rd','rd.reference_data_id','=','references_data.id')
         ->join('referencias_tablas as rt','rt.id','=','references_data.type_data_id')
         ->select('references_data.id as id','references_data.name as name','references_data.type_data_id as type_data_id'
@@ -90,30 +90,27 @@ class Conciliacion extends Model
         ->where('section',$section) 
         ->get();
 
-      /*   $referece_data = ReferencesData::where([
-			'section' => 'datos_personales', 
-			'table'=>'conciliaciones'
-			])->get();  */
-
-        /* foreach ($referece_data as $key => $value) {
-            echo $value->options;
-        }
-       dd( $referece_data); */
-
-       return $referece_data ;
+          return $referece_data ;
     }
     
     public function files(){
         return $this->belongsToMany(File::class,'conciliacion_has_files','conciliacion_id')
-        ->withPivot('id','concepto','file_id','type_status_id')->withTimestamps(); 
+        ->withPivot('id','concepto','file_id','type_status_id','user_id')->withTimestamps(); 
      }  
 
+     public function expedientes(){
+        return $this->belongsToMany(Expediente::class,'conc_has_exp','conciliacion_id','exp_id')
+        ->withPivot('id','conciliacion_id','exp_id','type_status_id','user_id','actuacion_id')->withTimestamps(); 
+     }  
 
+     public function actuaciones(){
+        return $this->belongsToMany(Actuacion::class,'conc_has_exp','conciliacion_id','actuacion_id')
+        ->withPivot('id','conciliacion_id','exp_id','type_status_id','user_id','actuacion_id')->withTimestamps(); 
+     }
 
     public function getStaticDataVal($name,$section,$option_id=null){
         $ref_data = ReferencesStaticData::where(['name'=>$name,'section'=>$section])->first();
-    //  dd( $ref_data);
-        if ($ref_data) {           
+         if ($ref_data) {           
             $data = $this->aditional_static_data()
             ->where([
                 'reference_data_id'=>$ref_data->id,
@@ -140,12 +137,24 @@ class Conciliacion extends Model
 
     public function getUser($tipo_usuario){
       $user =  $this->usuarios()->where('tipo_usuario_id',$tipo_usuario)->first();
-    //  dd($user);
+ 
         if(!$user){ 
             $user = new User();
         }
       
     return $user;
 
+    }
+
+    public function scopeFilter($query,$request){
+
+        if($request->tipo_busqueda!='all' and $request->tipo_busqueda!='idnumber' and $request->tipo_busqueda != 'fecha_rango'){
+            return $query->where($request->tipo_busqueda,$request->data);
+        }elseif($request->tipo_busqueda!='all' and $request->tipo_busqueda=='idnumber'){
+            return $query->where('users.idnumber', $request->data)
+            ->join('conciliacion_has_user as cu','cu.conciliacion_id','=','conciliaciones.id')
+            ->join('users', 'users.id', '=', 'cu.user_id');             
+        }
+        
     }
 }

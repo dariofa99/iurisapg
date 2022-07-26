@@ -1,12 +1,21 @@
+@if(count($conciliacion->expedientes)>0)
 <div class="row">
-    <div class="col-md-12" id="content_conciliaciones">
-    
+    <div class="col-md-12">
+        <h6><i>Número de expediente: 
+           <a href="/expedientes/{{$conciliacion->expedientes[0]->expid}}/edit">
+             {{$conciliacion->expedientes[0]->expid}}
+           </a></i></h6>
+    </div>
+</div>
+@endif
+<div class="row">
+    <div class="col-md-12" id="content_conciliaciones">    
     <form id="myForm">
         <input type="hidden" id="conciliacion_id" value="{{$conciliacion->id}}">
         <input type="hidden" id="older_value">
     <div class="row">
         <div class="col-md-12">
-            <h4>INFORMACIÓN DE LAS PARTES</h4>
+            <h5>INFORMACIÓN DE LAS PARTES</h5>
         </div>
     </div>
     <div class="box_section">

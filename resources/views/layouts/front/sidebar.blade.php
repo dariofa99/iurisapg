@@ -127,7 +127,7 @@
 
 
 
-@if(currentUser()->can("crear_conciliaciones"))           
+@if(currentUser()->can("crear_conciliaciones") and currentUser()->hasRole("solicitante"))           
         <li class="treeview">        
                   <a href="#">
                   <i class="fa fa-hand-paper-o" aria-hidden="true"></i>
@@ -136,12 +136,20 @@
                       <i class="fa fa-angle-left pull-right"></i>
                     </span>
                   </a>
-            <ul class="treeview-menu">       
-              <li><a href="{{route("front.conciliaciones")}}"> Ver conciliaciones </a></li>   
+            <ul class="treeview-menu">        
+              <li><a href="{{route("front.conciliaciones")}}"> Mis conciliaciones </a></li>   
               {{-- <li><a href="/audiencias"> Agenda audiencias </a></li>  
               <li><a href="{{route('reportes.create')}}"> Administrar formatos </a></li> 
               --}}        
             </ul>
+@if(count($auth_conciliaciones)>0)
+            <ul class="treeview-menu">        
+              <li><a href="{{route("front.conciliaciones.solicitud")}}"> Solicitudes de conciliación </a></li>   
+              {{-- <li><a href="/audiencias"> Agenda audiencias </a></li>  
+              <li><a href="{{route('reportes.create')}}"> Administrar formatos </a></li> 
+              --}}        
+            </ul>
+@endif
       </li>
 @endif
           

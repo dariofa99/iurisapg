@@ -9,68 +9,114 @@ $(document).ready(function(){
     getDatosAsigEstConciliacion(idcon)
 
 
-})
+   
+    $( "#audiencia_fecha" ).change(function() {
+        let namecolors = ['Amarrillo','Azul','Verde','Gris','Rojo'];
+        let daycolors = ["#fdd835","#0073b7","#00a65a","#a0afb3","#f56954"];
+        var fecha1 = moment("2021-10-18");
+        var day_fecha_ini= fecha1.day() - 1;// dia de la smeana de la fecha inicial lunes 0
+        var fecha1 = fecha1.subtract(day_fecha_ini, "days");//inicia la semana siempre en lunes
+        var fecha2 = moment(this.value);
+        var semday = fecha2.day(); // dia de la semana, lunes inicia en 1
+        var day = semday-1;//lunes inicia en 0
+        var semanas = fecha2.diff(fecha1, 'weeks');
+        var y = 0;
+        for (var i = 0; i < semanas; i++) {
+            y++
+            if (y==5) {y=0}
+        }
+        var daysemcolor= day+y;
+        if (daysemcolor > 4) {daysemcolor=daysemcolor-5;}
+        $( "#audiencia_label_color_day" ).css("background-color", daycolors[daysemcolor])
+                                        .html(namecolors[daysemcolor]);
+    });
 
-$( "#audiencia_fecha" ).change(function() {
-    let namecolors = ['Amarrillo','Azul','Verde','Gris','Rojo'];
-    let daycolors = ["#fdd835","#0073b7","#00a65a","#a0afb3","#f56954"];
-    var fecha1 = moment("2021-10-18");
-    var day_fecha_ini= fecha1.day() - 1;// dia de la smeana de la fecha inicial lunes 0
-    var fecha1 = fecha1.subtract(day_fecha_ini, "days");//inicia la semana siempre en lunes
-    var fecha2 = moment(this.value);
-    var semday = fecha2.day(); // dia de la semana, lunes inicia en 1
-    var day = semday-1;//lunes inicia en 0
-    var semanas = fecha2.diff(fecha1, 'weeks');
-    var y = 0;
-    for (var i = 0; i < semanas; i++) {
-        y++
-        if (y==5) {y=0}
-    }
-    var daysemcolor= day+y;
-    if (daysemcolor > 4) {daysemcolor=daysemcolor-5;}
-    $( "#audiencia_label_color_day" ).css("background-color", daycolors[daysemcolor])
-                                    .html(namecolors[daysemcolor]);
-});
 
-function editRolEstudentAudiencia(idnumber) {
-    $( "#label_rol_est"+idnumber).css("display","none");
-    $( "#select_rol_est"+idnumber).css("display","block");
+    $("#btn_invitacion_sala_alterna").on('click', function () {
+        $("#info_modal_salas_alternas_audiencia_list").html('')
+        var id = $(this).attr('data-id')
+        var route = "/conciliacion/numusers/salasalternasaudiencia/"+id;
+        $.ajax({
+            url: route,
+            type: "GET",
+            datatype: "json",
+            data: {},
+            cache: false,
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+                $("#wait").show();
+            },
+            success: function (res) {
+                //se crean las salas
+                var cont = res.salas.length
+                if (cont >= 1) {
+                    const response = salasalternascreatebd(id,cont)
+                    response.then(function (){
+                            chekcedfuntion(res.salasalternas);
+                            $("#nueva_sala_alterna_audiencia").attr("data-cont",cont+1)
+                        })
+                        .catch(function (errors) {
+                        })
+                    //se activan los check
+                } else if (cont == 0) {
+                    cont = 1
+                    getSalasAudiencia(id,cont)
+                    $("#nueva_sala_alterna_audiencia").attr("data-cont",cont+1)
+                }
+    
+                $("#wait").hide();
+            },
+            error: function (xhr, textStatus, thrownError) {
+                /* alert(
+                    "Hubo un error con el servidor ERROR::" + thrownError,
+                    textStatus
+                ); */
+                $("#wait").hide();
+            },
+        });
+    
+    
+        $("#myModal_audiencia_salas_alternas").modal("show");
+        $("#nueva_sala_alterna_audiencia").prop( "disabled", false );
+    
+    });
 
-}
+    $("#ul-users-chat").on("click",'.btn_open_chat',function (e) {
+        var request = {
+          "conciliacion_id": $("#conciliacion_id").val(),
+          "useridnumber":$(this).attr("data-idnumber")
+        }
+        getChat(request)
+    });
 
-$("#btn_invitacion_sala_alterna").on('click', function () {
-    $("#info_modal_salas_alternas_audiencia_list").html('')
-    var id = $(this).attr('data-id')
-    var route = "/conciliacion/numusers/salasalternasaudiencia/"+id;
+   var iframe = document.getElementsByClassName("embed-responsive-item")
+   console.log(iframe[0]);
+
+    $("iframe").contents().find("btn-message").on("click",function (e) {
+       // alert("ss")
+    });
+
+});//fin document ready
+
+
+
+function getChat(request) {
+   
+    var route = "/conciliacion/chat/"+request.useridnumber;    
     $.ajax({
         url: route,
         type: "GET",
         datatype: "json",
-        data: {},
+        data: request,
         cache: false,
         beforeSend: function (xhr) {
             xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
             $("#wait").show();
         },
-        success: function (res) {
-            //se crean las salas
-            var cont = res.salas.length
-            if (cont >= 1) {
-                const response = salasalternascreatebd(id,cont)
-                response.then(function (){
-                        chekcedfuntion(res.salasalternas);
-                        $("#nueva_sala_alterna_audiencia").attr("data-cont",cont+1)
-                    })
-                    .catch(function (errors) {
-                    })
-                //se activan los check
-            } else if (cont == 0) {
-                cont = 1
-                getSalasAudiencia(id,cont)
-                $("#nueva_sala_alterna_audiencia").attr("data-cont",cont+1)
-            }
-
+        success: function (res) {           
+            $("#chat-conciliacion").html(res)
             $("#wait").hide();
+   
         },
         error: function (xhr, textStatus, thrownError) {
             /* alert(
@@ -80,12 +126,17 @@ $("#btn_invitacion_sala_alterna").on('click', function () {
             $("#wait").hide();
         },
     });
+}
 
 
-    $("#myModal_audiencia_salas_alternas").modal("show");
-    $("#nueva_sala_alterna_audiencia").prop( "disabled", false );
 
-})
+function editRolEstudentAudiencia(idnumber) {
+    $( "#label_rol_est"+idnumber).hide();
+    $( "#select_rol_est"+idnumber).show();
+
+}
+
+
 
 function salasalternascreatebd(id,cont) {
     return new Promise(function(resolve) {
@@ -469,11 +520,11 @@ function editRolEstudentAudiencia(idnumber) {
 
 
 function hideupdaterolest(idnumber) {
-    $("#label_rol_est_conciliacion"+idnumber).css('display','block')
-    $("#btn_habilityEditRol_Est"+idnumber).css('display','block')
-    $("#select_rol_est_conciliacion"+idnumber).css('display','none')
-    $("#btn_UpdateRol_est"+idnumber).css('display','none')
-    $("#btn_hide_edit_rol_conciliacion_est"+idnumber).css('display','none')
+    $("#label_rol_est_conciliacion"+idnumber).show()
+    $("#btn_habilityEditRol_Est"+idnumber).show()
+    $("#select_rol_est_conciliacion"+idnumber).hide()
+    $("#btn_UpdateRol_est"+idnumber).hide()
+    $("#btn_hide_edit_rol_conciliacion_est"+idnumber).hide()
 
 }
 
@@ -523,6 +574,7 @@ function Updaterolest_conciliacion(idnumber) {
                     }
 
                 }
+                window.location.reload(true)
             } else {
                 Toast.fire({
                     title: 'Error en la asignación, contactar al administrador.',
@@ -591,15 +643,16 @@ function listTrunosEstConciliacion(route,idcon) {
                 ); */
                 $("#wait").hide();
             },
-        });
+        }); 
 
         
 
 }
 
-$( "#chatroomconciliacion").change(function() {
-    var route = "/conciliacion/chat/"+this.value;
-    console.log(route)
+
+
+$( "#chatroomconciliacion").on("change",function() {
+    var route = "/conciliacion/chat/"+this.value;    
     $.ajax({
         url: route,
         type: "GET",
@@ -610,8 +663,7 @@ $( "#chatroomconciliacion").change(function() {
             xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
             $("#wait").show();
         },
-        success: function (res) {
-           
+        success: function (res) {           
             $("#chat-conciliacion").html(res)
             $("#wait").hide();
    

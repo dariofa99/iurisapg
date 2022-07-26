@@ -34,12 +34,12 @@ IURIS
 Motivo:
 </td>
 <td>
-Señor  {!! $notification->name!!} Firma de documento
+Señor  {!! $notification->name!!} {!! $notification->lastname!!} se solicita la firma del documento <b>{!! $notification->nombre_reporte!!}</b> en calidad de <b>{!! $notification->calidad!!}</b>.
 </td>
 </tr>
 <tr>
 <td>
-Código: 
+Clave de acceso: 
 </td>
 <td>
     {!! $notification->codigo!!}

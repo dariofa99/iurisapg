@@ -29,47 +29,7 @@
                     </thead>
                     <tbody>
                         @foreach($turnos as $turno)
-                        @if(isset($data_search) and $data_search!='')  {{-- mostrar busqueda --}}
-                        @if($turno->cursando_id == $data_search)
-                            <tr>
-                            <td>
-                            {{$turno->idnumber }}
-                            </td>
-
-                            <td align="left">
-                                <input type="hidden" value="{{$turno->estudiante_id}}" id="estudiante_id{{$turno->id}}">
-                                {{$turno->name }} {{$turno->lastname }}
-                            </td>
-                            <td>
-                                <label> {{$turno->curso_nombre }} </label>
-                            </td>
-                            <td>
-                                <label id="label_color{{$turno->id}}" class="label dis-block {{$turno->getColorTurno($turno->color_ref_value) }}">{{$turno->horario_nombre }}</label>
-                            </td>
-                            <td>
-                                0
-                            </td>
-                            <td>
-                            0
-                            </td>
-
-                            @if(currentUser()->hasRole('amatai') || currentUser()->hasRole('diradmin') || currentUser()->hasRole("dirgral"))
-                            <td>
-                                <a style="display: none;" class="btn btn-success btn_updatecolor" id="btnUpdatecolor_{{$turno->id}}"><i class="fa fa-check-square"> </i> Actualizar</a>
-
-                                <a style="display: none;" class="btn btn-warning" id="btn_hideupdatecolor{{$turno->id}}" onclick="hideEditColor({{$turno->id}})"><i class="fa fa-close"> </i></a>
-
-                                <a class="btn btn-primary" id="btn_habilityupdatecolor{{$turno->id}}" onclick="habilityEditColor({{$turno->id}})"><i class="fa fa-edit"> </i>Editar</a>
-
-                                <a class="btn btn-danger btn_delete_turno" id="btn_delete_turno-{{$turno->id}}"><i class="fa fa-edit"> </i>Eliminar</a>
-
-                            </td>
-                            @endif
-                        </tr>
-                        @endif
-
-                        @else
-                        <tr>
+                          <tr>
                             <td>
                                 {{$turno->idnumber }}
                             </td>
@@ -94,7 +54,7 @@
 
                                 </select>
                             </td>
-                            @if(currentUser()->hasRole('amatai') || currentUser()->hasRole('diradmin') || currentUser()->hasRole("dirgral"))
+                            @if(currentUser()->hasRole('amatai') || currentUser()->hasRole('diradmin') || currentUser()->hasRole("dirgral") || (currentUser()->hasRole('estudiante') and currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar'])))
                             <td>
                                 <a style="display: none;" class="btn btn-success" id="btn_UpdateRol_est{{$turno->idnumber}}" onclick="Updaterolest_conciliacion('{{$turno->idnumber}}')"><i class="fa fa-check-square"> </i> Actualizar</a>
                                 <a style="display: none;" class="btn btn-warning" id="btn_hide_edit_rol_conciliacion_est{{$turno->idnumber}}" onclick="hideupdaterolest('{{$turno->idnumber}}')"><i class="fa fa-close"> </i> Cancelar</a>
@@ -102,7 +62,7 @@
                             </td>
                             @endif
                         </tr>
-                        @endif
+                       
                         @endforeach
                     </tbody>
                 </table>

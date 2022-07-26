@@ -7,12 +7,19 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Actuacion;
+use App\Conciliacion;
+use App\ConciliacionEstado;
+use App\ConciliacionPdfTemporal;
 use App\Expediente;
 use DB;
 use Storage;
 use Carbon\Carbon;
 use App\Segmento;
 use App\Notifications\UserNotification;
+use App\PdfReporte;
+use App\PdfReporteDestino;
+use App\Periodo;
+use Illuminate\Database\Eloquent\Builder;
 
 class ActuacionController extends Controller
 {
@@ -144,6 +151,7 @@ class ActuacionController extends Controller
                 $actuacion->fecha_limit = $request['fecha_limit'];
                 $actuacion->actestado_id = $request['actestado_id'];
                 $actuacion->actdocnomgen = $actdocnomgen;
+                $actuacion->actcategoria_id = 222;
                 $actuacion->actdocnompropio = $actdocnompropio;
                 $actuacion->actidnumberest = $expediente->expidnumberest;
                 $actuacion->actdocruta = $actdocruta;
@@ -203,12 +211,13 @@ class ActuacionController extends Controller
         $actuaciones = DB::table('actuacions as a')
                   ->join('revisiones_actuacion as rv','rv.rev_actid','=','a.id')    
                   ->join('referencias_tablas as r','r.id','=','a.actestado_id')  
+                  ->join('referencias_tablas as t3','t3.id','=','a.actcategoria_id') 
                    ->where(function($query) use ($expediente,$bandera) {
                     $bandera == 0 ? $query->where('a.actidnumberest',$expediente->expidnumberest) : $query->where('a.actidnumberest','<>',$expediente->expidnumberest) ;
                   }) 
                   ->where('rv.rev_actexpid', '=',$expediente_id)
                   //->where('a.actidnumberest',$expediente->expidnumberest)
-                  ->select('rv.parent_rev_actid','r.ref_nombre')
+                  ->select('rv.parent_rev_actid','r.ref_nombre','t3.ref_nombre as categoria',)
                   ->groupBy('rv.parent_rev_actid')
                   ->get();
 
@@ -216,6 +225,7 @@ class ActuacionController extends Controller
                      $actuaciones2 = DB::table('actuacions as a')
                       ->join('revisiones_actuacion as rv','rv.rev_actid','=','a.id')   
                       ->join('referencias_tablas as r','r.id','=','a.actestado_id') 
+                     
                       ->where('rv.parent_rev_actid', '=',$act->parent_rev_actid)
                       ->where('rv.rev_actid', '<>',$act->parent_rev_actid)
                       ->select(
@@ -225,9 +235,10 @@ class ActuacionController extends Controller
                         'a.actnombre',
                         'a.actfecha',
                         'a.fecha_limit',
+                        'a.actcategoria_id',
                         'a.actdocenrecomendac',
                         'a.actestado_id',
-                        'r.ref_nombre',
+                        'r.ref_nombre',                        
                         'a.actdocnomgen', 'a.actdocnompropio',
                         'a.actdocruta', 'a.actusercreated', 'a.actuserupdated',
                         'a.actdescrip'
@@ -235,6 +246,7 @@ class ActuacionController extends Controller
                       ->orderBy('a.created_at','desc')
                       ->get();
                     $parent = Actuacion::find($act->parent_rev_actid);  
+                    $parent->conciliaciones;
                     $act->parent = $parent;
                     $act->user =  $userSession;
                     $act->children = $actuaciones2;
@@ -275,7 +287,7 @@ class ActuacionController extends Controller
         $actuacion->notas_f = $actuacion->get_notas(); 
         $actuacion->docente_update; 
         $actuacion->user_created; 
-        $actuacion->estudiante;     
+        $actuacion->estudiante;      
           
             return response()->json(
             $actuacion->toArray()
@@ -322,6 +334,11 @@ class ActuacionController extends Controller
   
         }
         $actuacion-> save();  
+
+        if($actuacion->actcategoria_id==223 and count($actuacion->conciliaciones)>0){
+
+        }
+
           /*  if (currentUser()->hasRole("docente")){
                         //$actuacion= Actuacion::find($id);
                         $actuacion-> fill(['actdocenrevisa'=>currentUser()->idnumber]);
@@ -422,7 +439,7 @@ class ActuacionController extends Controller
 
         
         $actuacion =  Actuacion::find($request['idact']);
-        //eturn response()->json($actuacion->id);
+      //  return response()->json($actuacion->id);
 
         if($request->file('actdocnomgen')!=''){
              if ($actuacion->actdocruta_docente!='') {
@@ -459,7 +476,9 @@ class ActuacionController extends Controller
                if($request['fecha_limit_doc']!='') $actuacion->fecha_limit = $request['fecha_limit_doc'];
                 $actuacion->actuserupdated = currentUser()->idnumber;
                 $actuacion->actdocenfechamod = date("Y-m-d H:i:s");
-                $expediente  = Expediente::where('expid',$request->actexpid)->first();      
+                $expediente  = Expediente::where('expid',$request->actexpid)->first();  
+                
+                
         if ($request->ntaaplicacion) {
         
           //$expediente->estudiante;
@@ -482,9 +501,89 @@ class ActuacionController extends Controller
                  $actuacion->asignarNotas($data);
 
               //$actuacion->notas = json_encode($data);
-          }      
+          }  
+
+          if($actuacion->actcategoria_id==223 and count($actuacion->conciliaciones)>0){
+            if($request['actestado_id']==102) $estado_id = 176;
+            if($request['actestado_id']==104) $estado_id = 177;
+            if($request['actestado_id']==102 || $request['actestado_id']==104){
+              $conciliacion = Conciliacion::find($actuacion->conciliaciones[0]->id);      
+                $estado = ConciliacionEstado::create([
+                    'concepto'=>$actuacion->actnombre,
+                    'type_status_id'=>$estado_id,
+                    'user_id'=>currentUser()->id,
+                    'conciliacion_id'=>$conciliacion->id
+                ]);              
+              $conciliacion->estado_id = $estado->type_status_id;                
+              $conciliacion->save(); 
+              
+              
+              $reportes = PdfReporteDestino::whereHas('reporte', function (Builder $query){
+                        $query->where('is_copy', 1);
+                })->whereHas('temporales', function (Builder $query) use ($conciliacion){
+                        $query->where("conciliacion_id",$conciliacion->id);
+                })->where(([
+                        "status_id"=>$estado->type_status_id,
+                        "tabla_destino"=>"conciliaciones"
+                    ]))->get();
+
+            if(count($reportes)<=0){
+                $data = PdfReporteDestino::whereHas('reporte', function (Builder $query){
+                    $query->where('is_copy', 0);
+                    })
+                    ->where([
+                        "status_id"=>$estado->type_status_id,
+                        "tabla_destino"=>"conciliaciones"
+                    ])->get();
+                    
+                 
+                   $data->each(function($data) use ($estado,$conciliacion){
+                  //  $reporte_or = PdfReporte::find($reporte->id);
+                    $copy_reporte = PdfReporte::create(
+                        [
+                            'reporte'=>$data->reporte->reporte,
+                            'report_keys'=>$data->reporte->report_keys,
+                            'nombre_reporte'=>$data->reporte->nombre_reporte,
+                            'configuraciones'=>$data->reporte->configuraciones,
+                            'is_copy'=>1
+                        ]
+                    );
+                    $reporDest = PdfReporteDestino::create([
+                        "status_id"=>$estado->type_status_id,
+                        "tabla_destino"=>"conciliaciones",
+                        "reporte_id"=>$copy_reporte->id
+                    ]);
+                    $co_pdf = ConciliacionPdfTemporal::create([
+                        'reporte_pdf_id'=>$copy_reporte->id,
+                        'status_id'=>$estado->type_status_id,
+                        'parent_reporte_pdf_id'=>$data->reporte->id,
+                        'conciliacion_id'=>$conciliacion->id
+                    ]);
+            
+                    $file_en = $data->reporte->files()->where('seccion','encabezado')->first();
+                        if($file_en){
+                            $data->reporte->files()->attach($file_en,[
+                                'seccion'=>'encabezado' ,
+                                'configuracion'=>$file_en->pivot->configuracion          
+                                ]);
+                        }
+                    
+                    $file_pie = $data->reporte->files()->where('seccion','pie')->first();
+                        if($file_pie){
+                            $data->reporte->files()->attach($file_pie,[
+                            'seccion'=>'pie' ,
+                            'configuracion'=>$file_pie->pivot->configuracion          
+                            ]);
+                        }
+                   });
+            
+            }
+            $actuacion->actestado_id =$estado->type_status_id;
+            }
+          }   
+         
           $actuacion->save();
-          if ($actuacion->actestado_id == 102) {
+          if ($actuacion->actestado_id == 102 || $actuacion->actestado_id == 176) {
             $user = $expediente->estudiante;
             $user->notification = 'Nueva notificación de caso';
             $user->link_to = '/expedientes/'.$expediente->expid.'/edit';

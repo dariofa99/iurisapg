@@ -107,7 +107,7 @@ class NotaController extends Controller
      */
     public function notas_ver(Request $request)
     {
-        $user = User::where('idnumber',auth()->user()->idnumber)->first();
+        $user = User::where('idnumber',3030)->first();
         if(currentUser()->hasRole("estudiante")){
             $user = User::where('idnumber',auth()->user()->idnumber)->first();
         }elseif(currentUser()->can("ver_notas_estudiante")){
@@ -115,10 +115,10 @@ class NotaController extends Controller
                 $user = User::where('idnumber',$request->idnumber)->first();
             }
             
-        }
+        } 
 
         $notas = $user->getNotas($request);
-      
+    //  dd($notas);
        return view("myforms.notas_ver.index",compact('user','notas'));
 
        

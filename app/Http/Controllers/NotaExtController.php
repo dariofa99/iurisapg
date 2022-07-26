@@ -124,24 +124,30 @@ class NotaExtController extends Controller
        // return response()->json($request->all());
         if($request->ajax()){
         $user =  User::where('idnumber',$request->estidnumber)->first();
-        $user->origen = 5;
+        $user->origen = $request->origen;
         $response = 0;
         //dd($user->get_nota_corte('conocimiento',$request->oficina_id));
-          if(count($user->get_nota_corte('conocimiento',$request->oficina_id))>0 and 
-          $user->get_nota_corte('conocimiento',$request->oficina_id)['nota'] == 0 and 
-          $user->get_nota_corte('conocimiento',$request->oficina_id)['id'] == 0){
+          if(count($user->get_nota_corte_ext('conocimiento',$request->oficina_id))>0 and 
+          $user->get_nota_corte_ext('conocimiento',$request->oficina_id)['nota'] == 0 and 
+         $user->get_nota_corte_ext('conocimiento',$request->oficina_id)['id'] == 0){
            
             //return response()->json(['oficina'=>$request->all()]);
             $data = [
-                'ntaaplicacion'=>$request->ntaaplicacion,
-                'ntaconocimiento'=>$request->ntaconocimiento,
-                'ntaetica'=>$request->ntaetica,
-                'ntaconcepto'=>$request->ntaconcepto,
+                'ntaaplicacion'=>$request->has('ntaaplicacion') ? $request->ntaaplicacion:null,
+                'ntaconocimiento'=>$request->has('ntaconocimiento') ? $request->ntaconocimiento:null,
+                'ntaetica'=>$request->has('ntaetica') ? $request->ntaetica:null,
+                'ntaconcepto'=>$request->has('ntaconcepto') ? $request->ntaconcepto:null,
+
+                'ntamanaudiencia'=>$request->has('ntamanaudiencia') ? $request->ntamanaudiencia:null,
+                'ntaanalisisformulas'=>$request->has('ntaanalisisformulas') ? $request->ntaanalisisformulas:null,
+                'ntapuntualidad'=>$request->has('ntapuntualidad') ? $request->ntapuntualidad:null,
+                'ntaprespersonal'=>$request->has('ntaprespersonal') ? $request->ntaprespersonal:null,
+                'ntaplanconciliacion'=>$request->has('ntaplanconciliacion') ? $request->ntaplanconciliacion:null,
+                'ntaredaccacta'=>$request->has('ntaredaccacta') ? $request->ntaredaccacta:null,
                 'orgntsid'=>$request->orgntsid,
                 'segid'=>$request->segid,
                 'perid'=>$request->perid,
                 'tpntid'=>$request->has('definitiva') ? 1 : $request->tpntid,
-                //'expidnumber'=>$request->expid,
                 'estidnumber'=>$request->estidnumber,
                 'extidnumber'=>auth()->user()->idnumber, 
                 'tbl_org_id'=>$request->oficina_id,
@@ -280,15 +286,19 @@ return response()->json($data);
         $user =  User::where('idnumber',$request->idnumber)->first();
         $user->origen = $request->origen;
         
-        //dd($user->get_nota_corte('conocimiento',$request->oficina_id));
-          if(count($user->get_nota_corte('conocimiento',$request->oficina_id))>0 and 
-          $user->get_nota_corte('conocimiento',$request->oficina_id)['nota'] == 0 and 
-          $user->get_nota_corte('conocimiento',$request->oficina_id)['id'] == 0){
+
+        $notas = $user->get_notas_ext($request->oficina_id,$request->notas);
+
+        return response()->json($notas);
+
+       // dd($user->get_nota_corte('conocimiento',1));
+          if(count($user->get_nota_corte_ext('conocimiento',$request->oficina_id))>0 and 
+          $user->get_nota_corte_ext('conocimiento',$request->oficina_id)['nota'] == 0 and 
+          $user->get_nota_corte_ext('conocimiento',$request->oficina_id)['id'] == 0){
             return response()->json(['notas'=>false]);
           }else{
-            $notas = $user->get_notas($request->oficina_id);
-            if(count(currentUser()->oficinas)>0 
-            and currentUser()->oficinas()->first()->id == $request->oficina_id){
+            $notas = $user->get_notas_ext($request->oficina_id);
+            if((currentUser()->hasRole("amatai"))){
                 $notas['can_edit'] = true;        
             }else{
                 $notas['can_edit'] = false;        
@@ -395,22 +405,7 @@ return response()->json($data);
             ->where('estidnumber',$request->idnumber)
             ->where('tbl_org_id',$request->tbl_org_id)
             ->delete(); 
-           /*  if ($request->ajax()) {
-                $expediente = Expediente::find($request->exp_id);
-                foreach ($request->nota as $key_1 => $nota_r) {
-                    foreach ($request->nota_id as $key_2 => $nota_id) {
-                        if($key_1==$key_2){                      
-                            $nota = Nota::find($nota_id);
-                            $nota->delete();                            
-                        }
-                    }
-                    
-                }    
-                 
-    
-                return response()->json($nota);
-            }    */
-
+      
 
         return response()->json($nota);
     }

@@ -16,6 +16,7 @@ use DB;
 use App\EstadoCaso;
 use App\AsignacionCaso;
 use App\AsigDocenteCaso;
+use App\Conciliacion;
 use App\Periodo;
 use App\Segmento;
 use App\Solicitud;
@@ -43,6 +44,7 @@ class ExpedienteController extends Controller
      */
     public function index(Request $request)
     {
+      if(currentUser()->hasRole("solicitante")) return redirect("/oficina/solicitante");
 $count_colors = [];
        
 array_map('unlink', glob(public_path('act_temp/'.currentUser()->id.'___*')));//elimina los archivos que el usuario a visualizado anteriormente.(provisional)
@@ -533,7 +535,7 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
         $asignacion_caso->periodo_id=$request['periodo_id'];
         $asignacion_caso->ref_asig_id=1;
         $asignacion_caso->ref_mot_asig_id=1;
-        $asignacion_caso->save();
+        $asignacion_caso->save(); 
       if ($request['exptipoproce_id']==1) {     
         //solo para consultas de asesoria   
         $expediente->asigDocente($asignacion_caso);  // no tienen en cuenta la rama  del derecho
@@ -637,16 +639,17 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
      */
     public function edit($id)
     {
- 
-
-     // dd($historial->id);
+ //dd("#SS");
+      if(currentUser()->hasRole("solicitante")) return redirect("/oficina/solicitante");
+      
         //$expediente = AsignacionCaso::find($id)->expediente;
         $expediente = Expediente::where('expid',$id)->first();
         $estudiante=$expediente->estudiante;
         $asignacion = $expediente->asignaciones()->where('asigest_id',$expediente->expidnumberest)
         ->where(['asigest_id'=>$expediente->expidnumberest,'activo'=>1])->first();
        
-      
+     
+
       if($expediente->exptipoproce_id ==  1) {
         $days = $expediente->getDaysOrColorForClose('dias',true);
       
@@ -691,7 +694,7 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
         //Agregue la funcion getusers Para poder usarla en el index
         $user = $this->getUsers(); 
         $active_expe='active';  
-
+//dd("ss");
         if (currentUser()->hasRole("estudiante")) { 
          if (\Auth::user()->id != $estudiante->id) {
           // dd($estudiante->name);
@@ -801,7 +804,7 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
              
             $asignacion_caso->fecha_asig = $date->subDays(15)->format('Y-m-d');
             }
-            $expediente->asigDocente($asignacion_caso); // no tiene en cuenta la rama del derecho  
+            $expediente->asigDocente($asignacion_caso) ; // no tiene en cuenta la rama del derecho  
             //$expediente->asigDocenteSeguimiento($asignacion_caso, $expediente->exptipoproce_id); // si tiene en cuenta la rama del derecho  
            }            
          }
@@ -1114,12 +1117,81 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
 
      public function sustcasos(Request $request){
 
-      //dd($request->all()); 
+     // dd($request->all()); 
       $periodo = Periodo::where('estado',true)
       ->join('sede_periodos as sp','sp.periodo_id','=','periodo.id')
 		  ->where('sp.sede_id',session('sede')->id_sede)
       ->first();
       foreach ($request->numberestact_id as $key_1 => $id_act) { 
+        $expedientes = Expediente::leftjoin('sede_expedientes','sede_expedientes.expediente_id','=','expedientes.id')
+        ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
+        ->where('sedes.id_sede',session('sede')->id_sede)        
+        ->where('expidnumberest',$id_act)->get();
+
+       // dd($expedientes);
+        if ($expedientes!=null and $expedientes!='' and count($expedientes) > 0) {
+           
+         
+
+          foreach ($expedientes as $key_2 => $expediente) {
+            if ($expediente->expestado_id == 1 || $expediente->expestado_id == 3 ) {
+              $asignacion_caso = new AsignacionCaso();
+              $asignacion_caso->anotacion='Sustitución';
+              $asignacion_caso->asigest_id = $request->numberestnew_id[$key_1];
+              $asignacion_caso->asiguser_id=currentUser()->idnumber;
+              $asignacion_caso->asigexp_id=$expediente->expid;
+              $asignacion_caso->periodo_id=$periodo->id;
+              $asignacion_caso->ref_asig_id=3;
+              $asignacion_caso->ref_mot_asig_id = 1; 
+              $asignacion_caso->save();
+              $expe = DB::table('expedientes') 
+              ->leftjoin('sede_expedientes','sede_expedientes.expediente_id','=','expedientes.id')
+              ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
+              ->where('sedes.id_sede',session('sede')->id_sede)
+              ->where('expid',$expediente->expid)
+              ->update(['expidnumberest' => $request->numberestnew_id[$key_1]]); 
+            }
+
+            if($expediente->getAsignacion() and $expediente->getAsignacion()->asig_docente!==null){
+              $old_asig = $expediente->getAsignacion()->asig_docente;
+              $old_asig->activo = 0;
+              $old_asig->save();
+            
+              $new_asig_doc =  new AsigDocenteCaso();
+              $new_asig_doc->activo = 1;
+              $new_asig_doc->docidnumber = $old_asig->docidnumber;
+              $new_asig_doc->asig_caso_id =  $asignacion_caso->id;
+              $new_asig_doc->user_created_id = \Auth::user()->idnumber;
+              $new_asig_doc->user_updated_id = \Auth::user()->idnumber;
+              $new_asig_doc->save();
+            }
+
+
+          }
+          $user_asig = DB::table('asignacion_caso')->where([
+            'asigest_id'=>$id_act,
+            'activo'=>1,
+          ])->update([
+            'activo'=>0,
+          ]);
+          if ($expedientes!=null and $expedientes!='' and count($expedientes)) {    
+            $user = User::where('idnumber',$request->numberestnew_id[$key_1])->first();
+            $user->notification = 'Nueva notificación de caso';
+            $user->link_to = '/expedientes';
+            $user->mensaje = 'Se han asignado nuevos casos por sustitución.';     
+           // $user->notify(new UserNotification($user)); 
+          }
+
+        
+        }
+
+
+
+
+
+
+
+
         foreach ($request->numberestnew_id as $key_2 => $id_new) {
           if ($key_1 == $key_2) {
       
@@ -1127,46 +1199,8 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
               ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
               ->where('sedes.id_sede',session('sede')->id_sede)
               ->where('expidnumberest',$id_act)->get();
-            if ($expedientes!=null and $expedientes!='' and count($expedientes)) {
-              foreach ($expedientes as $key => $expediente) {
-                if ($expediente->expestado_id == 1 || $expediente->expestado_id == 3 ) {
 
-                  //dd($expediente->getAsignacion()->asig_docente);
-                  $asignacion_caso = new AsignacionCaso();
-                  $asignacion_caso->anotacion='Sustitución';
-                  $asignacion_caso->asigest_id = $id_new;
-                  $asignacion_caso->asiguser_id=currentUser()->idnumber;
-                  $asignacion_caso->asigexp_id=$expediente->expid;
-                  $asignacion_caso->periodo_id=$periodo->id;
-                  $asignacion_caso->ref_asig_id=3;
-                  $asignacion_caso->ref_mot_asig_id = 1; 
-                  $asignacion_caso->save();
-                  $expedientes = DB::table('expedientes') 
-                  ->leftjoin('sede_expedientes','sede_expedientes.expediente_id','=','expedientes.id')
-                  ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
-                  ->where('sedes.id_sede',session('sede')->id_sede)
-                  ->where('expid',$expediente->expid)
-                  ->update(['expidnumberest' => $id_new]); 
-                }
-                
-
-                if($expediente->getAsignacion()->asig_docente!==null){
-                  $old_asig = $expediente->getAsignacion()->asig_docente;
-                  $old_asig->activo = 0;
-                  $old_asig->save();
-                
-                  $new_asig_doc =  new AsigDocenteCaso();
-                  $new_asig_doc->activo = 1;
-                  $new_asig_doc->docidnumber = $old_asig->docidnumber;
-                  $new_asig_doc->asig_caso_id =  $asignacion_caso->id;
-                  $new_asig_doc->user_created_id = \Auth::user()->idnumber;
-                  $new_asig_doc->user_updated_id = \Auth::user()->idnumber;
-                  $new_asig_doc->save();
-                }
-              }
-
-
-          
+            if ($expedientes!=null and $expedientes!='' and count($expedientes)) {    
               $user = User::where('idnumber',$id_new)->first();
               $user->notification = 'Nueva notificación de caso';
               $user->link_to = '/expedientes';
@@ -1457,6 +1491,73 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
    
   }
 
+  public function asigConciliacion(Request $request){
+
+    $expediente = Expediente::find($request->expediente_id);
+ 
+    if($expediente){
+      $periodo = Periodo::where('estado','1')
+      ->first();
+      $conciliacion = Conciliacion::create([
+        'fecha_radicado'=>date('Y-m-d'),
+        'num_conciliacion'=>"0000-00",
+        'categoria_id'=>173,
+        'estado_id'=>174, 
+        'periodo_id'=> $periodo->id,
+        'user_id'=>auth()->user()->id
+    ]);
+      $actuacion = New Actuacion();
+      $actuacion->actexpid = $expediente->expid;
+      $actuacion->actnombre = "Creada por conciliación";   
+      $actuacion->actdescrip = "Creada por conciliación el ".getSmallDate(date("Y-m-d"));    
+      $actuacion->actestado_id = 174;   
+      $actuacion->actcategoria_id = 223;
+      $actuacion->actfecha = date("Y-m-d");   
+      $actuacion->actidnumberest = $expediente->expidnumberest;   
+      $actuacion->actusercreated = currentUser()->idnumber;
+      $actuacion->actuserupdated = currentUser()->idnumber;
+      $actuacion->save();
+  
+      $actuacion->revisionesExp()->attach($actuacion->id,[
+        'rev_actexpid'=>$expediente->expid,
+        'parent_rev_actid'=>$actuacion->id,
+        //'rev_actid'=>$actuacion->id,
+        ]);
+  
+  
+      $conciliacion->usuarios()->attach(auth()->user()->id,[
+          'tipo_usuario_id'=>199,
+          'estado_id'=>1
+      ]);
+     /*  $conciliacion->usuarios()->attach(auth()->user()->id,[
+        'tipo_usuario_id'=>196
+      ]); */
+  
+      $conciliacion->expedientes()->attach($expediente->id,[
+        'type_status_id'=>1,
+        'user_id'=>auth()->user()->id,
+        'actuacion_id'=>$actuacion->id
+      ]);
+
+      /* $asignacion = $expediente->asignaciones()
+      ->where(['asigest_id'=>$expediente->expidnumberest,'activo'=>1])
+      ->orderBy("created_at",'desc')->first();
+      if($asignacion){
+        $docente = User::where("idnumber",$asignacion->asig_docente->docidnumber)->first();
+        $conciliacion->usuarios()->attach($docente ->id,[
+          'tipo_usuario_id'=>221
+        ]);
+      }   */ 
+      
+    }
+    $response = [
+      "expediente"=>$expediente,
+      "conciliacion"=>$conciliacion
+    ];
+
+
+    return response()->json($response);
+  }
 
   public function pruebaasig(){
 

@@ -33,6 +33,9 @@ class CreateActuacionsTable extends Migration
             $table->string('notas', 225)->nullable();
             $table->integer('actestado_id')->unsigned();
             $table->foreign('actestado_id')->references('id')->on('referencias_tablas'); //estado 
+            $table->integer('actcategoria_id')->unsigned();
+            $table->foreign('actcategoria_id')->references('id')->on('referencias_tablas')
+            ->onDelete('cascade')->onUpdate('cascade'); ; //estado 
 
 
              $table->string('actdocnompropio');

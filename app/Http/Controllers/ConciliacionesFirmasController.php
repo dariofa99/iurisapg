@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Conciliacion;
 use App\ConciliacionEstado;
+use App\ConciliacionEstadoFileCompartido;
+use App\ConciliacionEstadoReporteDescargado;
+use App\ConciliacionEstadoReporteGenerado;
 use App\ConciliacionPdfTemporal;
 use App\ConciliacionReporte;
 use App\Mail\ConfirmarFirma;
@@ -11,6 +14,7 @@ use App\PdfReporte;
 use App\User;
 use App\PdfReporteDestino;
 use App\Traits\PdfReport;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -25,14 +29,24 @@ class ConciliacionesFirmasController extends Controller
 
    
     public function firmaVerify(Request $request,$token){  
+      
+      try {
         $user = DB::table('pdf_reportes_users')       
         ->where('pdf_reportes_users.token',$token)
         ->first();
-         if($user){
+        //dd($user);
+        $nowDate = Carbon::now();
+        $diff = $nowDate->diffInDays($user->created_at);
+       
+         if($user and $diff < 2){
             if($user->firmado == 1)  return view("myforms.conciliaciones_firmas.firmar_firmado");
             return view("myforms.conciliaciones_firmas.verificar_codigo",compact('token'));
         }
-        abort(404);
+      } catch (\Throwable $th) {
+       
+      }
+        
+        abort(303);
        // $user->sedes;
         //dd($user->sedes[0]->id_sede);
         
@@ -71,7 +85,7 @@ class ConciliacionesFirmasController extends Controller
             //dd($user);           
             return view("myforms.conciliaciones_firmas.firmar_documento",compact('pdf_report','user'));
         }
-        abort(404);
+        abort(303);
         return view("myforms.conciliaciones_firmas.verificar_codigo",compact('token','user'));
         
     }
@@ -116,9 +130,124 @@ class ConciliacionesFirmasController extends Controller
             return view("myforms.conciliaciones_firmas.firmar_firmado");
              
          }
-         abort(404);
+         abort(303);
        
          
      }
+
+     public function firmaRevocar (Request $request,$token,$codigo){     
+     request()->merge(['codigo' => $codigo,'token' => $token ]);
+     $user = DB::table('pdf_reportes_users')      
+      ->where('pdf_reportes_users.codigo',$codigo)
+      ->where('pdf_reportes_users.token',$token)
+      ->where('pdf_reportes_users.revocado',0)
+      ->first();      
+      if($user){
+         // if($user->firmado == 0)  return view("myforms.conciliaciones_firmas.firmar_firmado");
+          $pdf_report = PdfReporteDestino::find($user->pdf_reporte_id);   
+          //dd($user);           
+          return view("myforms.conciliaciones_firmas.firmar_revocar",compact('pdf_report','user'));
+      }
+      abort(303);
+
+           
+       
+   }
+
+   public function firmaRevocarOk(Request $request){
+
+    $user = DB::table('pdf_reportes_users')      
+    ->where('pdf_reportes_users.codigo',$request->codigo)
+    ->where('pdf_reportes_users.token',$request->token_firma)
+    ->first();
+    if($user){
+        $user = DB::table('pdf_reportes_users')      
+        ->where('pdf_reportes_users.codigo',$request->codigo)
+        ->where('pdf_reportes_users.token',$request->token_firma)
+        ->update(['revocado'=>1]);     
+        return response()->json($user);
+         
+     }
+     return response()->json($user);
+   }
+
+   public function getFirmaRevocar(Request $request){
+
+    $user = DB::table('pdf_reportes_users')      
+    ->where('pdf_reportes_users.codigo',$request->codigo)
+    ->where('pdf_reportes_users.token',$request->token_firma)
+    ->first();
+   
+     return response()->json($user);
+   }
+
+     public function showFormVerifyDocument($token,Request $request){
+        
+      // dd("ss");
+          $conGen = ConciliacionEstadoFileCompartido::where('token',$token)
+          ->first();
+         
+         
+ 
+          if($conGen){
+              if(Carbon::now() < $conGen->fecha_exp_token){
+                  
+                return view("myforms.conciliaciones_firmas.consultar_documento",compact('token','conGen'));
+         
+              }
+          }
+         
+          abort(303);
+          return view("myforms.conciliaciones_firmas.verificar_codigo",compact('token','user'));
+          
+      }
+
+      public function showVerifyDocument($token,Request $request){      
+        $conGen = ConciliacionEstadoFileCompartido::where('token',$token)
+        ->first();       
+          if($conGen){
+            if(Carbon::now() < $conGen->fecha_exp_token and Carbon::now() < session("newDateTime") ){                
+              return view("myforms.conciliaciones_firmas.ver_documentos",compact('token','conGen'));       
+            }
+        }       
+        return redirect("/firmar/pdf/verify/".$token);
+        
+    }
+
+      public function storeReportDescargado(Request $request){
+        $conGen = ConciliacionEstadoFileCompartido::where('token',$request->token)
+        ->where('clave',$request->clave)
+        ->first();  
+        if ($conGen and Carbon::now() < $conGen->fecha_exp_token) {
+           $rep_desc = ConciliacionEstadoReporteDescargado::create([
+            'conc_report_comp_id'=>$conGen->id,
+            'data'=>json_encode($request->all())]);
+             $newDateTime = Carbon::now()->addHours(1);
+
+            return redirect()
+            ->route("show.documents",
+                                [
+                            'token' => $request->token]
+            )     
+            ->with('newDateTime', $newDateTime);
+        }
+        return redirect()->back()->withInput()->with('status', "Datos no encontrados");;
+        
+        
+      }
+
+      public function getStatus(Request $request){
+
+        $user = DB::table('pdf_reportes_users')       
+        ->where('pdf_reportes_users.token',$request->token_firma)
+        ->where('pdf_reportes_users.codigo',$request->codigo)
+        ->first();
+      //  return response()->json(['firmado'=> 0,'request'=>$user ], 200); 
+         if($user){
+          return response()->json(['firmado'=> $user->firmado,'request'=>$request->all() ], 200);            
+        }
+        return response()->json(['firmado'=> 0,'request'=>$request->all() ], 200);            
+
+      }
  
 }

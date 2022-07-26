@@ -78,7 +78,8 @@ class MyusersController extends Controller
     { 
         
         $active_users='active';  
-        $tipodoc = TablaReferencia::where(['categoria'=>'tipo_doc','tabla_ref'=>'users'])->pluck('ref_nombre','id'); 
+        $tipodoc = TablaReferencia::where(['categoria'=>'tipo_doc','tabla_ref'=>'users'])
+        ->pluck('ref_nombre','id'); 
          return view('myforms.frm_myusers', compact('active_users','tipodoc'));
        
     }

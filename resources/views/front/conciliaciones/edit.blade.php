@@ -31,7 +31,8 @@
 <div class="row">
     <div class="col-md-12">
         Número: <strong>{{$conciliacion->num_conciliacion}}</strong><br>
-        <span class="badge bg-{{$conciliacion->estado->color}}"> Estado: {{$conciliacion->estado->ref_nombre}}</span> 
+        <span class="badge bg-{{$conciliacion->estado->color}}"> 
+            Estado: {{$conciliacion->estado->ref_nombre}}</span> 
     </div>    
 </div>
             
@@ -57,15 +58,34 @@
     <div class="col-md-12">
         <ul class="nav nav-tabs">
             <li class="active"><a class="urlactive" data-toggle="tab" href="#home">Información de Solicitud</a></li>
-            <li><a class="urlactive" data-toggle="tab" href="#menu1">Comentarios</a></li>
-            <li><a class="urlactive" data-toggle="tab" href="#menu2">Estado de la solicitud</a></li>
-            <li><a class="urlactive" data-toggle="tab" href="#menu3">Asignaciones</a></li>
-            <li><a class="urlactive" data-toggle="tab" href="#menu4">Audiencia</a></li>
-            <li><a class="urlactive" data-toggle="tab" href="#menu5">Notas</a></li>
+            @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('secretaria') || currentUser()->hasRole('docente') || currentUser()->hasRole('amatai')))
+            || ((currentUserInConciliacion($conciliacion->id,['autor']))))
+         
+         <li><a class="urlactive" data-toggle="tab" href="#menu1">Comentarios</a></li>
+
+         @endif
+         @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
+         || ((currentUserInConciliacion($conciliacion->id,['autor','solicitante','rep_legal_solicitante','apoderado_solicitante','conciliador','asistente']))))
+            {{-- <li><a class="urlactive" data-toggle="tab" href="#menu2">Estado de la solicitud</a></li> --}}
+        @endif
+            {{-- <li><a class="urlactive" data-toggle="tab" href="#menu3">Asignaciones</a></li> --}}
+           @if($audiencia != '') <li><a class="urlactive" data-toggle="tab" href="#menu4">Audiencia</a></li> @endif
+            {{-- <li><a class="urlactive" data-toggle="tab" href="#menu5">Notas</a></li> --}}
           </ul>
 
           <div class="tab-content">
             <div id="home" class="tab-pane fade in active">
+                @if(((currentUser()->can('act_conciliacion') ))
+         || ((currentUserInConciliacion($conciliacion->id,['autor','auxiliar']))))   
+         @if ($conciliacion->estado_id == 174 || $conciliacion->estado_id == 194)
+              
+                <div class="row">
+                    <div class="col-md-2">
+                        <button id="btn_radicar_conci" class="btn btn-primary btn-sm btn-block">Radicar</button>
+                    </div>
+                </div>
+                @endif    
+                @endif
               @include('myforms.conciliaciones.conciliacion_form')
             </div>
             <div id="menu1" class="tab-pane fade">
@@ -78,7 +98,7 @@
               @include('myforms.conciliaciones.conciliacion_asignaciones')
           </div>
           <div id="menu4" class="tab-pane fade">
-            {{--   @include('myforms.conciliaciones.conciliacion_audiencia') --}}
+              @include('myforms.conciliaciones.conciliacion_audiencia')
           </div>
           <div id="menu5" class="tab-pane fade">
             @include('myforms.conciliaciones.conciliacion_notas')
@@ -95,9 +115,10 @@
     @include('myforms.conciliaciones.componentes.modal_create_user')
     @include('myforms.conciliaciones.componentes.modal_create_estado_pretension')
     @include('myforms.conciliaciones.componentes.modal_detalles_user')
-{{--     @include('myforms.conciliaciones.componentes.modal_audiencia_salas_alternas') --}}
+    @include('myforms.conciliaciones.componentes.modal_audiencia_salas_alternas')
     @include('myforms.conciliaciones.componentes.modal_add_notas')
     @include('myforms.conciliaciones.componentes.modal_edit_notas')
+    @include('myforms.conciliaciones.componentes.modal_reportes_archivos_compartidos')
 @stop
 
 @push('scripts')
@@ -105,6 +126,5 @@
 {!! Html::script('js/audiencia_conciliacion.js?v=1')!!}
 <script src="https://meet.jit.si/external_api.js"></script>
 {!! Html::script('js/config_jitsi.js?v=3')!!}
-
 @include('myforms.conciliaciones.script')
 @endpush

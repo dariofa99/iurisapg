@@ -65,6 +65,10 @@
                         </div>
                 </form> 
                 <hr>
+                <div id="respu_firma" style="display: none" class="alert alert-success alert-dismissible" role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <strong id="lbl_respu_firma">Warning!</strong> 
+                  </div>
                  
                 </div>
         </div> 
@@ -78,7 +82,32 @@
 <script>
 
     $(document).ready(function () {
-        $("#myFormFirmarDocConciliacion").on("submit",function (e) {           
+        $("#myFormFirmarDocConciliacion").on("submit",function (e) {  
+            var request = $(this).serialize();         
+            getStatus(request)
+            e.preventDefault()
+     });  
+    })
+     
+
+    // firmarDocumento({});
+
+    function getStatus(request) {
+    var route = "/firmar/get/status";
+    $.ajax({
+        url: route,
+        type: "GET", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {
+            
+          if(res.firmado==0){
             Swal.fire({
                 title: 'Esta seguro que desea firmar el documento?',         
                 input: 'text',
@@ -97,18 +126,37 @@
                 cancelButtonText: 'No, cancelar!'
             }).then((result) => {
                 if (result.value) {    
-                    var request = $(this).serialize();
-                    firmarDocumento(request);          
+                    var request = $("#myFormFirmarDocConciliacion").serialize();
+                    if($("#myFormFirmarDocConciliacion input[name=email]").val()!=''){
+                        firmarDocumento(request);   
+                    }
+                          
                 }
             }); 
-            e.preventDefault()
-     });  
-    })
-     
-
-    // firmarDocumento({});
-
-    
+          }else{
+            Swal.fire({
+				title: 'El documento ya fue firmado!',
+				type: 'info', 				         
+                //showDenyButton: true,
+                confirmButtonText: 'Cerrar',
+                //denyButtonText: `Don't save`,             
+            })
+          }
+          //  window.location.reload(true);
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            Swal.fire({
+				title: 'Correo electrónico no encontrado!',
+				type: 'info', 				         
+                //showDenyButton: true,
+                confirmButtonText: 'Cerrar',
+                //denyButtonText: `Don't save`,             
+            })
+            $("#wait").hide();
+        },
+    });
+}
 
     function firmarDocumento(request) {
     var route = "/firmar/ok";
@@ -134,7 +182,10 @@
                 confirmButtonText: 'Cerrar',
                 //denyButtonText: `Don't save`,             
             })
-console.log(res);
+            $("#lbl_respu_firma")
+            .html('Se ha enviado un correo a '+res.user.email+' para su confirmación.')
+            .show()
+            $("#respu_firma").show()
           //  window.location.reload(true);
             $("#wait").hide();
         },

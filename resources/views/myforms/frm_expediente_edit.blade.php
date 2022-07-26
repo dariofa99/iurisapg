@@ -65,8 +65,12 @@ Editar
  			@endif
 		   {{-- <li><a href="#tab_9" class="urlactive" data-toggle="tab">Quejas</a>
 		  </li> --}}
-		   <li><a href="#tab_10" class="urlactive" data-toggle="tab">Autorizaciones</a>
+		   <li>
+			<a href="#tab_10" class="urlactive" data-toggle="tab">Autorizaciones</a>
 		  </li>
+		 {{--  <li>
+			<a href="#tab_conciliacion" class="urlactive" data-toggle="tab">Conciliación</a>
+		  </li> --}}
 		</ul> 
 		
 		<!--Tab contnent-->
@@ -204,6 +208,17 @@ Editar
 		</div>
 
 			<!--Tab pane tab_9-->
+
+			
+	{{-- 	<div class="tab-pane" id="tab_conciliacion">
+			<div class="row">
+					<div class="col-md-12">	
+							@include('myforms.components_exp.frm_conciliacion')
+					</div>              
+			</div>
+		</div> --}}
+
+		<!--Tab pane tab_9-->
 
 		</div><!--Tab contnent-->
 		

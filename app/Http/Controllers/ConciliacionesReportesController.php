@@ -4,13 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Conciliacion;
 use App\ConciliacionEstado;
+use App\ConciliacionEstadoReporteGenerado;
 use App\ConciliacionPdfTemporal;
 use App\ConciliacionReporte;
 use App\Mail\Firma;
+use App\Mail\RevocarFirma;
 use App\PdfReporte;
 use App\User;
 use App\PdfReporteDestino;
+use App\TablaReferencia;
 use App\Traits\PdfReport;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -23,39 +27,79 @@ class ConciliacionesReportesController extends Controller
 
    
     public function getPdfReportesConciliacion(Request $request){
-        $reportes = PdfReporteDestino::with('reporte')
+       // return response()->json($request->all());
+        $reportes = PdfReporteDestino::whereHas('reporte', function (Builder $query){
+            $query->where('is_copy', 1);
+    })
+   ->whereHas('temporales', function (Builder $query) use ($request){
+        $query->where("conciliacion_id",$request->conciliacion_id);
+})
     //    ->with('users')
-        ->where($request->except(['_','conciliacion_id']))->get();
+        ->where($request->except(['_','conciliacion_id','conc_estado_id']))->get();
         
+        //return response()->json($reportes[0]->temporales);
        $conciliacion = Conciliacion::find($request->conciliacion_id);
+       $reportes->each(function($reporte) use ($request){
+            $file = ConciliacionEstadoReporteGenerado::where([
+            "status_id"=>$request->status_id,
+            "conciliacion_id"=>$request->conciliacion_id,
+            "reporte_id"=>$reporte->reporte_id
+            ])
+            ->first();
+            $reporte->is_created = false;
+            if($file) $reporte->is_created = true;
+            $reporte->has_firm = false;
+            $reporte->users = $reporte->users()->where([
+                "conciliacion_id"=>$request->conciliacion_id,
+                "revocado"=>0
+                ])->get();
+                foreach ($reporte->users as $key_ => $user) {
+                   if($user->pivot->firmado==0){
+                    $reporte->has_firm = true;
+                    break;
+                   }
+                   
+                }
+
+       });
         $view = view('myforms.conciliaciones.componentes.pdf_report_list',compact('reportes','conciliacion'))->render();
         $response = [
+            'conc_estado_id'=>$request->conc_estado_id,
             'data'=>$reportes,
             'view'=> $view
         ];
         return response()->json($response);
     }
     public function getFirmantes(Request $request){
+       // return response()->json($request->all());
+
         $reporte_de = PdfReporteDestino::find($request->id);
         $reporte_de->reporte;
+        $reporte_de->users = $reporte_de->users()
+        ->where([
+            'conciliacion_id'=>$request->conciliacion_id,
+            'revocado'=>0,
+        ])
+        ->get();
         $ids = [] ;
         $tipos = [];
         $tipos_estados = [];
         $all_firmas = true;
-        foreach ($reporte_de->users as $key => $user) {
-           $ids[] = $user->id;
-           $tipos[$user->id] =  $user->pivot->tipo_usuario_id;
-           $tipos_estados[$user->id] =  $user->pivot->firmado;
-            if($user->pivot->tipo_usuario_id == 209 and $user->pivot->firmado == 0) $all_firmas = false;
-        }
-        //return response()->json($estados);
-        $conciliacion = Conciliacion::find($request->conciliacion_id);
-       // dd(array_key_exists(11220, $estados));
-
-        $view = view('myforms.conciliaciones.componentes.pdf_report_list_firmantes',
-        compact('ids','reporte_de','conciliacion','tipos','tipos_estados','all_firmas'))->render();
         
-      
+
+        foreach ($reporte_de->users as $key => $user) {
+           // return response()->json($user);
+            $ids[] = $user->id;
+            $tipos[$user->id."-".$user->pivot->tipo_usuario_id] =  $user->pivot->tipo_firma_id;
+            $tipos_estados[$user->id."-".$user->pivot->tipo_usuario_id] =  $user->pivot->firmado;
+            if($user->pivot->tipo_firma_id == 209 and $user->pivot->firmado == 0) $all_firmas = false;
+        }
+        
+        $conciliacion = Conciliacion::find($request->conciliacion_id);
+ 
+        $view = view('myforms.conciliaciones.componentes.pdf_report_list_firmantes',
+        compact('ids','reporte_de','conciliacion','tipos','tipos_estados','all_firmas'))
+        ->render();   
 
 
         $response = [
@@ -68,77 +112,120 @@ class ConciliacionesReportesController extends Controller
         return response()->json($response);
     }
     function reenviarMails(Request $request){
-        $users = DB::table("pdf_reportes_users")
+       // return response()->json($request->all());
+      /*   $users = DB::table("pdf_reportes_users")
         ->whereIn('user_id',$request->email_user_id)
         ->where(['conciliacion_id'=>$request->conciliacion_id,
                 'pdf_reporte_id'=>$request->estado_id
-        ])->get();
-        foreach ($users as $key => $us) {
-            $user = User::find($us->user_id);
-            $user->token = $us->token;
-            $user->codigo = $us->codigo;
-            Mail::to($user)->send(new Firma($user));
+        ])->get(); */
+        if($request->email_user_id){
+            foreach ($request->email_user_id as $key => $us) {
+                $user = DB::table("pdf_reportes_users")
+                ->where('user_id',$us)
+                ->where(['conciliacion_id'=>$request->conciliacion_id,
+                        'pdf_reporte_id'=>$request->estado_id,
+                        'tipo_usuario_id'=>$request->type_user_id[$key],
+                ])->first();
+               // return response()->json($user);
+                if($user){
+                    $referencia = TablaReferencia::find($request->type_user_id[$key]);   
+                    $user_m = User::find($user->user_id);
+                    $user_m->token = $user->token;
+                    $user_m->codigo = $user->codigo;
+                    $user_m->calidad = $referencia->ref_nombre;
+                    Mail::to($user_m)->send(new Firma($user_m));
+                }            
+            }
+
             return response()->json($user);
         }
-        return response()->json($users);
+       
+        return response()->json($request->all());
     }
 
     function setFirmantes(Request $request){
        
-        //return response()->json($request->all());
+       
         $pdf_rpd = PdfReporteDestino::find($request->estado_id);
+        
         if($request->delete_users_id){
-            $query = DB::table("pdf_reportes_users")
-            ->whereIn('user_id',$request->delete_users_id)
-            ->where(['conciliacion_id'=>$request->conciliacion_id,
-            'pdf_reporte_id'=>$request->estado_id,
-           ])->delete();
+            foreach ($request->delete_users_id as $key => $delete_user) {
+                $porciones = explode("-", $delete_user);
+                $id = $porciones[0];
+                $query = DB::table("pdf_reportes_users")
+                ->where('user_id',$id)
+                ->where([
+                'conciliacion_id'=>$request->conciliacion_id,
+                'pdf_reporte_id'=>$pdf_rpd->id,
+                'revocado'=>0,
+                'tipo_usuario_id'=>$request->tipo_usuario_id[$key]
+               ])->delete();
+            }
+            
         }
         
     if($request->user_id){
         foreach ($request->user_id as $key => $id) {
+            $pdf_reporte = PdfReporte::find($pdf_rpd->reporte_id)   ;
+            $referencia = TablaReferencia::find($request->tipo_usuario_id[$key]);
+
             $user = DB::table("pdf_reportes_users")
             ->where('user_id',$id)
-            ->where(['conciliacion_id'=>$request->conciliacion_id,
-                    'pdf_reporte_id'=>$request->estado_id
+            ->where([
+                'conciliacion_id'=>$request->conciliacion_id,
+                'pdf_reporte_id'=>$pdf_rpd->id,
+                'tipo_usuario_id'=>$request->tipo_usuario_id[$key],
+                'revocado'=>0,
             ])->first();
 
-            if ( !$user ) {          
+            if ( !$user ) {    
+                $firma = 0;
+                if($request->tipo_firmante[$key]!=209)$firma = 1;
                 $token = str_replace ('/', '', bcrypt(time())); ;
                 $codigo = Str::random(5);
                 $user =  $pdf_rpd->users()->attach($id,[
-                    'tipo_usuario_id'=>$request->tipo_firmante[$key],
+                    'tipo_usuario_id'=>$request->tipo_usuario_id[$key],
                     'tipo_firma_id'=>$request->tipo_firmante[$key],
                     'conciliacion_id'=>$request->conciliacion_id,
                     'token'=>$token,
-                    'codigo'=>$codigo
+                    'codigo'=>$codigo,
+                    'firmado'=>$firma
                 ]);
-                if($request->has("user_email_id") and in_array($id,$request->user_email_id)){                   
+                
+                if($request->has("user_email_id") and in_array($id,$request->user_email_id)){                                   
                     $user = User::find($id);
                     $user->token = $token;
                     $user->codigo = $codigo;
+                    $user->calidad = $referencia->ref_nombre;
+                    $user->nombre_reporte = $pdf_reporte->nombre_reporte;
                     Mail::to($user)->send(new Firma($user));
                 }
       
            
             }else{
                 //return response()->json($user);
-                if($user->tipo_usuario_id != $request->tipo_firmante[$key] and $request->tipo_firmante[$key] == 209 ){
+                if($user->tipo_firma_id != $request->tipo_firmante[$key] and $request->tipo_firmante[$key] == 209 ){
                     $us = User::find($id);
                     $us->token = $user->token;
                     $us->codigo = $user->codigo;
+                    $user->calidad = $referencia->ref_nombre;
+                    $user->nombre_reporte = $pdf_reporte->nombre_reporte;
                     Mail::to($us)->send(new Firma($us));
                 }
-                $user =  $pdf_rpd->users()->updateExistingPivot($id,[
-                    'tipo_usuario_id'=>$request->tipo_firmante[$key],
-                    'conciliacion_id'=>$request->conciliacion_id ,
-                                 
-                ]);
-
-               return response()->json($user);
-            }
-
-         
+                if($request->tipo_firmante[$key] == 209){
+                    $user =  $pdf_rpd->users()->updateExistingPivot($id,[
+                        'tipo_firma_id'=>$request->tipo_firmante[$key],
+                        'conciliacion_id'=>$request->conciliacion_id,                                 
+                    ]);
+                }else{
+                    $user =  $pdf_rpd->users()->updateExistingPivot($id,[
+                        'tipo_firma_id'=>$request->tipo_firmante[$key],
+                        'conciliacion_id'=>$request->conciliacion_id,  
+                        'firmado'=>1,                                 
+                    ]);
+                }
+                //return response()->json($user);
+            }        
             
         }
     }
@@ -153,7 +240,7 @@ class ConciliacionesReportesController extends Controller
         //return view('myforms.conciliaciones.reportes.edit');
     }
     public function store(Request $request){
-    //    return response()->json($request->all());
+        return response()->json($request->all());
         //$request['pdf_reporte_id']=$request->id;
         $config = $this->setConfig($request);
         $request['configuraciones'] = json_encode($config);
@@ -166,8 +253,7 @@ class ConciliacionesReportesController extends Controller
         ]);
         $reporte_ant = PdfReporte::find($request->id);
         if($request->file('encabezado_file')!=''){  
-            $configuracion = json_encode($this->setEncaConfig($request)); 
-            //$request['configuraciones'] = json_encode($configuracion);     
+            $configuracion = json_encode($this->setEncaConfig($request));                 
             $file = $co_reporte->uploadFile($request->file('encabezado_file'),'/pdf_reportes_'.$co_reporte->id);
             $co_reporte->files()->attach($file,[
                 'seccion'=>'encabezado' ,
@@ -176,10 +262,13 @@ class ConciliacionesReportesController extends Controller
 		}else{
            
             $file_en = $reporte_ant->files()->where('seccion','encabezado')->first();
-            $co_reporte->files()->attach($file_en,[
-                'seccion'=>'encabezado' ,
-                'configuracion'=>$file_en->pivot->configuracion          
-                ]);
+            if($file_en){
+                $co_reporte->files()->attach($file_en,[
+                    'seccion'=>'encabezado' ,
+                    'configuracion'=>$file_en->pivot->configuracion          
+                    ]);
+            }
+           
         }
         if($request->file('pie_file')!=''){     
             $configuracion = json_encode($this->setPieConfig($request));        
@@ -190,17 +279,19 @@ class ConciliacionesReportesController extends Controller
                 ]);                   
 		}else{
             $file_pie = $reporte_ant->files()->where('seccion','pie')->first();
+            if($file_pie){
             $co_reporte->files()->attach($file_pie,[
                 'seccion'=>'pie' ,
                 'configuracion'=>$file_pie->pivot->configuracion          
                 ]);
+            }
         }
 
         return response()->json($co_reporte);
     }
 
     public function update(Request $request,$id){
-        //return response()->json($request->all());
+        //return response()->json("request->all()");
         $config = $this->setConfig($request);
         $request['configuraciones'] = json_encode($config);
         $co_reporte = PdfReporte::find($id);
@@ -274,8 +365,7 @@ class ConciliacionesReportesController extends Controller
             $reporte->is_temp = true;
         }else{
             $reporte = PdfReporte::find($id); 
-        }
-        
+        }        
         $conciliacion = Conciliacion::find($conciliacion);
         $ocultar_menu = true;
         return view('myforms.conciliaciones.reportes.edit_temporal',compact('reporte','ocultar_menu','conciliacion','estado'));
@@ -287,6 +377,36 @@ class ConciliacionesReportesController extends Controller
            $conciliacion->estados->each(function($estado){
             $estado->files;
            });
+
+
+          // dd($conciliacion->estados);
+         //$ocultar_menu = true;
+         return response()->json($conciliacion);
+     }
+
+     public function revocarFirmas(Request $request){
+        // 
+        
+        $users = DB::table("users") 
+        ->join('pdf_reportes_users','pdf_reportes_users.user_id','=','users.id')        
+            ->where([
+                'conciliacion_id'=>$request->conciliacion_id,
+                'pdf_reporte_id'=>$request->reporte_id,
+                'tipo_firma_id'=>209,
+                'firmado'=>1,
+                'revocado'=>0
+            ])->get();
+
+           // return response()->json($request->all());
+
+            foreach ($users as $key => $user) {                
+                Mail::to($user)->send(new RevocarFirma($user));
+            }
+
+            return response()->json($users);
+
+           $conciliacion = Conciliacion::find($request->conciliacion_id);
+           
 
 
           // dd($conciliacion->estados);

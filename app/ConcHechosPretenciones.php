@@ -12,11 +12,17 @@ class ConcHechosPretenciones extends Model
         'descripcion',
         'conciliacion_id',
         'tipo_id',   
-        'estado_id'    
+        'estado_id',
+        'user_id'   
     ];
 
     public function conciliacion()
     {
         return $this->belongsTo(Conciliacion::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

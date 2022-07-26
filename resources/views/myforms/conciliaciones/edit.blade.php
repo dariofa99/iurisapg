@@ -31,7 +31,8 @@
 <div class="row">
     <div class="col-md-12">
         Número: <strong>{{$conciliacion->num_conciliacion}}</strong><br>
-        <span class="badge bg-{{$conciliacion->estado->color}}"> Estado: {{$conciliacion->estado->ref_nombre}}</span> 
+        <span class="badge bg-{{$conciliacion->estado->color}}"> 
+            Estado: {{$conciliacion->estado->ref_nombre}}</span> 
     </div>    
 </div>
             
@@ -64,12 +65,31 @@
 
          @endif
          @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-         || ((currentUserInConciliacion($conciliacion->id,['autor','solicitante','rep_legal_solicitante','apoderado_solicitante','conciliador','asistente']))))
+         || ((currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']))) 
+         || ($conciliacion->getUser(199)->hasRole('estudiante') and currentUserInConciliacion($conciliacion->id,['autor'])))
             <li><a class="urlactive" data-toggle="tab" href="#menu2">Estado de la solicitud</a></li>
         @endif
+        @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
+        || ((currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']))))
+       
             <li><a class="urlactive" data-toggle="tab" href="#menu3">Asignaciones</a></li>
+            @endif
+
+            @if($audiencia!='' || currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']) || currentUser()->hasRole('amatai'))
+
             <li><a class="urlactive" data-toggle="tab" href="#menu4">Audiencia</a></li>
+            @endif
+            @if(((currentUser()->can('act_conciliacion') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
+            || ($conciliacion->getUser(199)->hasRole('estudiante') and (currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']))))
+           
             <li><a class="urlactive" data-toggle="tab" href="#menu5">Notas</a></li>
+            @endif
+            @if(((currentUser()->can('act_conciliacion')))
+            || ($conciliacion->getUser(199)->hasRole('estudiante') and (currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar','autor']))))
+             @if(count($conciliacion->expedientes)<=0) 
+              <li><a class="urlactive" data-toggle="tab" href="#menu6">Expediente</a></li>
+              @endif
+           @endif
           </ul>
 
           <div class="tab-content">
@@ -91,7 +111,9 @@
           <div id="menu5" class="tab-pane fade">
             @include('myforms.conciliaciones.conciliacion_notas')
           </div>
-   
+          <div id="menu6" class="tab-pane fade">
+            @include('myforms.conciliaciones.conciliacion_expediente')
+          </div>
           </div>
     </div>
 </div>
@@ -106,6 +128,7 @@
     @include('myforms.conciliaciones.componentes.modal_audiencia_salas_alternas')
     @include('myforms.conciliaciones.componentes.modal_add_notas')
     @include('myforms.conciliaciones.componentes.modal_edit_notas')
+    @include('myforms.conciliaciones.componentes.modal_reportes_archivos_compartidos')
 @stop
 
 @push('scripts')

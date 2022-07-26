@@ -39,7 +39,7 @@
 <div class="col-md-6">
     <div class="form-group">
         {!!Form::label('Tipo de usuario') !!}
-        <select  name="tipo_usuario_id" class="form-control required" required>
+        <select {{(isset($user) and Request::get('data_type') )? 'disabled' : ''}}  name="tipo_usuario_id" class="form-control required" required>
             <option value="">Seleccione...</option>
             @foreach($types_users as $key => $type)
             <option {{Request::get('data_type') == $key ? 'selected': ''}}  value="{{$key}}">{{$type}}</option>
@@ -47,6 +47,7 @@
         </select>
     </div>
 </div>   
+
 @endif 
 
 
