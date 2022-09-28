@@ -23,16 +23,18 @@ use App\Solicitud;
 use App\HistorialDatosCaso;
 use Facades\App\Facades\NewPush;
 use App\Notifications\UserNotification;
+use App\Services\UsersService;
 use Firebase\JWT\JWT;
-
+use Illuminate\Support\Facades\Auth;
 
 class ExpedienteController extends Controller
 {
 
+  private $userService;
 
-  public function __construct()
+  public function __construct(UsersService $userService)
   {
-      
+    $this->userService = $userService;
     $this->middleware('permission:ver_expedientes',   ['only' => ['create']]);
     $this->middleware('permission:sustituir_casos',   ['only' => ['replacecaso']]);
   }
@@ -736,7 +738,9 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
            ->where ('role_id', '6' )           
            ->select('users.id','users.idnumber',            
              DB::raw('CONCAT(users.name," ",users.lastname) as full_name')
-             ,'role_user.role_id', 'roles.display_name')->orderBy('users.created_at', 'desc')->pluck( 'full_name' ,'users.idnumber');
+             ,'role_user.role_id', 'roles.display_name')
+             ->orderBy('users.created_at', 'desc')
+             ->pluck( 'full_name' ,'users.idnumber');
 
            return $users;
     }
@@ -902,11 +906,11 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
          if (!empty($request->get('tipo_busqueda'))) {
            
             $expedientes= Expediente::leftjoin('sede_expedientes','sede_expedientes.expediente_id','=','expedientes.id')
-->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
-->where('sedes.id_sede',session('sede')->id_sede)
-->Criterio($request->data,$request->tipo_busqueda)
-->orderBy(DB::raw("FIELD(expestado_id,'4','1','2','3')"))
-->orderBy(DB::raw("expedientes.created_at"), 'desc')->paginate($numpaginate);
+          ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
+          ->where('sedes.id_sede',session('sede')->id_sede)
+          ->Criterio($request->data,$request->tipo_busqueda)
+          ->orderBy(DB::raw("FIELD(expestado_id,'4','1','2','3')"))
+          ->orderBy(DB::raw("expedientes.created_at"), 'desc')->paginate($numpaginate);
             
             $numEx= Expediente::leftjoin('sede_expedientes','sede_expedientes.expediente_id','=','expedientes.id')
             ->leftjoin('sedes','sedes.id_sede','=','sede_expedientes.sede_id')
@@ -974,9 +978,7 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
  
 
 
-     public function reasigcaso(Request $request){
-
-      
+     public function reasigcaso(Request $request){      
         $expediente = Expediente::where('expid',$request->expid)->first();     
         $asig = $expediente->asignaciones()
         ->where('asigest_id',$expediente->estudiante->idnumber)
@@ -1022,12 +1024,8 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
           $asignacion->user_created_id = \Auth::user()->idnumber;
           $asignacion->user_updated_id = \Auth::user()->idnumber;
           $asignacion->save();
-        }
-       
-
-       
+        }       
         return $asignacion_caso->asig_docente;
-
      }
 
      public function replacecaso(Request $request){
@@ -1230,16 +1228,7 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
 
      public function getEstudiantes(){
 
-      $estudiantes = DB::table('users')
-           ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
-           ->leftjoin('roles' , 'role_user.role_id','=','roles.id')
-           ->leftjoin('sede_usuarios','sede_usuarios.user_id','=','users.id')
-           ->leftjoin('sedes','sedes.id_sede','=','sede_usuarios.sede_id')           
-           ->where('sedes.id_sede',session('sede')->id_sede) 
-           ->where ('role_id', '6' ) 
-           ->select('users.id','users.idnumber',
-             DB::raw('CONCAT(users.name," ",users.lastname) as full_name')
-             ,'role_user.role_id', 'roles.display_name')->orderBy('users.created_at', 'desc')->get();
+      $estudiantes = $this->userService->getEstudiantes();
       return response()->json($estudiantes);
      }
 
@@ -1384,7 +1373,11 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
       ->leftjoin('sede_usuarios','sede_usuarios.user_id','=','users.id')
       ->leftjoin('sedes','sedes.id_sede','=','sede_usuarios.sede_id')
       ->where('sedes.id_sede',session('sede')->id_sede) 
-      ->select('users.idnumber AS astid_estudent','users.name', 'users.lastname' , DB::raw('SUM(IF(expedientes.exptipoproce_id = 1, 1, 0)) AS simples'),DB::raw('SUM(IF(expedientes.exptipoproce_id = 2, 1, 0)) as complejas'),DB::raw('SUM(IF(expedientes.exptipoproce_id = 1 AND expedientes.expestado_id = 3, 1, 0)) AS simples_cerradas'),DB::raw('SUM(IF(expedientes.exptipoproce_id = 2 AND expedientes.expestado_id = 3, 1, 0)) as complejas_cerradas'))
+      ->select('users.idnumber AS astid_estudent','users.name', 'users.lastname' , 
+      DB::raw('SUM(IF(expedientes.exptipoproce_id = 1, 1, 0)) AS simples'),
+      DB::raw('SUM(IF(expedientes.exptipoproce_id = 2, 1, 0)) as complejas'),
+      DB::raw('SUM(IF(expedientes.exptipoproce_id = 1 AND expedientes.expestado_id = 3, 1, 0)) AS simples_cerradas'),
+      DB::raw('SUM(IF(expedientes.exptipoproce_id = 2 AND expedientes.expestado_id = 3, 1, 0)) as complejas_cerradas'))
       ->where('users.active', '=', '1')
       ->where('role_user.role_id', '=', '6')
       //->where('expfecha', '>=', $fecha_in)
@@ -1624,5 +1617,49 @@ foreach ($consul1 as $key => $value) {
 }*/
 
   }
+
+  public function darBaja(Request $request){      
+    
+    
+    $users = $this->userService->getUsersByRoleName("docente_prueba");
+  
+    
+
+    if(count($users)>0){
+      $expediente = Expediente::where('expid',$request->exp_id)->first();     
+      $asig = $expediente->asignaciones()
+      ->where('asigest_id',$expediente->estudiante->idnumber)
+      ->where('activo',1)->first();
+     
+      $old_asig = AsigDocenteCaso::where([
+        "asig_caso_id"=>$asig->id,
+        "activo"=>1
+      ])->first();    
+
+      $user = $users[0];
+      $asignacion = new AsigDocenteCaso();
+      $asignacion->docidnumber = $user['idnumber'];
+      $asignacion->asig_caso_id = $asig->id;
+      $asignacion->user_created_id = Auth::user()->idnumber;
+      $asignacion->user_updated_id = Auth::user()->idnumber;
+      $asignacion->save();
+      if($old_asig){
+        $old_asig->activo = 0;
+        $old_asig->save();
+      }
+      
+
+      return response([
+        "error"=>false,
+        "message" => "El caso se dió de baja con éxito y fue asignado al docente de prueba ".$user['full_name']
+      ]);
+    }
+    return response([
+      "error"=>true,
+      "message" => "No hay un docente de pruebas activo"
+    ]);
+      
+     
+ }
  
   }

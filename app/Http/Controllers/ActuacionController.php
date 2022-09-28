@@ -213,7 +213,8 @@ class ActuacionController extends Controller
                   ->join('referencias_tablas as r','r.id','=','a.actestado_id')  
                   ->join('referencias_tablas as t3','t3.id','=','a.actcategoria_id') 
                    ->where(function($query) use ($expediente,$bandera) {
-                    $bandera == 0 ? $query->where('a.actidnumberest',$expediente->expidnumberest) : $query->where('a.actidnumberest','<>',$expediente->expidnumberest) ;
+                    $bandera == 0 ? $query->where('a.actidnumberest',$expediente->expidnumberest) 
+                    : $query->where('a.actidnumberest','<>',$expediente->expidnumberest) ;
                   }) 
                   ->where('rv.rev_actexpid', '=',$expediente_id)
                   //->where('a.actidnumberest',$expediente->expidnumberest)
@@ -224,10 +225,13 @@ class ActuacionController extends Controller
                  foreach ($actuaciones as $key => $act) {                        
                      $actuaciones2 = DB::table('actuacions as a')
                       ->join('revisiones_actuacion as rv','rv.rev_actid','=','a.id')   
-                      ->join('referencias_tablas as r','r.id','=','a.actestado_id') 
-                     
+                      ->join('referencias_tablas as r','r.id','=','a.actestado_id')                     
                       ->where('rv.parent_rev_actid', '=',$act->parent_rev_actid)
                       ->where('rv.rev_actid', '<>',$act->parent_rev_actid)
+                      ->where(function($query) use ($expediente,$bandera) {
+                        $bandera == 0 ? $query->where('a.actidnumberest',$expediente->expidnumberest) 
+                        : $query->where('a.actidnumberest','<>',$expediente->expidnumberest) ;
+                      }) 
                       ->select(
                         'rv.parent_rev_actid',
                         'rv.rev_actid',

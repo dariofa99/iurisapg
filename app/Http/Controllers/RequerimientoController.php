@@ -128,7 +128,7 @@ class RequerimientoController extends Controller
    
 return view('myforms.frm_requerimiento_list',compact('requerimientos','reqasis','request','active_expe'));
        
-    }
+    } 
 
     /**
      * Show the form for creating a new resource.

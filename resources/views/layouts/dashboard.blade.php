@@ -105,6 +105,7 @@
 <!-- Site wrapper -->
 <div class="wrapper">
 
+  
  
   @include('layouts.header')
 
@@ -125,6 +126,15 @@
     @if(!Request::is('graficas'))
     <!-- Content Header (Page header) -->
     <section class="content-header">
+      @if(Session::has('message-information'))
+      <div class="alert alert-info alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <strong>Bienvendido a IURIS!</strong> 
+        Recuerda que si tienes algun problema, duda o inquetitud con respecto al funcionamiento 
+        de la plataforma
+        puedes comunicarte via WhatsApp al número <b>310-6038006</b>
+      </div>
+      @endif
       <h1>
        @yield('titulo_general')
         <small>.</small>

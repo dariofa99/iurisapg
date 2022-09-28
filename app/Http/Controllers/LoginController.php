@@ -10,7 +10,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Controllers\Controller;
 use App\Sede;
 use App\LogSession;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Foundation\Auth\AuthenticatesUsers; 
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -66,7 +66,8 @@ class LoginController extends Controller
     
     public function store(LoginRequest $request)
     { 
-       // dd($request->all());
+        Session::flash('message-information', ' Crédenciales de autenticación incorrectas');      
+           
         if(is_numeric($request['user_name'])){
             $clave = 'idnumber'; 
         }else{
@@ -131,7 +132,6 @@ class LoginController extends Controller
                     return Redirect::to('oficina/solicitante');
                 }
             }
-                        
             return Redirect::to('dashboard');
              
 

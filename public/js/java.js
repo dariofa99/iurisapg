@@ -1691,6 +1691,27 @@ return false;
         });
     });
 
+    $("#btn_dar_baja_exp").on("click", function (e) {
+        var request = {
+            "exp_id":$("#expid").val()
+        }
+        Swal.fire({
+            title: "Esta seguro de dar de baja el expediente?",
+            text: "Se asignará un docente de pruebas!",
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si, dar de baja!",
+            cancelButtonText: "No, cancelar",
+        }).then((result) => {
+            if (result.value) {
+                console.log(request);
+                darBajaExpediente(request)
+            }
+        });
+    });
+
     $("#btn_active_reguser").on("click", function (e) {
         var id = $(this).attr("data-id");
         Swal.fire({
@@ -3246,6 +3267,55 @@ return false;
     })
 
 }); //Fin del document ready
+
+function darBajaExpediente(request) {
+    var route = "/expedientes/dar/baja";
+    $.ajax({
+        url: route,
+        type: "POST", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {
+            if(res.error){
+                Swal.fire({
+                    title: res.message,                    
+                    type: "error",                    
+                    confirmButtonColor: "#3085d6",                   
+                    confirmButtonText: "Cerrar",                    
+                });
+            }else{
+                Swal.fire({
+                    title: res.message,
+                    html: "<h4>De clic en OK para cargar los cambios o refresque la página</h4>",
+                    type: "info",                    
+                    confirmButtonColor: "#3085d6",                    
+                    confirmButtonText: "OK",                    
+                }).then((result) => {
+                    if (result.value) {
+                        window.location.reload(true)
+                    }
+                });
+            }
+           
+           
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+}
+
 function asigExpedienteToConc(request){
     var route = "/conciliaciones/asignar/expediente";
     $.ajax({

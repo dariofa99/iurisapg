@@ -361,7 +361,7 @@ function datemodalcalendarest(color,horario,fecha) {
         texthorario["112"] = "2PM a 4PM";
         texthorario["113"] = "4PM a 6PM";
 
-  $("#tituloturnos").html('<div class="col-md-6">Truno: <span style="color: white; background-color: '+codcolor[color]+'; border-radius: 7px; padding: 0px 15px 0px 15px;"> '+textcolor[color]+'</span></div><div class="col-md-4">Horario: '+texthorario[horario]+'</div>');
+  $("#tituloturnos").html('<div class="col-md-6">Turno: <span style="color: white; background-color: '+codcolor[color]+'; border-radius: 7px; padding: 0px 15px 0px 15px;"> '+textcolor[color]+'</span></div><div class="col-md-4">Horario: '+texthorario[horario]+'</div>');
         //define turno presencial o virtual
           var weeknumber = moment(fecha, "YYYY-MM-DD").isoWeek();
           var parimparweek = parImpar(weeknumber);//1 par, 0 impar
@@ -488,16 +488,16 @@ $('#contencalendarid').append('<tr><td>'+parseInt(key+1)+'</td><td>'+value.name+
                 if (idparimpar == 1) {
                   estadoturno = "Presencial" 
                 } else {
-                  estadoturno = "Virtual"
+                  estadoturno = "Presencial"
                 }
               } else {
                 if (idparimpar == 0) {
                   estadoturno = "Presencial" 
                 } else {
-                  estadoturno = "Virtual"
+                  estadoturno = "Presencial"
                 }
               }
-            } else { estadoturno = ""}
+            } else { estadoturno = "Presencial"}
                 
 @if (currentUser()->hasRole('coordprac') OR currentUser()->hasRole('diradmin') OR currentUser()->hasRole('dirgral') OR currentUser()->hasRole('amatai'))
                    $('#contencalendarid').append('<tr id="row_'+key+'">'+

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Sede;
-use Auth; 
+use Auth;
+use Illuminate\Support\Facades\DB;
+
 class SedesController extends Controller
 {
     /**
@@ -111,8 +113,28 @@ class SedesController extends Controller
     }
 
     public function selectSede(Request $request){
+
+        //Estudiantes con menos interacciones
+        $data = DB::table('auditoria')
+        ->join('users','users.id','=','auditoria.user_id')
+        ->join('role_user','role_user.user_id','=','users.id')
+        ->join('roles','roles.id','=','role_user.role_id')
+        ->where('roles.id',6)
+        ->get();
+
+      //  dd($data);
+
+
+
         $sedes = Sede::all();
-       //dd(session('sede')->can('mostrar_sexo_form_user'));
+        
+        
+
+
+
+
+
+
         if(count($sedes)>1){
             return view('myforms.frm_bienvenida',compact('sedes'));
         }elseif(count($sedes)<=0){

@@ -28,7 +28,7 @@
         <hr>
        
         
-                   <input type="submit" value="Cambiar" class="btn btn-primary btn-block">
+                   <input type="submit" value="Solicitar cambio" class="btn btn-primary btn-block">
         
         </div>
 

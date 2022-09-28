@@ -17,10 +17,11 @@ Hola!!  {{  currentUser()->name  }}  bienvenido a <strong>Iuris </strong>!!
 <div class="contain">
     <div class="row">
         <div class="col-md-4 col-xl-3">
-            <div class="card bg-c-blue order-card">
+            <div class="card bg-light-blue color-palette order-card">
                 <div class="card-block">
                     <h4 class="m-b-20">Estudiantes que menos han ingresado</h4>
-                    <h2 class="text-right"><i class="fa fa-users f-left"></i><span><a style="color: aliceblue" href="/dashboard/search?type=users_not_session">486</a></span></h2>
+                    <h2 class="text-right"><i class="fa fa-users f-left"></i><span>
+                        <a style="color: aliceblue" href="/dashboard/search?type=users_not_session">486</a></span></h2>
                    {{--  <p class="m-b-0">Completed Orders<span class="f-right">351</span></p> --}}
                 </div>
             </div>

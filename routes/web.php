@@ -187,6 +187,7 @@ Route::post('expedientes/getestudiantes/', 'ExpedienteController@getEstudiantes'
 Route::get('expediente/casos/reasignados', 'ExpedienteController@casosreasig');
 Route::post('expedientes/anteriorestudiante/', 'ExpedienteController@anteriorEstudiante');
 Route::post('expedientes/buscarexpasig/', 'ExpedienteController@searchExpAsig'); 
+Route::post('expedientes/dar/baja', 'ExpedienteController@darBaja'); 
 
 Route::get('expediente/createstream/{id}', 'ExpedienteController@createStream'); 
 Route::get('expediente/sharestream/{id}', 'ExpedienteController@shareStream');  

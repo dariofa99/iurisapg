@@ -7,26 +7,24 @@ use Session;
 use Redirect;
 use Validator;
 use Illuminate\Validation\Rule;
-use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use \App\User;
 use Intervention\Image\ImageManagerStatic as Image;
-use Input;
-use Entrust; 
-use App\Role;
 use DB; 
 use App\TablaReferencia; 
-use App\Turno;
 use App\Mail\ConfirmarCorreo;
+use App\Services\UsersService;
 use Illuminate\Support\Facades\Mail;  
 
 class MyusersController extends Controller 
 {
 
-  public function __construct()
+  private $userService;
+
+  public function __construct(UsersService $userService)
   {
-      
+    $this->userService = $userService;
      // $this->middleware('permission:edit_usuarios',   ['only' => ['edit']]);
       $this->middleware('permission:ver_usuarios',   ['only' => ['index']]);
   }
@@ -352,73 +350,22 @@ class MyusersController extends Controller
     }
 
     function getUsers(Request $request){
-       /*  if (currentUser()->hasRole("estudiante")) {
-
-           $users= DB::table('users')
-           ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
-           ->leftjoin('roles' , 'role_user.role_id','=','roles.id')
-           ->where('role_user.role_id', '=','8')
-           ->select('users.active','users.id','users.idnumber',
-            'users.name', 'users.lastname', 'users.email',
-             'users.tel1','users.tel2','users.datecreated'
-             ,'role_user.role_id', 'roles.display_name')->orderBy('users.created_at', 'desc')->paginate(20);
-
-        }elseif(currentUser()->hasRole("coordprac") || currentUser()->hasRole("diradmin") || currentUser()->hasRole("dirgral")) {
-             $users= DB::table('users')
-           ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
-           ->leftjoin('roles' , 'role_user.role_id','=','roles.id')
-           ->leftjoin('sede_usuarios','sede_usuarios.user_id','=','users.id')
-           ->leftjoin('sede_usuarios','sede_usuarios.user_id','=','users.id')
-           ->leftjoin('sedes','sedes.id_sede','=','sede_usuarios.sede_id')
-           ->where('role_user.role_id','<>','1')
-           ->select('users.active','users.id','users.idnumber',
-            'users.name', 'users.lastname', 'users.email',
-             'users.tel1','users.tel2','users.datecreated'
-             ,'role_user.role_id', 'roles.display_name','sedes.nombre as sede')
-             ->groupBy('users.id')
-             ->orderBy('users.created_at', 'desc')->paginate(20);
- 
-        
-        }elseif(currentUser()->hasRole("docente")) {
-           $users= DB::table('users')
-           ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
-           ->leftjoin('roles' , 'role_user.role_id','=','roles.id')
-           ->where('role_user.role_id','<>','1')
-           ->select('users.active','users.id','users.idnumber',
-            'users.name', 'users.lastname', 'users.email',
-             'users.tel1','users.tel2','users.datecreated'
-             ,'role_user.role_id', 'roles.display_name')
-             ->orderBy('users.created_at', 'desc')->paginate(20);
-
-
-
-
-
-        }elseif(currentUser()->hasRole("amatai")) { */
+       
              $users= User::leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
            ->leftjoin('roles' , 'role_user.role_id','=','roles.id')
            ->leftjoin('sede_usuarios','sede_usuarios.user_id','=','users.id')
            ->leftjoin('sedes','sedes.id_sede','=','sede_usuarios.sede_id')
-           ->Criterio($request->data_search,$request->criterio)
-           //->where('role_user.role_id','<>','1')
+           ->Criterio($request->data_search,$request->criterio)           
            ->select('users.active','users.id','users.idnumber',
             'users.name', 'users.lastname', 'users.email',
              'users.tel1','users.tel2','users.datecreated'
              ,'role_user.role_id', 'roles.display_name',
-             'sedes.nombre as sede'
-             )
-            /*  ->where(function($query) use ($request){
-               if(auth()->user()->can('cambiar_sede') and session('sede')){
-                return $query->where('sedes.id_sede',session('sede')->id_sede);
-               }
-             }) */
+             'sedes.nombre as sede')           
              ->where('sedes.id_sede',session('sede')->id_sede)
             ->groupBy('users.id')
             ->orderBy('users.created_at', 'desc')
             ->paginate(20);
-    //    }
-
-       // dd($users);
+    
 
         return $users;
 
@@ -482,39 +429,17 @@ class MyusersController extends Controller
     }
  
     public function getEstudiantes(Request $request){
-          $users = DB::table('users')
-           ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
-           ->leftjoin('roles' , 'role_user.role_id','=','roles.id')
-           ->leftjoin('sede_usuarios','sede_usuarios.user_id','=','users.id')
-           ->leftjoin('sedes','sedes.id_sede','=','sede_usuarios.sede_id')
-           ->leftjoin('referencias_tablas' , 'referencias_tablas.id','=','users.cursando_id')
-           ->where ('role_id', '6' )
-           ->where ('users.active', true)
-           ->where('sedes.id_sede',session('sede')->id_sede)
-           ->select('users.active','users.id','ref_nombre','users.idnumber',
-             DB::raw('CONCAT(users.name," ",users.lastname) as full_name')
-             ,'role_user.role_id', 'roles.display_name')
-            ->orderBy('users.created_at', 'desc')
-            ->get();
-       if ($request->ajax()) {
+          $users = $this->userService->getEstudiantes();
+
+        if ($request->ajax()) {
             return response()->json($users);
         }    
       return ($users);
      }
 
   public function getDocentes(Request $request){
-            $users = DB::table('users')
-           ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
-           ->leftjoin('roles' , 'role_user.role_id','=','roles.id')
-           ->leftjoin('sede_usuarios','sede_usuarios.user_id','=','users.id')
-           ->leftjoin('sedes','sedes.id_sede','=','sede_usuarios.sede_id')
-           ->leftjoin('referencias_tablas' , 'referencias_tablas.id','=','users.cursando_id')
-           ->where ('role_id', '4' )
-           ->where ('users.active', true)
-           ->where('sedes.id_sede',session('sede')->id_sede)
-           ->select('users.active','users.id','ref_nombre','users.idnumber',
-             DB::raw('CONCAT(users.name," ",users.lastname) as full_name')
-             ,'role_user.role_id', 'roles.display_name')->orderBy('users.created_at', 'desc')->get();
+            $users = $this->userService->getDocentes();
+
        if ($request->ajax()) {
             return response()->json($users);
         }    

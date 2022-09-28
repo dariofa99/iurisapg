@@ -86,12 +86,12 @@ socket.on('LIuOgI52dWJxe0ZMnotifications_'+$("#user_session_idnumber").val(), fu
 
 
 socket.on('LIuOgI52dWJxe0ZMRoomAlterConciliacionactive'+$("#user_session_idnumber").val(), function(data){
-    console.log(data.url)
+   // console.log(data.url)
     //enviamensaje de inivitacion
     //activa un boton para acceder a la videollamada en caso de no ver el mensaje
     //guarda en el localstorage el acceso en caso de refrescar la pagina
 
-    console.log(data.id_conciliacion)
+    //console.log(data.id_conciliacion)
     $( "#btm_access_room_alter"+data.id_conciliacion).attr('onClick',"openPopUpSalas(\'"+data.url+"\')");
     $( "#btm_access_room_alter"+data.id_conciliacion).css("display","block");
 
