@@ -538,7 +538,10 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
         $asignacion_caso->ref_asig_id=1;
         $asignacion_caso->ref_mot_asig_id=1;
         $asignacion_caso->save(); 
-      if ($request['exptipoproce_id']==1) {     
+
+        $subRama = $asignacion_caso->expediente->rama_derecho->subrama;
+
+      if ($request['exptipoproce_id']==1 and $subRama!='UNAVI') {     
         //solo para consultas de asesoria   
         $expediente->asigDocente($asignacion_caso);  // no tienen en cuenta la rama  del derecho
         //$expediente->asigDocenteSeguimiento($asignacion_caso, $expediente->exptipoproce_id); // si tiene en cuenta la rama del derecho        

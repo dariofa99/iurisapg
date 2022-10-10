@@ -17,86 +17,23 @@ use App\Periodo;
 use App\Segmento;
 use Excel; 
 use App\Exports\NotasExport;
+use App\Services\UsersService;
+
 class NotaController extends Controller
 { 
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    private $userService;
+
+    public function __construct(UsersService $userService)
+    {
+      $this->userService = $userService;
+      
+    }
+ 
+    
     public function index(Request $request)
     {
-   /*      $request->id = 3030;
-        $request->corte = 1;
-        $request->periodo = 0;
-
-        $notas = DB::table('notas')->where(['estidnumber'=>$request->id,'segid'=>1])->get();
-        $not_exp = [];
-        $not_act = [];
-        $not_req = [];
-
-        $nota_conocimiento = [];
-        $nota_aplicacion = [];
-        $nota_etica = [];
-        
-        
-        foreach ($notas as $key => $nota) {
-
-
-            if($nota->cptnotaid=='1') $nota_conocimiento[]=$nota;
-            if($nota->cptnotaid=='2') $nota_aplicacion[]=$nota;
-        }
-
-
-      // dd($nota_conocimiento);
-
-
-
-
-
-
-
-
-
-
-
-
-      /*  $asignaciones = AsignacionCaso::join('users','users.idnumber','=','asignacion_caso.asigest_id')
-        ->where(['asignacion_caso.asigest_id'=>$request->id])
-        ->groupBy('asignacion_caso.asigexp_id')
-        ->select('asignacion_caso.asigexp_id')
-        ->get();
-        $expedientes=[];
-        $notas=[];
-        foreach ($asignaciones as $key => $asignacion) {            
-            $notas_act=[];
-            $notas_req=[];
-            foreach ($asignacion->expediente->actuacion()
-            ->where(['actidnumberest'=>$request->id,'actestado_id'=>104])
-            ->get() as $key_2 => $act) {
-               $notas_act[] = $act->get_nota_corte('etica'); 
-            }
-           // $notas['notas_act'] =  $notas_act; 
-            foreach ($asignacion->expediente->requerimientos()->where('reqidest',$request->id)->get() as $key_2 => $req) {
-                $notas_req[] = $req->get_nota_corte('etica');
-             }
-            // $notas['notas_req'] =  $notas_req;
-             $notas [$asignacion->expediente->expid] = [
-                 'notas_caso'=>$asignacion->expediente->get_notas_caso(),
-                 'notas_req'=>$notas_req,
-                 'notas_act'=>$notas_act,                  
-             ];
-           //dd($asignacion->expediente->actuacion[0]->get_nota_corte('etica'));
-        }
-    
-        dd($notas);
-
-        foreach ($notas as $expediente => $notas) {
-         dd($notas);
-        }*/ 
-       // dd("wordpress-258963147");
-        $periodos = Periodo::all();
-        
+  
+        $periodos = Periodo::all();        
         return view('report.notas.frm_notas_list',compact('periodos'));
     }
 
@@ -116,9 +53,15 @@ class NotaController extends Controller
             }
             
         } 
-
-        $notas = $user->getNotas($request);
-    //  dd($notas);
+        $notas = [];
+        if($user){
+            $notas = $user->getNotas($request);
+        }else{
+            $request->session()->flash('message-success', 'No se encontró el estudiante!');
+        }
+       
+       
+    // dd($notas);
        return view("myforms.notas_ver.index",compact('user','notas'));
 
        
@@ -177,33 +120,7 @@ class NotaController extends Controller
         ob_end_clean(); // this
         ob_start();
         if(!$request->ajax()){
-      /*   $notas = DB::table('notas')
-        ->join('cptonotas as cp','cp.id','=','notas.cptnotaid')
-        ->join('segmentos','segmentos.id','=','notas.segid')
-        ->join('periodo','periodo.id','=','notas.perid')
-        ->select(
-            'notas.nota','notas.cptnotaid','notas.segid','notas.perid','notas.estidnumber',
-            'cp.cpntnombre as concepto','segmentos.segnombre as segmento','periodo.prddes_periodo'
-            )
-        ->where([
-            'estidnumber'=>$request->idnumber,
-           // 'segid'=>$request->segmento_id,
-            'notas.perid'=>$request->periodo_id        
-        ])->get(); */
-
-        /* $notas = DB::select(DB::raw("SELECT notas.estidnumber, UPPER(users.name) as nombre,
-         UPPER(users.lastname) as apellido, referencias_tablas.ref_nombre as curso,
-         AVG(if(cptnotaid='1',nota,null)) AS nota_conocimiento, 
-         AVG(if(cptnotaid='2',nota,null)) AS nota_aplicacion, 
-         AVG(if(cptnotaid='3',nota,null)) AS nota_etica,
-         (ROUND(((AVG(if(cptnotaid='1',nota,null))+AVG(if(cptnotaid='2',nota,null))+AVG(if(cptnotaid='3',nota,null)))/3),1)) notafinal
-         FROM notas, expedientes, users, referencias_tablas
-         WHERE segid = $request->segmento_id AND exptipoproce_id!='3' AND notas.`expidnumber`=`expedientes`.`expid`
-         AND notas.`estidnumber`=`users`.`idnumber` AND users.`cursando_id`=`referencias_tablas`.`id`
-         GROUP BY estidnumber"));
-
-    $notas= json_decode( json_encode($notas), true); */
-   // return response()->json($request->all());
+   
     $notas = $this->notas_download($request);
     // dd($notas);
 //return response()->json($notas);
@@ -213,14 +130,7 @@ $periodo = Periodo::find($request->periodo_id);
 if($request->segmento_id){
    $header =  ['cedula','nombres','curso','casos','defensas','conciliaciones','otros','final'];
    return Excel::download(new NotasExport($notas,$header,null,'Notas_'.$periodo->prddes_periodo),'Reporte.xlsx');
-  /*   
-   Excel::create('Notas_'.$periodo->prddes_periodo, function($excel) use($notas,$segmento,$periodo) {
-        
-        $excel->sheet('Not_'.$segmento->segnombre."_".$periodo->prddes_periodo, function($sheet) use($notas) {
-           $sheet->row(1,['cedula','nombres','curso','casos','defensas','conciliaciones','otros','final']);
-           $sheet->fromArray($notas,null,'A2',false,false);           
-        });
-        })->store('xlsx','exports/',true);  */ 
+   
 }else{
     $segmentos = Segmento::join('sede_segmentos as sg','sg.segmento_id','=','segmentos.id')
     ->where('sg.sede_id',session('sede')->id_sede)
@@ -237,25 +147,7 @@ if($request->segmento_id){
     }     
     $header[] = 'final periodo';
    return Excel::download(new NotasExport($notas,$header,$segmentos,'Notas_'.$periodo->prddes_periodo),'Reporte.xlsx');
-    /* Excel::create('Notas_'.$periodo->prddes_periodo, function($excel) use($notas,$header,$segmentos,$periodo) {
-        $cells = ['D1:H1','I1:M1','N1:R1','S1:W1'];  
-        $cells_v = ['D1','I1','N1','S1']; 
-        $excel->sheet('Notas_'.$periodo->prddes_periodo, function($sheet) use($notas,$header,$segmentos,$cells,$cells_v) {     
-            foreach ($segmentos as $key => $segmento) {
-                $sheet->mergeCells($cells[$key]);
-                $sheet->setCellValue($cells_v[$key], $segmento->segnombre);
-                $header[] = 'casos';
-                $header[] = 'defensas';
-                $header[] = 'conciliaciones';
-                $header[] = 'otros';
-                $header[] = 'final';               
-            }     
-            $header[] = 'final periodo';       
-            $sheet->row(2,$header);
-            $sheet->fromArray($notas,null,'A3',false,false); 
-            //$sheet->loadView('myforms.reportes.notas')    ;      
-           });  
-        })->store('xlsx','exports/',true); */  
+   
 }
     $data = [
             'success' => true,

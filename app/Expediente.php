@@ -1,10 +1,10 @@
-<?php   
+<?php
 
 namespace App;
 
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon; 
+use Carbon\Carbon;
 use App\Traits\ColorTurnos;
 use Illuminate\Support\Facades\Event;
 use DB;
@@ -20,7 +20,7 @@ class Expediente extends Model
     use Notifiable;
     use ColorTurnos;
     use AsigNotas;
-   /**
+    /**
      * The database table used by the model.
      *
      * @var string
@@ -34,44 +34,44 @@ class Expediente extends Model
      * @var array
      */
     protected $fillable = [
-						    'expid', 
-						    'expramaderecho_id', 
-						    'expfecha',
-                            'expidnumber',
-                'expestado_id',
-                'exptipoproce_id',
-                'expfecha',
-						    'expusercreated',
-						    'expuserupdated',
-                            'exptipocaso_id',
-                            'expdesccorta',
-                            'expidnumberest',
-                            'expdepto_id',
-                            'expmunicipio_id',
-                            'exptipovivien_id',
-                            'expperacargo',
-                            'expingremensual',
-                            'expegremensual',
-                            'exphechos',
-                            'exprtaest',
-                            'expjuzoent',
-                            'expnumproc',
-                            'exppersondemandante',
-                            'exppersondemandada',
-                            //'exptipoactuacion',
-                            'expfechalimite',
+        'expid',
+        'expramaderecho_id',
+        'expfecha',
+        'expidnumber',
+        'expestado_id',
+        'exptipoproce_id',
+        'expfecha',
+        'expusercreated',
+        'expuserupdated',
+        'exptipocaso_id',
+        'expdesccorta',
+        'expidnumberest',
+        'expdepto_id',
+        'expmunicipio_id',
+        'exptipovivien_id',
+        'expperacargo',
+        'expingremensual',
+        'expegremensual',
+        'exphechos',
+        'exprtaest',
+        'expjuzoent',
+        'expnumproc',
+        'exppersondemandante',
+        'exppersondemandada',
+        //'exptipoactuacion',
+        'expfechalimite',
 
-                            'expidnumberdocen',
-                            'expfecha_res',
-                            //'expcierrecasocpto',
-                            'expcierrecasonotaest',
-                            'expcierrecasonotadocen'
-
-
+        'expidnumberdocen',
+        'expfecha_res',
+        //'expcierrecasocpto',
+        'expcierrecasonotaest',
+        'expcierrecasonotadocen'
 
 
 
-                            ];
+
+
+    ];
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -79,14 +79,16 @@ class Expediente extends Model
      * @var array
      */
 
-    public function __construct(){
-       // Carbon::setlocale('es');
+    public function __construct()
+    {
+        // Carbon::setlocale('es');
     }
 
-    public function conciliaciones(){
-        return $this->belongsToMany(Conciliacion::class,'conc_has_exp','exp_id','conciliacion_id')
-        ->withPivot('id','conciliacion_id','exp_id','type_status_id','user_id')->withTimestamps(); 
-     }  
+    public function conciliaciones()
+    {
+        return $this->belongsToMany(Conciliacion::class, 'conc_has_exp', 'exp_id', 'conciliacion_id')
+            ->withPivot('id', 'conciliacion_id', 'exp_id', 'type_status_id', 'user_id')->withTimestamps();
+    }
 
     public function estudiante()
     {
@@ -103,14 +105,16 @@ class Expediente extends Model
         return $this->belongsTo(User::class, 'expidnumber', 'idnumber');
     }
 
-    public function asignaciones(){
-      return $this->hasMany(AsignacionCaso::class, 'asigexp_id', 'expid');
+    public function asignaciones()
+    {
+        return $this->hasMany(AsignacionCaso::class, 'asigexp_id', 'expid');
     }
 
-     public function requerimientos(){
-      return $this->hasMany(Requerimiento::class, 'reqexpid', 'expid');
-    } 
- 
+    public function requerimientos()
+    {
+        return $this->hasMany(Requerimiento::class, 'reqexpid', 'expid');
+    }
+
     public function actuacion()
     {
         return $this->hasMany(Actuacion::class, 'actexpid', 'expid');
@@ -143,174 +147,136 @@ class Expediente extends Model
 
     public function solicitudes()
     {
-       return $this->belongsToMany(Solicitud::class,'solicitud_has_exp','exp_id')
-       ->withPivot('solicitud_id','exp_id')->withTimestamps();
-    }  
+        return $this->belongsToMany(Solicitud::class, 'solicitud_has_exp', 'exp_id')
+            ->withPivot('solicitud_id', 'exp_id')->withTimestamps();
+    }
 
-    public function sedes(){
-        return $this->belongsToMany(Sede::class,'sede_expedientes','expediente_id','sede_id')
-        ->withPivot('id','sede_id','expediente_id')->withTimestamps(); 
-     } 
+    public function sedes()
+    {
+        return $this->belongsToMany(Sede::class, 'sede_expedientes', 'expediente_id', 'sede_id')
+            ->withPivot('id', 'sede_id', 'expediente_id')->withTimestamps();
+    }
 
-  public  function asigDocente($asignacion_caso){
+    public  function asigDocente($asignacion_caso)
+    {
 
-    /*
-        $periodo = Periodo::where('estado',true)->first();
-        $asig_doc = DB::select(
-        DB::raw("SELECT `docidnumber`, COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
-         JOIN asignacion_caso ON `asignacion_docente_caso`.asig_caso_id = asignacion_caso.id
-         JOIN expedientes ON asignacion_caso.asigexp_id = expedientes.expid
-         JOIN users ON `asignacion_docente_caso`.`docidnumber` = users.idnumber
-         WHERE expedientes.exptipoproce_id = '1' AND users.active=1 AND users.active_asignacion=1 AND asignacion_caso.periodo_id = $periodo->id
-         GROUP BY `docidnumber` ORDER BY num_casos ASC
-         ")
-        );
-    */
-    $segmento = Segmento::where('estado',true)
-    ->join('sede_segmentos as sg','sg.segmento_id','=','segmentos.id')
-	->where('sg.sede_id',session('sede')->id_sede)
-    ->first();
-    $asig_doc = DB::select(
-        DB::raw("SELECT `docidnumber`, COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
-        JOIN asignacion_caso ON `asignacion_docente_caso`.asig_caso_id = asignacion_caso.id
-        JOIN expedientes ON asignacion_caso.asigexp_id = expedientes.expid
-        JOIN users ON `asignacion_docente_caso`.`docidnumber` = users.idnumber
-        JOIN periodo ON asignacion_caso.periodo_id = periodo.id
-        JOIN segmentos ON periodo.id = segmentos.perid
-        JOIN sede_usuarios ON sede_usuarios.user_id = users.id
-        WHERE expedientes.exptipoproce_id = '1' AND users.active=1
-        AND users.active_asignacion=1 AND segmentos.id = $segmento->segmento_id
-        AND sede_usuarios.sede_id = ".session('sede')->id_sede."
-        GROUP BY `docidnumber` ORDER BY num_casos ASC
-         ")
-        );
+        $segmento = Segmento::where('estado', true)
+            ->join('sede_segmentos as sg', 'sg.segmento_id', '=', 'segmentos.id')
+            ->where('sg.sede_id', session('sede')->id_sede)
+            ->first();
 
-        $docentes = DB::table('users')
-           ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
-           ->leftjoin('roles' , 'role_user.role_id','=','roles.id')
-           ->leftjoin('referencias_tablas' , 'referencias_tablas.id','=','users.cursando_id')
-           ->leftjoin('sede_usuarios','sede_usuarios.user_id','=','users.id')
-           ->leftjoin('sedes','sedes.id_sede','=','sede_usuarios.sede_id')
-           ->where ('role_id', '4' )
-           ->where ('users.active', true)
-           ->where ('users.active_asignacion', true)
-           ->where('sedes.id_sede',session('sede')->id_sede)
-           ->select('users.active','users.id','ref_nombre','users.idnumber',
-             DB::raw('CONCAT(users.name," ",users.lastname) as full_name')
-             ,'role_user.role_id', 'roles.display_name')->orderBy('users.created_at', 'desc')->get();
-          
-        if(count($docentes)>0 and count($asig_doc)>0){
 
-       
-        if(count($docentes) == count($asig_doc) ) {  
-           $asignacion = new AsigDocenteCaso();
-          $asignacion->docidnumber = $asig_doc[0]->docidnumber;
-          $asignacion->asig_caso_id = $asignacion_caso->id;
-          $asignacion->user_created_id = \Auth::user()->idnumber;
-          $asignacion->user_updated_id = \Auth::user()->idnumber;
-          $asignacion->save();
-
-        } else {
-
-          foreach ($docentes as $key => $docente) {
-          
-            $found_key = array_search($docente->idnumber, array_column($asig_doc, 'docidnumber'));
-            if($found_key===false) {
-               $asignacion = new AsigDocenteCaso();
-               $asignacion->docidnumber =  $docente->idnumber;
-               $asignacion->asig_caso_id = $asignacion_caso->id;
-               $asignacion->user_created_id = \Auth::user()->idnumber;
-               $asignacion->user_updated_id = \Auth::user()->idnumber;
-               $asignacion->save();
-              break;
-            }
-          }
-          
-        }
-    } elseif (count($docentes)>0) {
-        foreach ($docentes as $key => $docente) {   
-               $asignacion = new AsigDocenteCaso();
-               $asignacion->docidnumber =  $docente->idnumber;
-               $asignacion->asig_caso_id = $asignacion_caso->id;
-               $asignacion->user_created_id = \Auth::user()->idnumber;
-               $asignacion->user_updated_id = \Auth::user()->idnumber;
-               $asignacion->save();
-              break;
+    
             
-        }
+        $asig_doc = DB::select(
+            DB::raw("SELECT `docidnumber`, COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
+            JOIN asignacion_caso ON `asignacion_docente_caso`.asig_caso_id = asignacion_caso.id
+            JOIN expedientes ON asignacion_caso.asigexp_id = expedientes.expid
+            JOIN users ON `asignacion_docente_caso`.`docidnumber` = users.idnumber
+            JOIN periodo ON asignacion_caso.periodo_id = periodo.id
+            JOIN segmentos ON periodo.id = segmentos.perid
+            JOIN sede_usuarios ON sede_usuarios.user_id = users.id
+            WHERE expedientes.exptipoproce_id = '1' AND users.active=1
+            AND users.active_asignacion=1 AND segmentos.id = $segmento->segmento_id
+            AND sede_usuarios.sede_id = " . session('sede')->id_sede . "
+            GROUP BY `docidnumber` ORDER BY num_casos ASC
+             ")
+            );
 
-    }
-
-    }
-
-   public function asigDocenteSeguimiento($asignacion_caso,$tipoproce){
-       
-       //dd($asignacion_caso->expediente->rama_derecho->subrama);
-
-      $segmento = Segmento::where('estado',true)
-      ->join('sede_segmentos as sg','sg.segmento_id','=','segmentos.id')
-      ->where('sg.sede_id',session('sede')->id_sede)->first();
-      $asig_doc = DB::select(
-        DB::raw("SELECT `docidnumber`, COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
-        JOIN asignacion_caso ON `asignacion_docente_caso`.asig_caso_id = asignacion_caso.id
-        JOIN expedientes ON asignacion_caso.asigexp_id = expedientes.expid
-        JOIN users ON `asignacion_docente_caso`.`docidnumber` = users.idnumber
-        JOIN periodo ON asignacion_caso.periodo_id = periodo.id
-        JOIN segmentos ON periodo.id = segmentos.perid
-        JOIN sede_usuarios ON sede_usuarios.user_id = users.id
-        WHERE expedientes.exptipoproce_id = '$tipoproce' 
-        AND sede_usuarios.sede_id = ".session('sede')->id_sede."
-        AND users.active=1 AND users.active_asignacion=1 
-        AND segmentos.id = $segmento->segmento_id 
-        GROUP BY `docidnumber` ORDER BY num_casos ASC
-         ")
-        );
-
-       $subRama = $asignacion_caso->expediente->rama_derecho->subrama;  
-
-       $doceWithRama = DB::table('users')
-       ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
-       ->leftjoin('roles' , 'role_user.role_id','=','roles.id')
-       ->leftjoin('user_has_ramasderecho' , 'user_has_ramasderecho.user_id','=','users.id')
-       ->leftjoin('rama_derecho' , 'rama_derecho.id','=','ramaderecho_id')
-       ->leftjoin('sede_usuarios','sede_usuarios.user_id','=','users.id')
-       ->where ('role_id', '4' )
-       ->where ('rama_derecho.subrama', $subRama )
-       ->where ('users.active', true)
-       ->where ('users.active_asignacion', true)
-       ->where('sede_usuarios.sede_id',session('sede')->id_sede)
-       ->select('users.id','users.idnumber')
-        ->orderBy('users.created_at', 'desc')->get()->toArray();
-        //dd($doceWithRama,$asig_doc);
-
-        $arraydocentescompleto=[];
-        $casoasignado=0;
-        foreach ($doceWithRama as $key1 => $docenterama) {
-            $docexiste=0;
-            foreach ($asig_doc as $key2 => $docentecasos) { 
-               // echo $docenterama->idnumber."=".$docentecasos->docidnumber."<br>";
-                if ($docenterama->idnumber == $docentecasos->docidnumber) {
-                    $docexiste=1;
-                    $arraydocentescompleto[$docenterama->idnumber]=$docentecasos->num_casos;
+            $docentes = DB::table('users')
+                ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
+                ->leftjoin('roles', 'role_user.role_id', '=', 'roles.id')
+                ->leftjoin('referencias_tablas', 'referencias_tablas.id', '=', 'users.cursando_id')
+                ->leftjoin('sede_usuarios', 'sede_usuarios.user_id', '=', 'users.id')
+                ->leftjoin('sedes', 'sedes.id_sede', '=', 'sede_usuarios.sede_id')
+                ->where('role_id', '4')
+                ->where('users.active', true)
+                ->where('users.active_asignacion', true)
+                ->where('sedes.id_sede', session('sede')->id_sede)
+                ->select(
+                    'users.active',
+                    'users.id',
+                    'ref_nombre',
+                    'users.idnumber',
+                    DB::raw('CONCAT(users.name," ",users.lastname) as full_name'),
+                    'role_user.role_id',
+                    'roles.display_name'
+                )->orderBy('users.created_at', 'desc')->get();
+        
+      
+        if (count($docentes) > 0 and count($asig_doc) > 0) {
+            if (count($docentes) == count($asig_doc)) {
+                $asignacion = new AsigDocenteCaso();
+                $asignacion->docidnumber = $asig_doc[0]->docidnumber;
+                $asignacion->asig_caso_id = $asignacion_caso->id;
+                $asignacion->user_created_id = \Auth::user()->idnumber;
+                $asignacion->user_updated_id = \Auth::user()->idnumber;
+                $asignacion->save();
+            } else {
+                foreach ($docentes as $key => $docente) {
+                    $found_key = array_search($docente->idnumber, array_column($asig_doc, 'docidnumber'));
+                    if ($found_key === false) {
+                        $asignacion = new AsigDocenteCaso();
+                        $asignacion->docidnumber =  $docente->idnumber;
+                        $asignacion->asig_caso_id = $asignacion_caso->id;
+                        $asignacion->user_created_id = \Auth::user()->idnumber;
+                        $asignacion->user_updated_id = \Auth::user()->idnumber;
+                        $asignacion->save();
+                        break;
+                    }
                 }
             }
-           
-           if ($docexiste==0){
-                 $casoasignado=1;
-                 //dd($docenterama->idnumber,$subRama);
-                 $asignacion = new AsigDocenteCaso();
-                 $asignacion->docidnumber = $docenterama->idnumber;
-                 $asignacion->asig_caso_id = $asignacion_caso->id;
-                 $asignacion->user_created_id = \Auth::user()->idnumber;
-                 $asignacion->user_updated_id = \Auth::user()->idnumber;
-                 $asignacion->save();
-                 $asignado = true;
+        } elseif (count($docentes) > 0) {
+            foreach ($docentes as $key => $docente) {
+                $asignacion = new AsigDocenteCaso();
+                $asignacion->docidnumber =  $docente->idnumber;
+                $asignacion->asig_caso_id = $asignacion_caso->id;
+                $asignacion->user_created_id = \Auth::user()->idnumber;
+                $asignacion->user_updated_id = \Auth::user()->idnumber;
+                $asignacion->save();
                 break;
-           }
+            }
         }
-        if ($casoasignado==0) {
+    }
+
+    public function asigDocenteSeguimiento($asignacion_caso, $tipoproce)
+    {
+
+        $asig_doc = $this->getDocentesAsigByRama($tipoproce);
+
+        $subRama = $asignacion_caso->expediente->rama_derecho->subrama;
+
+        $doceWithRama = $this->getDocentesByRama($subRama);
+        //dd($doceWithRama,$asig_doc);
+
+        $arraydocentescompleto = [];
+        $casoasignado = 0;
+        foreach ($doceWithRama as $key1 => $docenterama) {
+            $docexiste = 0;
+            foreach ($asig_doc as $key2 => $docentecasos) {
+                // echo $docenterama->idnumber."=".$docentecasos->docidnumber."<br>";
+                if ($docenterama->idnumber == $docentecasos->docidnumber) {
+                    $docexiste = 1;
+                    $arraydocentescompleto[$docenterama->idnumber] = $docentecasos->num_casos;
+                }
+            }
+
+            if ($docexiste == 0) {
+                $casoasignado = 1;
+                //dd($docenterama->idnumber,$subRama);
+                $asignacion = new AsigDocenteCaso();
+                $asignacion->docidnumber = $docenterama->idnumber;
+                $asignacion->asig_caso_id = $asignacion_caso->id;
+                $asignacion->user_created_id = \Auth::user()->idnumber;
+                $asignacion->user_updated_id = \Auth::user()->idnumber;
+                $asignacion->save();
+                $asignado = true;
+                break;
+            }
+        }
+        if ($casoasignado == 0) {
             asort($arraydocentescompleto);
-            foreach ($arraydocentescompleto as $key => $numecasos) { 
+            foreach ($arraydocentescompleto as $key => $numecasos) {
                 $asignacion = new AsigDocenteCaso();
                 $asignacion->docidnumber = $key;
                 $asignacion->asig_caso_id = $asignacion_caso->id;
@@ -318,226 +284,263 @@ class Expediente extends Model
                 $asignacion->user_updated_id = \Auth::user()->idnumber;
                 $asignacion->save();
                 $asignado = true;
-            break;
+                break;
             }
-    
         }
-      
+    }
 
-    
-    }  
+    private function getDocentesByRama($rama)
+    {
+        return $doceWithRama = DB::table('users')
+            ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
+            ->leftjoin('roles', 'role_user.role_id', '=', 'roles.id')
+            ->leftjoin('user_has_ramasderecho', 'user_has_ramasderecho.user_id', '=', 'users.id')
+            ->leftjoin('rama_derecho', 'rama_derecho.id', '=', 'ramaderecho_id')
+            ->leftjoin('sede_usuarios', 'sede_usuarios.user_id', '=', 'users.id')
+            ->where('role_id', '4')
+            ->where('rama_derecho.subrama', $rama)
+            ->where('users.active', true)
+            ->where('users.active_asignacion', true)
+            ->where('sede_usuarios.sede_id', session('sede')->id_sede)
+            ->select('users.id', 'users.idnumber')
+            ->orderBy('users.created_at', 'desc')->get()->toArray();
+    }
 
-    function getDocenteAsig(){
-        $asig = $this->getAsignacion();  
+    private function getDocentesAsigByRama($tipoproce)
+    {
+        $segmento = Segmento::where('estado', true)
+            ->join('sede_segmentos as sg', 'sg.segmento_id', '=', 'segmentos.id')
+            ->where('sg.sede_id', session('sede')->id_sede)->first();
+        return $asig_doc = DB::select(
+            DB::raw("SELECT `docidnumber`, COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
+        JOIN asignacion_caso ON `asignacion_docente_caso`.asig_caso_id = asignacion_caso.id
+        JOIN expedientes ON asignacion_caso.asigexp_id = expedientes.expid
+        JOIN users ON `asignacion_docente_caso`.`docidnumber` = users.idnumber
+        JOIN periodo ON asignacion_caso.periodo_id = periodo.id
+        JOIN segmentos ON periodo.id = segmentos.perid
+        JOIN sede_usuarios ON sede_usuarios.user_id = users.id
+        WHERE expedientes.exptipoproce_id = '$tipoproce' 
+        AND sede_usuarios.sede_id = " . session('sede')->id_sede . "
+        AND users.active=1 AND users.active_asignacion=1 
+        AND segmentos.id = $segmento->segmento_id 
+        GROUP BY `docidnumber` ORDER BY num_casos ASC
+         ")
+        );
+    }
+    function getDocenteAsig()
+    {
+        $asig = $this->getAsignacion();
         // dd($asig);
         try {
-           
-            $docente = $asig->asig_docente()->where('asignacion_docente_caso.activo',1)
-            ->first()->docente; 
-            
+
+            $docente = $asig->asig_docente()->where('asignacion_docente_caso.activo', 1)
+                ->first()->docente;
+
             return  $docente;
-              } catch (\ErrorException $e) {
-                  $user = new User(); 
-                  $user->name = 'Sin asignar';
-                  $user->idnumber = 'Sin asignar';
+        } catch (\ErrorException $e) {
+            $user = new User();
+            $user->name = 'Sin asignar';
+            $user->idnumber = 'Sin asignar';
             return $user;
         }
     }
- 
-    function getAsignacion(){
-        $asig = $this->asignaciones()->where('asigest_id',$this->estudiante->idnumber)
-        ->where('activo',1)->first();   
-      
-        try {            
+
+    function getAsignacion()
+    {
+        $asig = $this->asignaciones()->where('asigest_id', $this->estudiante->idnumber)
+            ->where('activo', 1)->first();
+
+        try {
             return  $asig;
-              } catch (\ErrorException $e) {
-                 return "Error";
+        } catch (\ErrorException $e) {
+            return "Error";
         }
     }
 
-    function getDaysOrColorForClose($item='',$value=false){
-       
+    function getDaysOrColorForClose($item = '', $value = false)
+    {
+
         /* $asig = $this->asignaciones()->where('asigest_id',$this->estudiante->idnumber)
         ->where('periodo_id',$periodo->id)
-        ->orderBy('fecha_asig','desc')->first();  */  
+        ->orderBy('fecha_asig','desc')->first();  */
         $asig = $this->getAsignacion();
-        $response=[];    
+        $response = [];
         try {
-            $fecha_asig = Carbon::parse($asig->fecha_asig); 
+            $fecha_asig = Carbon::parse($asig->fecha_asig);
             $fecha_asig->addDays(31);
             $now =  Carbon::now();
-            $days = $now->diffInDays($fecha_asig,false); 
+            $days = $now->diffInDays($fecha_asig, false);
 
-            if ($days<=0) {
-                if (($days==0)){
+            if ($days <= 0) {
+                if (($days == 0)) {
                     $color = 'gray !important';
                     $days = 'Evaluado por sistema';
                     //$days = $now->diffInDays($fecha_asig,false);
-                    if($value) $days = true;
+                    if ($value) $days = true;
                 } else {
                     $color = 'gray !important';
                     $days = 'Evaluado por sistema';
                     //$days = $now->diffInDays($fecha_asig,false);
-                    if($value) $days = $days;  
+                    if ($value) $days = $days;
                 }
-            } elseif ($days>0 && $days<=10) {
+            } elseif ($days > 0 && $days <= 10) {
                 //rojo
                 $color = '#CB4335 !important';
-                if($value){
+                if ($value) {
                     $days =  $days;
-                }else{
-                    $days = $days.' Días';
-                }   
-            } elseif ($days>10 && $days<=19) {
+                } else {
+                    $days = $days . ' Días';
+                }
+            } elseif ($days > 10 && $days <= 19) {
                 //amarillo
                 $color = '#F4D03F !important';
-                    
-                if($value){
+
+                if ($value) {
                     $days =  $days;
-                }else{
-                    $days = $days.' Días';
-                } 
-            } elseif ($days>19) {
-                if ($days<=30) {
+                } else {
+                    $days = $days . ' Días';
+                }
+            } elseif ($days > 19) {
+                if ($days <= 30) {
                     //naranja
                     $color = '#2ECC71 !important';
-                    if($value){
+                    if ($value) {
                         $days =  $days;
-                    }else{
-                        $days = $days.' Días';
-                    } 
+                    } else {
+                        $days = $days . ' Días';
+                    }
                 } else {
                     $color = '#2ECC71 !important';
-                    if($value){
-                     $days =  30;
-                    }else{
-                     $days = '30 Días';
-                    }  
+                    if ($value) {
+                        $days =  30;
+                    } else {
+                        $days = '30 Días';
+                    }
                 }
-
             }
-            
-              
 
-        
-        if($item=='color') return $color;
-        if($item=='dias')  return $days;
-        return  'Función sin argumento';
-              } catch (\ErrorException $e) {                  
-           return  'Error';
+
+
+
+            if ($item == 'color') return $color;
+            if ($item == 'dias')  return $days;
+            return  'Función sin argumento';
+        } catch (\ErrorException $e) {
+            return  'Error';
         }
     }
 
-    function getActuacions($expid){
+    function getActuacions($expid)
+    {
 
         $acts = DB::table('actuacions')
-        ->join('revisiones_actuacion as rv','rv.rev_actid','=','actuacions.id')
-        ->join('expedientes','expedientes.expid','=','actuacions.actexpid')
-        ->select(
-         DB::raw('SUM(if(parent_rev_actid = rv.rev_actid, 1, 0)) AS padre'),
-         DB::raw('SUM(if(actestado_id="138" OR actestado_id="136", if(parent_rev_actid = rv.rev_actid, 1, 0), if(actestado_id="104" OR actestado_id="139", 1, 0))) AS aprobado'),
-         DB::raw('SUM(if(actestado_id="101", 1, 0)) AS pendiente'),
-         DB::raw('SUM(if(actestado_id="102", if(DATEDIFF(`fecha_limit`, now())>0 AND DATEDIFF(`fecha_limit`, now())<3, 1, 0), if(actestado_id="140", if(DATEDIFF(`fecha_limit`, now())>0 AND DATEDIFF(`fecha_limit`,now())<3, 1, 0), 0))) AS time
+            ->join('revisiones_actuacion as rv', 'rv.rev_actid', '=', 'actuacions.id')
+            ->join('expedientes', 'expedientes.expid', '=', 'actuacions.actexpid')
+            ->select(
+                DB::raw('SUM(if(parent_rev_actid = rv.rev_actid, 1, 0)) AS padre'),
+                DB::raw('SUM(if(actestado_id="138" OR actestado_id="136", if(parent_rev_actid = rv.rev_actid, 1, 0), if(actestado_id="104" OR actestado_id="139", 1, 0))) AS aprobado'),
+                DB::raw('SUM(if(actestado_id="101", 1, 0)) AS pendiente'),
+                DB::raw('SUM(if(actestado_id="102", if(DATEDIFF(`fecha_limit`, now())>0 AND DATEDIFF(`fecha_limit`, now())<3, 1, 0), if(actestado_id="140", if(DATEDIFF(`fecha_limit`, now())>0 AND DATEDIFF(`fecha_limit`,now())<3, 1, 0), 0))) AS time
          ')
-      )
-        ->where(['actuacions.actexpid'=>$expid, ])
-        ->whereRaw('expedientes.expidnumberest = actuacions.actidnumberest')
-        ->first();
-  
-          $circle=[];
-      if ($acts->padre > $acts->aprobado AND $acts->pendiente == 0) {
-         if ($acts->time > 0) {
-          $circle=[0=>'circle-red',1=>'Correciones por vencerse'];
-          return $circle;
-         // return 'circle-red';
-         }
-       }
-  
-  
-       if ($acts->pendiente > 0) {
-         if (\Auth::user()->hasRole('estudiante') ){
-          $var=$acts->aprobado+$acts->pendiente;
-          
-          if ($acts->padre > $var) {
-              $circle=[0=>'circle-black',1=>'Corregir estudiante'];
-              return $circle;
-              //return 'circle-black';
+            )
+            ->where(['actuacions.actexpid' => $expid,])
+            ->whereRaw('expedientes.expidnumberest = actuacions.actidnumberest')
+            ->first();
+
+        $circle = [];
+        if ($acts->padre > $acts->aprobado and $acts->pendiente == 0) {
+            if ($acts->time > 0) {
+                $circle = [0 => 'circle-red', 1 => 'Correciones por vencerse'];
+                return $circle;
+                // return 'circle-red';
             }
-         }
-         $circle=[0=>'circle-white',1=>'Revisar docente'];
-         return $circle;
-         //return 'circle-white';
-       }
-  
-       if ($acts->padre > $acts->aprobado) {
-          $circle=[0=>'circle-black',1=>'Corregir estudiante'];
-          return $circle;
-         //return 'circle-black';
-       }
-       $circle=[0=>'circle-none',1=>''];
-       return $circle;
-       //return 'circle-none';
-      } 
-
-    public function verifyNotReq($date=null){
-
-        if($date==null){
-            $date = Carbon::now();
-            $date = $date->subDays(15);          
-            $date = $date->format('Y-m-d');     
         }
-        $reqs =  DB::table('requerimientos')         
-        ->where(
-            ['evaluado'=>false,
-            'reqidest'=>$this->expidnumberest,
-            'reqexpid'=>$this->expid,
-            ['reqfecha','<=',$date]
-            ]
-        )
-        ->select('requerimientos.id')        
-        ->get();
 
-        return $reqs;
 
+        if ($acts->pendiente > 0) {
+            if (\Auth::user()->hasRole('estudiante')) {
+                $var = $acts->aprobado + $acts->pendiente;
+
+                if ($acts->padre > $var) {
+                    $circle = [0 => 'circle-black', 1 => 'Corregir estudiante'];
+                    return $circle;
+                    //return 'circle-black';
+                }
+            }
+            $circle = [0 => 'circle-white', 1 => 'Revisar docente'];
+            return $circle;
+            //return 'circle-white';
+        }
+
+        if ($acts->padre > $acts->aprobado) {
+            $circle = [0 => 'circle-black', 1 => 'Corregir estudiante'];
+            return $circle;
+            //return 'circle-black';
+        }
+        $circle = [0 => 'circle-none', 1 => ''];
+        return $circle;
+        //return 'circle-none';
     }
 
-    public function verifyNotAct($date=null){ 
-         $padresAct = DB::table('actuacions')
-         ->join('revisiones_actuacion','actuacions.id','=','revisiones_actuacion.parent_rev_actid') 
-         ->where([
-             ['actestado_id','<>','136'],
-             ['actestado_id','<>','138'],
-             ['actestado_id','<>','139'], 
-             ['actidnumberest',$this->expidnumberest] ,
-             ['actexpid',$this->expid]
-         ])
-         ->select('actuacions.id') 
-         ->groupBy('actuacions.id')
-         ->get();
+    public function verifyNotReq($date = null)
+    {
 
-        $hijos=[];
-        foreach ($padresAct as $key => $actpa) {  
-            if($date==null){
+        if ($date == null) {
+            $date = Carbon::now();
+            $date = $date->subDays(15);
+            $date = $date->format('Y-m-d');
+        }
+        $reqs =  DB::table('requerimientos')
+            ->where(
+                [
+                    'evaluado' => false,
+                    'reqidest' => $this->expidnumberest,
+                    'reqexpid' => $this->expid,
+                    ['reqfecha', '<=', $date]
+                ]
+            )
+            ->select('requerimientos.id')
+            ->get();
+
+        return $reqs;
+    }
+
+    public function verifyNotAct($date = null)
+    {
+        $padresAct = DB::table('actuacions')
+            ->join('revisiones_actuacion', 'actuacions.id', '=', 'revisiones_actuacion.parent_rev_actid')
+            ->where([
+                ['actestado_id', '<>', '136'],
+                ['actestado_id', '<>', '138'],
+                ['actestado_id', '<>', '139'],
+                ['actidnumberest', $this->expidnumberest],
+                ['actexpid', $this->expid]
+            ])
+            ->select('actuacions.id')
+            ->groupBy('actuacions.id')
+            ->get();
+
+        $hijos = [];
+        foreach ($padresAct as $key => $actpa) {
+            if ($date == null) {
                 $date = Carbon::now();
-                $date = $date->subDays(15);          
-                $date = $date->format('Y-m-d');   
-            }      
-          
-        $hijosAct = DB::select(DB::raw("SELECT rev_actid, actestado_id, actuacions.actfecha,actnombre FROM actuacions, revisiones_actuacion
+                $date = $date->subDays(15);
+                $date = $date->format('Y-m-d');
+            }
+
+            $hijosAct = DB::select(DB::raw("SELECT rev_actid, actestado_id, actuacions.actfecha,actnombre FROM actuacions, revisiones_actuacion
         WHERE actuacions.id = revisiones_actuacion.rev_actid
         AND parent_rev_actid = $actpa->id          
         AND actestado_id <> 136 AND actestado_id <> 138
         ORDER BY rev_actid DESC LIMIT 1"));
-        
-       
-        if(count($hijosAct)>0 and $hijosAct[0]->actestado_id!=104 and $hijosAct[0]->actestado_id!=139 and $hijosAct[0]->actfecha <= $date and $hijosAct[0]->actfecha >= '2018-08-21' )   $hijos[]= $hijosAct;
-                  
 
-         }
+
+            if (count($hijosAct) > 0 and $hijosAct[0]->actestado_id != 104 and $hijosAct[0]->actestado_id != 139 and $hijosAct[0]->actfecha <= $date and $hijosAct[0]->actfecha >= '2018-08-21')   $hijos[] = $hijosAct;
+        }
         // dd($hijos);  
-         return $hijos;
+        return $hijos;
 
-       /*  SELECT actuacions.`id` FROM actuacions, revisiones_actuacion
+        /*  SELECT actuacions.`id` FROM actuacions, revisiones_actuacion
         WHERE
          actuacions.`id`= revisiones_actuacion.`parent_rev_actid` AND `actexpid` = '2019B-1'
           AND  `actidnumberest` = ''
@@ -551,7 +554,7 @@ class Expediente extends Model
            AND  `actidnumberest` = ''
          */
 
-         /* SELECT rev_actid, actestado_id FROM actuacions, revisiones_actuacion
+        /* SELECT rev_actid, actestado_id FROM actuacions, revisiones_actuacion
          WHERE actuacions.`id`= revisiones_actuacion.`rev_actid` AND parent_rev_actid = '8682'
          ORDER BY rev_actid DESC LIMIT 1
         
@@ -560,140 +563,133 @@ class Expediente extends Model
            AND parent_rev_actid = '8682' 
            AND actestado_id <> '136' AND actestado_id <> '138'
             ORDER BY rev_actid DESC LIMIT 1 */
-
-
-       
     }
 
-    public function  setNotActLimit($date=null){
+    public function  setNotActLimit($date = null)
+    {
         $padresAct = DB::table('actuacions')
-         ->join('revisiones_actuacion','actuacions.id','=','revisiones_actuacion.parent_rev_actid') 
-         ->where([
-             ['actestado_id','<>','136'],
-             ['actestado_id','<>','138'],
-             ['actestado_id','<>','139'], 
-             ['actestado_id','<>','174'],
-             ['actestado_id','<>','175'], 
-             ['actestado_id','<>','176'], 
-             ['actestado_id','<>','177'], 
-             ['actestado_id','<>','178'], 
-             ['actidnumberest',$this->expidnumberest] ,
-             ['actexpid',$this->expid]
-         ])
-         ->select('actuacions.id') 
-         ->groupBy('actuacions.id')
-         ->get();
+            ->join('revisiones_actuacion', 'actuacions.id', '=', 'revisiones_actuacion.parent_rev_actid')
+            ->where([
+                ['actestado_id', '<>', '136'],
+                ['actestado_id', '<>', '138'],
+                ['actestado_id', '<>', '139'],
+                ['actestado_id', '<>', '174'],
+                ['actestado_id', '<>', '175'],
+                ['actestado_id', '<>', '176'],
+                ['actestado_id', '<>', '177'],
+                ['actestado_id', '<>', '178'],
+                ['actidnumberest', $this->expidnumberest],
+                ['actexpid', $this->expid]
+            ])
+            ->select('actuacions.id')
+            ->groupBy('actuacions.id')
+            ->get();
 
-        $hijos=[];
-        $segmento = Segmento::join('sede_segmentos as sg','sg.segmento_id','=','segmentos.id')			
-        ->where('sg.sede_id',session('sede')->id_sede)
-        ->where('estado',true)->first();
-         if(count($padresAct)>0){
-            foreach ($padresAct as $key => $actpa) {     
+        $hijos = [];
+        $segmento = Segmento::join('sede_segmentos as sg', 'sg.segmento_id', '=', 'segmentos.id')
+            ->where('sg.sede_id', session('sede')->id_sede)
+            ->where('estado', true)->first();
+        if (count($padresAct) > 0) {
+            foreach ($padresAct as $key => $actpa) {
                 $hijosAct = DB::select(DB::raw("SELECT rev_actid, actestado_id, actuacions.actfecha,actnombre,fecha_limit FROM actuacions, revisiones_actuacion
                 WHERE actuacions.id = revisiones_actuacion.rev_actid
                 AND parent_rev_actid = $actpa->id          
                 AND actestado_id <> 136 AND actestado_id <> 138
                 ORDER BY rev_actid DESC LIMIT 1"));
-                if($hijosAct[0]->fecha_limit!==null){
+                if ($hijosAct[0]->fecha_limit !== null) {
                     $percent = 100;
-                    $date = Carbon::now()->format('Y-m-d');           
-                    $fecha_limit = Carbon::parse($hijosAct[0]->fecha_limit);              
-                    if(count($hijosAct)>0 and $hijosAct[0]->actestado_id!=104 and $hijosAct[0]->actestado_id!=101  and $hijosAct[0]->actestado_id!=139 and $hijosAct[0]->fecha_limit!==null and $fecha_limit <  $date)  {
-                       
-                        $hijos[]= $hijosAct; 
-                       // dd( $date.'---'.$fecha_limit);
-                        $actuacion = Actuacion::find($hijosAct[0]->rev_actid);
-                         $data = [
-                            'ntaaplicacion'=>0,
-                            'ntaconocimiento'=>0,
-                            'ntaetica'=>0,
-                            'ntaconcepto'=>'Evaluado por sistema (fecha límite vencida)',
-                            'orgntsid'=>2,
-                            'segid'=>$segmento->segmento_id,
-                            'perid'=>$segmento->perid,
-                            'tpntid'=>1,
-                            'expidnumber'=>$actuacion->actexpid,
-                            'estidnumber'=>$actuacion->actidnumberest,
-                            'docidnumber'=>\Auth::user()->idnumber,
-                            'tbl_org_id'=>$actuacion->id,
-                          ];
-                          $actuacion->actestado_id = 139; 
-                          $actuacion->save();
-                          $actuacion->asignarNotas($data);         
-                        
-                    } 
-                }                
-        
-                 }
+                    $date = Carbon::now()->format('Y-m-d');
+                    $fecha_limit = Carbon::parse($hijosAct[0]->fecha_limit);
+                    if (count($hijosAct) > 0 and $hijosAct[0]->actestado_id != 104 and $hijosAct[0]->actestado_id != 101  and $hijosAct[0]->actestado_id != 139 and $hijosAct[0]->fecha_limit !== null and $fecha_limit <  $date) {
 
-         }  
+                        $hijos[] = $hijosAct;
+                        // dd( $date.'---'.$fecha_limit);
+                        $actuacion = Actuacion::find($hijosAct[0]->rev_actid);
+                        $data = [
+                            'ntaaplicacion' => 0,
+                            'ntaconocimiento' => 0,
+                            'ntaetica' => 0,
+                            'ntaconcepto' => 'Evaluado por sistema (fecha límite vencida)',
+                            'orgntsid' => 2,
+                            'segid' => $segmento->segmento_id,
+                            'perid' => $segmento->perid,
+                            'tpntid' => 1,
+                            'expidnumber' => $actuacion->actexpid,
+                            'estidnumber' => $actuacion->actidnumberest,
+                            'docidnumber' => \Auth::user()->idnumber,
+                            'tbl_org_id' => $actuacion->id,
+                        ];
+                        $actuacion->actestado_id = 139;
+                        $actuacion->save();
+                        $actuacion->asignarNotas($data);
+                    }
+                }
+            }
+        }
         // dd($hijos);
-       // return $hijos;
+        // return $hijos;
     }
 
-    public function scopeCriterio($query ,$data,$criterio,$search_all_exp=false)
+    public function scopeCriterio($query, $data, $criterio, $search_all_exp = false)
     {
-           if (trim($data) != '')
-        {
-                    switch ($criterio) { 
+        if (trim($data) != '') {
+            switch ($criterio) {
                 case 'codido_exp':
-                   return $query->where('expid','like', "%".$data); 
+                    return $query->where('expid', 'like', "%" . $data);
                     break;
                 case 'estudiante':
                 case 'estudiante_num':
-                    return $query->Orwhere(['expidnumberest'=>$data, 'expidnumber'=> $data]); 
+                    return $query->Orwhere(['expidnumberest' => $data, 'expidnumber' => $data]);
                     break;
                 case 'idnumber_doc':
-                    return $query->where('asignacion_docente_caso.docidnumber',$data); 
+                    return $query->where('asignacion_docente_caso.docidnumber', $data);
                     break;
                 case 'consultante':
                 case 'consultante_num':
                     //return $query->where('expidnumber', $data); 
-                    return $query->Orwhere(['expidnumberest'=>$data, 'expidnumber'=> $data]); 
-                   
+                    return $query->Orwhere(['expidnumberest' => $data, 'expidnumber' => $data]);
+
                     break;
                 case 'estado':
-                    return $query->where('expestado_id', $data); 
+                    return $query->where('expestado_id', $data);
                     break;
                 case 'tipo_consulta':
-                    return $query->where('exptipoproce_id', $data);  
-                    break; 
+                    return $query->where('exptipoproce_id', $data);
+                    break;
                 case 'fecha_creacion':
-                    return $query->where('expfecha', $data); 
-                    break; 
+                    return $query->where('expfecha', $data);
+                    break;
                 case 'rama_derecho':
-                    return $query->where('expramaderecho_id', $data); 
-                    break; 
+                    return $query->where('expramaderecho_id', $data);
+                    break;
                 case 'color':
-               
-                $now =  Carbon::now();
-                $now2 =  Carbon::now();
-                
 
-                if($data=='green') {
-                    return $query->where('exptipoproce_id', 1)
-                    ->where('expedientes.expestado_id','!=', 2)
-                    ->where('asignacion_caso.fecha_asig','>=',$now->subDays(11));
-                } elseif($data=='amarillo') {
-                    return $query->where('exptipoproce_id', 1)
-                    ->where('expedientes.expestado_id','!=', 2)
-                    ->whereBetween('asignacion_caso.fecha_asig', array($now->subDays(20), $now2->subDays(11)));
-                } elseif($data=='rojo') {
-                    return $query->where('exptipoproce_id', 1)
-                    ->where('expedientes.expestado_id','!=', 2)
-                    ->whereBetween('asignacion_caso.fecha_asig', array($now->subDays(30), $now2->subDays(20)));
-                  
-                } elseif($data=='gris') {
-                    return $query->where('exptipoproce_id', 1)
-                    ->where('expedientes.expestado_id','!=', 2)
-                    ->where('asignacion_caso.fecha_asig','<=',$now->subDays(30));
-                   }                    
-            break; 
-            }           
+                    $now =  Carbon::now();
+                    $now2 =  Carbon::now();
+
+
+                    if ($data == 'green') {
+                        return $query->where('exptipoproce_id', 1)
+                            ->where('expedientes.expestado_id', '!=', 2)
+                            ->where('asignacion_caso.fecha_asig', '>=', $now->subDays(11));
+                    } elseif ($data == 'amarillo') {
+                        return $query->where('exptipoproce_id', 1)
+                            ->where('expedientes.expestado_id', '!=', 2)
+                            ->whereBetween('asignacion_caso.fecha_asig', array($now->subDays(20), $now2->subDays(11)));
+                    } elseif ($data == 'rojo') {
+                        return $query->where('exptipoproce_id', 1)
+                            ->where('expedientes.expestado_id', '!=', 2)
+                            ->whereBetween('asignacion_caso.fecha_asig', array($now->subDays(30), $now2->subDays(20)));
+                    } elseif ($data == 'gris') {
+                        return $query->where('exptipoproce_id', 1)
+                            ->where('expedientes.expestado_id', '!=', 2)
+                            ->where('asignacion_caso.fecha_asig', '<=', $now->subDays(30));
+                    }
+                    break;
+            }
             //dd($criterio);
             //$query->where('expid', $criterio);
-              /*$query->where(function ($queryor)use ($data,$criterio) {
+            /*$query->where(function ($queryor)use ($data,$criterio) {
 
 
                 $queryor->orwhere('expid','=', $criterio)
@@ -703,217 +699,203 @@ class Expediente extends Model
                       ->orwhere('expestado','=', $criterio)
                       ->orwhere('expfecha','=', $criterio);
             });*/
-            
         }
-
     }
 
- public function scopeCrit($query, $criterio,$value)
+    public function scopeCrit($query, $criterio, $value)
     {
-           if (trim($criterio) != '')
-        {
-           // dd($value);
+        if (trim($criterio) != '') {
+            // dd($value);
             //$query->where('expid', $criterio);
-              $query->where(function ($queryor)use ($criterio,$value) {
-                $queryor->orwhere($value,'=', $criterio);
-                      //->orwhere('expidnumber','=', $criterio)
-                      //->orwhere('expidnumberest','=', $criterio)
-                      //->orwhere('exptipoproce','=', $criterio);
+            $query->where(function ($queryor) use ($criterio, $value) {
+                $queryor->orwhere($value, '=', $criterio);
+                //->orwhere('expidnumber','=', $criterio)
+                //->orwhere('expidnumberest','=', $criterio)
+                //->orwhere('exptipoproce','=', $criterio);
             });
-
         }
-
     }
 
-        public function scopeRangoFechas($query, $fechaini, $fechafin)
+    public function scopeRangoFechas($query, $fechaini, $fechafin)
     {
 
 
 
-            if ($fechaini<>'' and $fechafin <>''){
-                $query->whereBetween('asignacion_caso.created_at', array($fechaini, $fechafin))->get();
+        if ($fechaini <> '' and $fechafin <> '') {
+            $query->whereBetween('asignacion_caso.created_at', array($fechaini, $fechafin))->get();
+        }
+    }
+
+    function getIds()
+    {
+        $ids = substr($this->expid, 6);
+        $id = strlen($ids);
+
+        $ind = ($id) + 1;
+        $letra = substr($this->expid, 4, -$ind);
+        if ($letra == 'B') {
+            return $ids;
+        }
+    }
+    function getId($ids)
+    {
+        $year = date('Y');
+        $id = max($ids);
+        $oldYear = substr($this->expid, 0, -6);
+        dd($oldYear);
+        if ($oldYear != $year) {
+            $id = 0;
+        }
+        //dd($id);
+        $id_f = $year . "B-" . ($id + 1);
+        return $id_f;
+    }
+
+
+
+    function get_nota_prov($concepto)
+    {
+
+        $notas = $this->notas()->where(['orgntsid' => 1])->get();
+
+        $periodo = Periodo::join('sede_periodos as sp', 'sp.periodo_id', '=', 'periodo.id')
+            ->where('sp.sede_id', session('sede')->id_sede)
+            ->where('estado', true)->first();
+        $n_conocimiento = [];
+        $n_etica = [];
+        $n_aplicacion = [];
+
+        if ($periodo) {
+            foreach ($notas as $key => $nota) {
+                if ($nota->perid == $periodo->id) {
+
+                    //Provisionales
+                    if ($nota->orgntsid == 1 and $nota->tpntid == 2) {
+                        // echo $nota->nota."<br>";
+                        //echo $nota->segmento->segnombre."<br>";
+                        if ($nota->cptnotaid == 1 and $nota->estidnumber == $this->expidnumberest) {
+                            $n_conocimiento[] = [
+                                'nota' => $nota->nota,
+                                'id' => $nota->id,
+                            ];
+                        }
+                        if ($nota->cptnotaid == 2 and $nota->estidnumber == $this->expidnumberest) {
+                            $n_aplicacion[] =  [
+                                'nota' => $nota->nota,
+                                'id' => $nota->id,
+                            ];
+                        }
+                        if ($nota->cptnotaid == 3 and $nota->estidnumber == $this->expidnumberest) {
+                            $n_etica[] =  [
+                                'nota' => $nota->nota,
+                                'id' => $nota->id,
+                            ];
+                        }
+                    }
+                }
             }
 
-    } 
+            switch ($concepto) {
+                case 'conocimiento':
+                    $promedio = $this->get_promedio($n_conocimiento);
 
-    function getIds(){
-         $ids = substr($this->expid,6);
-         $id = strlen($ids);
+                    break;
+                case 'aplicacion':
+                    $promedio = $this->get_promedio($n_aplicacion);
+                    break;
+                case 'etica':
+                    $promedio = $this->get_promedio($n_etica);
+                    break;
+                case 'final':
+                    $promedio1 = $this->get_promedio($n_etica);
+                    $promedio2 = $this->get_promedio($n_aplicacion);
+                    $promedio3 = $this->get_promedio($n_conocimiento);
+                    $final = [];
+                    $final[] = ['nota' => $promedio1];
+                    $final[] = ['nota' => $promedio2];
+                    $final[] = ['nota' => $promedio3];
 
-         $ind = ($id) +1;
-         $letra = substr($this->expid,4,-$ind);        
-         if ($letra=='B') {
-              return $ids;
-         }      
+                    $promedio = $this->get_promedio($final);
 
-    }
-    function getId($ids){  
-        $year = date('Y');
-         $id = max($ids);
-         $oldYear = substr($this->expid,0,-6);
-         dd($oldYear);
-         if ($oldYear != $year) {
-          $id=0; 
-         }
-         //dd($id);
-         $id_f = $year."B-".($id +1);
-         return $id_f;
-    } 
-
-  
-
-function get_nota_prov($concepto){
-
-    $notas = $this->notas()->where(['orgntsid'=>1])->get();
-
-    $periodo = Periodo::join('sede_periodos as sp','sp.periodo_id','=','periodo.id')
-    ->where('sp.sede_id',session('sede')->id_sede)
-    ->where('estado',true)->first();
-    $n_conocimiento = [];
-    $n_etica = [];
-    $n_aplicacion = [];
-
-    if ($periodo) {
-        foreach ($notas as $key => $nota) {
-          if ($nota->perid==$periodo->id) {
-
-            //Provisionales
-          if ($nota->orgntsid==1 and $nota->tpntid==2) {
-              // echo $nota->nota."<br>";
-               //echo $nota->segmento->segnombre."<br>";
-               if ($nota->cptnotaid==1 and $nota->estidnumber==$this->expidnumberest){
-                    $n_conocimiento[] = [
-                    'nota'=>$nota->nota,
-                    'id'=> $nota->id,
-                ];
-                   
-
-               } 
-               if ($nota->cptnotaid==2 and $nota->estidnumber==$this->expidnumberest){
-                $n_aplicacion[] =  [
-                    'nota'=>$nota->nota,
-                    'id'=> $nota->id,
-                ];
-               } 
-               if ($nota->cptnotaid==3 and $nota->estidnumber==$this->expidnumberest){
-                $n_etica[] =  [
-                    'nota'=>$nota->nota,
-                    'id'=> $nota->id,
-                ];
-               } 
-
-              }           
-          }         
-          
-        }
-      
-        switch ($concepto) {
-            case 'conocimiento':
-                 $promedio = $this->get_promedio($n_conocimiento);           
-
-                break;
-            case 'aplicacion':
-                $promedio = $this->get_promedio($n_aplicacion);
-                break;
-            case 'etica':
-               $promedio = $this->get_promedio($n_etica);
-                break; 
-            case 'final':
-                $promedio1 = $this->get_promedio($n_etica);
-                $promedio2 = $this->get_promedio($n_aplicacion);
-                $promedio3 = $this->get_promedio($n_conocimiento);
-                $final = []; 
-                $final[] = ['nota'=>$promedio1];
-                $final[] = ['nota'=>$promedio2];
-                $final[] = ['nota'=>$promedio3];
-
-               $promedio = $this->get_promedio($final);
-                
-                break;            
-                       
-        }
-        $response = [
-                    'promedio'=>$promedio,
-                    'id'=>00
-        ];
-        return $response;
-      //  echo "$promedio";
-
-
-    }
-    return 0;
-
-     
-
-       
-    }
-
-
-
-function get_notas_caso($periodo=null){
-    //obtiene las notas de totales del caso//en todos los segmentos
-    $periodo = Periodo::join('sede_periodos as sp','sp.periodo_id','=','periodo.id')
-    ->where('sp.sede_id',session('sede')->id_sede)
-    ->where('estado',true)->first();
-    $segmentos = Segmento::join('sede_segmentos as sg','sg.segmento_id','=','segmentos.id')			
-    ->where('sg.sede_id',session('sede')->id_sede)
-    ->where('perid',$periodo->periodo_id)->get();
-    $notas = [];
-  //  dd($segmentos);
-    foreach ($segmentos as $key => $segmento) {
-        //dd($segmento);
-        if( $segmento->fecha_fin >= $this->expfecha || $segmento->estado  ){
-        $nota_conocimiento = $this->get_nota_corte('conocimiento',$segmento->segmento_id);
-        $nota_concepto = $this->get_nota_corte('concepto',$segmento->segmento_id);
-        $nota_aplicacion = $this->get_nota_corte('aplicacion',$segmento->segmento_id);
-        $nota_etica = $this->get_nota_corte('etica',$segmento->segmento_id);
-        $nota_final = $this->get_nota_corte('final',$segmento->segmento_id);
-        //$tipo_nota = $segmento->
-        $notas[]=[
-            'segmento_id'=>$segmento->segmento_id,
-            'segmento'=>$segmento->segnombre, 
-            'nota_conocimiento'=>$nota_conocimiento, 
-            'nota_aplicacion'=>$nota_aplicacion,
-            'nota_etica'=>$nota_etica,
-            'nota_final'=>$nota_final,
-            'nota_concepto'=>$nota_concepto
+                    break;
+            }
+            $response = [
+                'promedio' => $promedio,
+                'id' => 00
             ];
+            return $response;
+            //  echo "$promedio";
+
+
         }
-        
-        
+        return 0;
     }
-    //dd($segmentos);
-    return $notas;
 
-}
 
-public function get_has_nota_final(){
-    $nota_f = [];
-    $notas = $this->get_notas_caso();    
-    if(count($notas)>0){
-        foreach ($notas as $key => $nota) {           
-            if(count($nota['nota_etica'])>0){
-                if($nota['nota_etica']['tipo_id']==1){
-                    $nota_f = $nota;
-                    return $nota_f; 
+
+    function get_notas_caso($periodo = null)
+    {
+        //obtiene las notas de totales del caso//en todos los segmentos
+        $periodo = Periodo::join('sede_periodos as sp', 'sp.periodo_id', '=', 'periodo.id')
+            ->where('sp.sede_id', session('sede')->id_sede)
+            ->where('estado', true)->first();
+        $segmentos = Segmento::join('sede_segmentos as sg', 'sg.segmento_id', '=', 'segmentos.id')
+            ->where('sg.sede_id', session('sede')->id_sede)
+            ->where('perid', $periodo->periodo_id)->get();
+        $notas = [];
+        //  dd($segmentos);
+        foreach ($segmentos as $key => $segmento) {
+            //dd($segmento);
+            if ($segmento->fecha_fin >= $this->expfecha || $segmento->estado) {
+                $nota_conocimiento = $this->get_nota_corte('conocimiento', $segmento->segmento_id);
+                $nota_concepto = $this->get_nota_corte('concepto', $segmento->segmento_id);
+                $nota_aplicacion = $this->get_nota_corte('aplicacion', $segmento->segmento_id);
+                $nota_etica = $this->get_nota_corte('etica', $segmento->segmento_id);
+                $nota_final = $this->get_nota_corte('final', $segmento->segmento_id);
+                //$tipo_nota = $segmento->
+                $notas[] = [
+                    'segmento_id' => $segmento->segmento_id,
+                    'segmento' => $segmento->segnombre,
+                    'nota_conocimiento' => $nota_conocimiento,
+                    'nota_aplicacion' => $nota_aplicacion,
+                    'nota_etica' => $nota_etica,
+                    'nota_final' => $nota_final,
+                    'nota_concepto' => $nota_concepto
+                ];
+            }
+        }
+        //dd($segmentos);
+        return $notas;
+    }
+
+    public function get_has_nota_final()
+    {
+        $nota_f = [];
+        $notas = $this->get_notas_caso();
+        if (count($notas) > 0) {
+            foreach ($notas as $key => $nota) {
+                if (count($nota['nota_etica']) > 0) {
+                    if ($nota['nota_etica']['tipo_id'] == 1) {
+                        $nota_f = $nota;
+                        return $nota_f;
+                    }
                 }
-                
-            }            
-         } 
-    }       
-    return $nota_f; 
-}
-    
-///Eventos
-    public static function boot(){  
+            }
+        }
+        return $nota_f;
+    }
+
+    ///Eventos
+    public static function boot()
+    {
         parent::boot();
 
-        static::updated(function($service_request){
-          //dd($service_request);
-                Event::fire('expediente.updated',$service_request);
+        static::updated(function ($service_request) {
+            //dd($service_request);
+            Event::fire('expediente.updated', $service_request);
         });
 
-       /* static::updated(function($service_request){
+        /* static::updated(function($service_request){
                 Event::fire('nat_general_request.updated',$service_request);
         });
 
@@ -922,44 +904,37 @@ public function get_has_nota_final(){
         });*/
     }
     //////////////////////////
-    public function difDays($fecha_ini,$fecha_fin)
+    public function difDays($fecha_ini, $fecha_fin)
     {
-       $fecha_ini=Carbon::parse($fecha_ini);
-        return $fecha_ini->diffInDays($fecha_fin,false); 
+        $fecha_ini = Carbon::parse($fecha_ini);
+        return $fecha_ini->diffInDays($fecha_fin, false);
     }
     public function fechaHistorialDatosCaso($tipo)
-    { 
-        $historial = HistorialDatosCaso::where('hisdc_expidnumber',$this->expid)
-        ->where('hisdc_tipo_datos_caso',$tipo)
-        ->orderBy('id', 'DESC')
-        ->first();
+    {
+        $historial = HistorialDatosCaso::where('hisdc_expidnumber', $this->expid)
+            ->where('hisdc_tipo_datos_caso', $tipo)
+            ->orderBy('id', 'DESC')
+            ->first();
         if ($historial) {
-            $his_fecha=$historial->created_at;
-            $his_fecha=$his_fecha->format('d-m-Y');
+            $his_fecha = $historial->created_at;
+            $his_fecha = $his_fecha->format('d-m-Y');
             return $his_fecha;
-        } 
+        }
         return false;
-
-
-        
     }
     public function fechaVigente($fecha_db)
-    { 
-        $meses=["","Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-        $dias=["","Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"];
+    {
+        $meses = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        $dias = ["", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
 
         $now =  Carbon::now();
         $now = $now->format('d-m-Y');
-        $fecha_db=Carbon::parse($fecha_db);
-        $fecha2_db=$fecha_db;
-        $fecha_db =$fecha_db->format('d-m-Y');
-        if ($now<$fecha_db) {
-            return $dias[$fecha2_db->dayOfWeek].", ".$fecha2_db->day." de ".$meses[$fecha2_db->month]." del ".$fecha2_db->year;
+        $fecha_db = Carbon::parse($fecha_db);
+        $fecha2_db = $fecha_db;
+        $fecha_db = $fecha_db->format('d-m-Y');
+        if ($now < $fecha_db) {
+            return $dias[$fecha2_db->dayOfWeek] . ", " . $fecha2_db->day . " de " . $meses[$fecha2_db->month] . " del " . $fecha2_db->year;
         }
-            return false;
-              
-
-
-        
+        return false;
     }
 }

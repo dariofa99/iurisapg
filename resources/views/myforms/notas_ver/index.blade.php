@@ -43,15 +43,25 @@ Notas
                 <option @if(Request::has('origen') and Request::get('origen')=='conciliaciones') selected @endif value="conciliaciones">Conciliaciones</option>
                 
             </select>   
-    </div>   
+    </div>  
+    <div class="col-md-2">  
+        Periodo:  
+            <select class="form-control" name="segid" >                
+                @foreach($periodos as $key => $segmento)                
+                    <option @if(Request::has('segid') and Request::get('segid')==$segmento->id) selected @endif value="{{$segmento->segmento_id}}">{{$segmento->prddes_periodo}}</option>
+                @endforeach
+                <option value="">Ver todos</option>
+            </select>    
+            </div>   
             <div class="col-md-2">  
         Corte:  
-            <select class="form-control" name="segid" >
-                <option value="">Ver todos</option>
+            <select class="form-control" name="segid" >               
                 @foreach($segmentos as $key => $segmento)                
                     <option @if(Request::has('segid') and Request::get('segid')==$segmento->id) selected @endif value="{{$segmento->segmento_id}}">{{$segmento->segnombre}}</option>
                 @endforeach
-            </select>    
+                <option value="">Ver todos</option>  
+            </select> 
+             
             </div>  
    
     <div class="col-md-2">

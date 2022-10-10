@@ -68,6 +68,23 @@ class UsersRepository extends BaseRepository implements UsersService{
          ->get();
          return $users->toArray(); 
     }
+
+    public function getDocentesByRama($rama): Array {
+      $doceWithRama = DB::table('users')
+       ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
+       ->leftjoin('roles' , 'role_user.role_id','=','roles.id')
+       ->leftjoin('user_has_ramasderecho' , 'user_has_ramasderecho.user_id','=','users.id')
+       ->leftjoin('rama_derecho' , 'rama_derecho.id','=','ramaderecho_id')
+       ->leftjoin('sede_usuarios','sede_usuarios.user_id','=','users.id')
+       ->where ('role_id', '4' )
+       ->where ('rama_derecho.subrama', $rama )
+       ->where ('users.active', true)
+       ->where ('users.active_asignacion', true)
+       ->where('sede_usuarios.sede_id',session('sede')->id_sede)
+       ->select('users.id','users.idnumber')
+        ->orderBy('users.created_at', 'desc')->get()->toArray();
+        return $doceWithRama;
+    }
 }
 
 

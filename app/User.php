@@ -290,12 +290,8 @@ class User extends Authenticatable
                     if($request->has('segid') and $request->segid != ''){
                             return $query->where('segid',$request->segid);
                     }
-            })
-       
+            })       
             ->orderBy('notas_ext.created_at','desc')
-           // ->orderBy('notas.orgntsid','desc')
-           // ->orderBy('notas.cptnotaid','asc')
-            
             ->get();
         }else{
             $notas = $this->notas()
@@ -304,30 +300,26 @@ class User extends Authenticatable
                     if($request->has('segid') and $request->segid != ''){
                             return $query->where('segid',$request->segid);
                     }
-            })
-       
-            ->orderBy('notas.created_at','desc')
-           // ->orderBy('notas.orgntsid','desc')
-           // ->orderBy('notas.cptnotaid','asc')
-            
+                    if($request->has('perid') and $request->segid != ''){
+                        return $query->where('perid',$request->perid);
+                    }else{
+                        $periodo = Periodo::where("estado",1)->first();
+                        if ($periodo) {
+                            return $query->where('perid',$periodo->id);
+                        }
+                        
+                    }
+            })       
+            ->orderBy('notas.created_at','desc')                    
             ->get();
-        }
-      
-
-
-      //  dd($notas);
-
-
-
-        $response=[];
+        }        
         $origen = [];
         if(count($notas)>0){
          
             foreach ($notas as $key => $nota) { 
                 if(!isset($origen[$nota->tbl_org_id])){
                     $origen[$nota->tbl_org_id] = []; 
-                }
-               
+                }               
                
 
                  $data = [
@@ -355,73 +347,14 @@ class User extends Authenticatable
                
                  } 
                   if ($nota->cptnotaid==2){
-                   $n_aplicacion[] =  $data;
-                  /*  $origen[$nota->tbl_org_id][] = [
-                    'nota'=>$data['nota'],
-                    'id'=>$data['id'],
-                    'expediente'=>$data['expediente'],
-                    'tipo'=>$data['tipo'],
-                    'tipo_id'=>$data['tipo_id'],
-                    'concepto_nota'=>$data['concepto_nota'],
-                    'concepto_nota_id'=>$data['concepto_nota_id'],
-                    'origen_nota'=>$data['origen_nota'],
-                    'docidnumber'=>$data['docidnumber'],
-                    'docevname'=>$data['docevname'],
-                    'estidnumber'=>$data['estidnumber'],
-                    'periodo'=>$data['periodo'],
-                    'segmento'=>$data['segmento'],  
-                    'segmento_id'=>$data['segmento_id'], 
-                    'created_at'=>$data['created_at'], 
-                    'updated_at'=>$data['updated_at'], 
-    
-                   ];    */       
+                   $n_aplicacion[] =  $data;                      
                   } 
                   if ($nota->cptnotaid==3){
-                   $n_etica[] =  $data;
-                   
-                 /*   $origen[$nota->tbl_org_id][] = [
-                        'nota'=>$data['nota'],
-                        'id'=>$data['id'],
-                        'expediente'=>$data['expediente'],
-                        'tipo'=>$data['tipo'],
-                        'tipo_id'=>$data['tipo_id'],
-                        'concepto_nota'=>$data['concepto_nota'],
-                        'concepto_nota_id'=>$data['concepto_nota_id'],
-                        'origen_nota'=>$data['origen_nota'],
-                        'docidnumber'=>$data['docidnumber'],
-                        'docevname'=>$data['docevname'],
-                        'estidnumber'=>$data['estidnumber'],
-                        'periodo'=>$data['periodo'],
-                        'segmento'=>$data['segmento'], 
-                        'segmento_id'=>$data['segmento_id'], 
-                        'created_at'=>$data['created_at'], 
-                        'updated_at'=>$data['updated_at'],
-                    ]; */
-
-             
-                  
+                   $n_etica[] =  $data;           
                   }
                   if ($nota->cptnotaid==4){
-                   $n_concepto[] =  $data;
-                  
-            /*     $origen[$nota->tbl_org_id][]  = [
-                        'nota'=>$data['nota'],
-                        'id'=>$data['id'],
-                        'expediente'=>$data['expediente'],
-                        'tipo'=>$data['tipo'],
-                        'tipo_id'=>$data['tipo_id'],
-                        'concepto_nota'=>$data['concepto_nota'],
-                        'concepto_nota_id'=>$data['concepto_nota_id'],
-                        'origen_nota'=>$data['origen_nota'],
-                        'docidnumber'=>$data['docidnumber'],
-                        'docevname'=>$data['docevname'],
-                        'estidnumber'=>$data['estidnumber'],
-                        'periodo'=>$data['periodo'],
-                        'segmento'=>$data['segmento'], 
-                        'segmento_id'=>$data['segmento_id'], 
-                        'created_at'=>$data['created_at'], 
-                        'updated_at'=>$data['updated_at'],
-                ]; */               
+                   $n_concepto[] =  $data;                  
+                     
               
             } 
 

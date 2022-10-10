@@ -146,6 +146,7 @@
                    <option value="rep_legal_solicitada_{{$view}}">Rep. Legal parte solicitada</option>
                    <option value="hechos_pretensiones_{{$view}}">Hechos - Pretensiones</option>
                    <option value="audiencia_{{$view}}">Audiencia</option>
+                   <option value="personalizado_{{$view}}">Personalizado</option>
                </select>
                
             </div>
@@ -185,8 +186,7 @@
                     'tipo_usuario_id'=>197,
                     'parte'=>'solicitada',
                     'view'=>"solicitante_values",
-                    'mySummernote'=>$mySummernote,
-                    
+                    'mySummernote'=>$mySummernote,                
                 ])
             </div>
 
@@ -199,24 +199,24 @@
                 ])
             </div>
 
-            <div class="content_values_{{$view}}" style="display: none" id="hechos_pretensiones_{{$view}}">
+            <div class="content_values_{{$view}}" style="display: none; margin-top:3px" id="hechos_pretensiones_{{$view}}">
                 <div class="col-md-12">
-                    <div class="form-group">
-                        <small data-table="conc_hechos_preten"  data-summernote="{{$mySummernote}}"  data-short_name="hechos" class="item_con" user-type="hepr" data-name="hechos">Hechos</small>
+                    <div class="form-group item_value">
+                        <small data-table="conc_hechos_preten"  data-summernote="{{$mySummernote}}"  data-short_name="hechos" class="item_con" user-type="hepr" data-name="hechos">Hechos</small> 
                     </div>
                 </div>                 
                 <div class="col-md-12">
-                    <div class="form-group">
-                        <small data-table="conc_hechos_preten" data-summernote="{{$mySummernote}}"   data-short_name="pretensiones" class="item_con" user-type="hepr" data-name="pretensiones">Pretensiones</small>
+                    <div class="form-group item_value">
+                        <small data-table="conc_hechos_preten" data-summernote="{{$mySummernote}}"   data-short_name="pretensiones" class="item_con" user-type="hepr" data-name="pretensiones">Pretensiones</small> 
                 </div>
                 </div>
             </div>
 
-            <div class="content_values_{{$view}}" style="display: none" id="audiencia_{{$view}}">
+            <div class="content_values_{{$view}}" style="display: none;margin-top:3px" id="audiencia_{{$view}}">
                          
                 <div class="col-md-12">
-                    <div class="form-group">
-                        <small data-table="conciliacion_audiencias" data-summernote="{{$mySummernote}}"   data-short_name="fecha_audiencia" class="item_con" user-type="general" data-name="fecha_audiencia">Fecha y hora de audiencia</small>
+                    <div class="form-group item_value">
+                        <small data-table="conciliacion_audiencias" data-summernote="{{$mySummernote}}"   data-short_name="fecha_audiencia" class="item_con" user-type="general" data-name="fecha_audiencia">Fecha y hora de audiencia</small> 
                 </div>
                 </div>
             </div>

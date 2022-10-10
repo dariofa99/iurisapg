@@ -94,7 +94,8 @@ class ConciliacionesController extends Controller
         ]);
 
         $conciliacion->usuarios()->attach(auth()->user()->id,[
-            'tipo_usuario_id'=>199
+            'tipo_usuario_id'=>199,
+            'estado_id'=>1
         ]);
 
         return redirect('/conciliaciones/'.$conciliacion->id.'/edit');

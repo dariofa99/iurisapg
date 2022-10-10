@@ -517,6 +517,16 @@ background:#F4F6F6;
 }
 .item_con {
 	cursor: pointer;
+	
+}
+
+.item_value{
+	padding: 2px;
+	padding-left: 5px;
+	padding-right: 5px;
+	cursor: pointer;
+	border: 1px solid #bbb3b3;
+	border-radius: 3px;
 }
 .item_sp{
 	border-bottom: 1px solid #E5E8E8;

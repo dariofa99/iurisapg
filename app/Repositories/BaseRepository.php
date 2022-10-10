@@ -9,6 +9,7 @@ class BaseRepository
     protected $model;
     private $relations;
 
+    protected $connection = 'mysql';
     public function __construct(Model $model, array $relations = [])
     {
         $this->model = $model;

@@ -211,6 +211,7 @@ class MyusersController extends Controller
      */
     public function update(Request $request, $id)
     {
+ 
       $email_request = false;
        $user = User::find($id);
 
@@ -250,7 +251,7 @@ class MyusersController extends Controller
           $user->role()->sync($request['id_rol']);
         //dd($user->role()->sync($request['id_rol']));
       }
-      if($request->has('sede_id')){
+      if($request->has('sede_id') and $request->get('sede_id')!=null){
         $user->sedes()->sync($request->sede_id);
       }
 
