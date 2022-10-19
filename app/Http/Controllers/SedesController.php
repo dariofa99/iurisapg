@@ -114,21 +114,7 @@ class SedesController extends Controller
 
     public function selectSede(Request $request){
 
-        //Estudiantes con menos interacciones
-        $data = DB::table('auditoria')
-        ->join('users','users.id','=','auditoria.user_id')
-        ->join('role_user','role_user.user_id','=','users.id')
-        ->join('roles','roles.id','=','role_user.role_id')
-        ->where('roles.id',6)
-        ->get();
-
-      //  dd($data);
-
-
-
-        $sedes = Sede::all();
-        
-        
+           $sedes = Sede::all();       
 
 
 

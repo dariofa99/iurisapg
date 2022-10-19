@@ -11,6 +11,11 @@
 |
 */
 
+use App\Mail\Firma;
+use App\Segmento;
+use App\User;
+use Illuminate\Support\Facades\Mail;
+
 Route::get('webservice','WebServicesController@index');
 
 Route::post('webservice','WebServicesController@index');
@@ -154,7 +159,7 @@ Route::get('turnos/asistencia', 'TurnosController@reporasistencia');
 Route::get('turnos/asistencia/detalles/{idnum}', 'TurnosController@reporAsistenciaDetalles');
 Route::resource('turnos','TurnosController');
 Route::post('turnos/delete/all','TurnosController@deleteAllTurnos');
-
+Route::get('turnos/descargar/curso','TurnosController@descargarTurnosExcel');
 
 //Excel usuarios
 Route::get('usuarios/importar', 'ExcelusuariosController@getImport');
@@ -463,8 +468,46 @@ Route::get('/login', function () {
 }); */
 
 Route::get('/prueba', function () {
-  dd(currentUser()->oficinas);
- // NotaExt::message();
+  $user = User::find(1);
+  Mail::to('darioj99@gmail.com')->send(new Firma($user));
+
+  /* $doceWithRama = \DB::table('users')
+            ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
+            ->leftjoin('roles', 'role_user.role_id', '=', 'roles.id')
+            ->leftjoin('user_has_ramasderecho', 'user_has_ramasderecho.user_id', '=', 'users.id')
+            ->leftjoin('rama_derecho', 'rama_derecho.id', '=', 'ramaderecho_id')
+            ->leftjoin('sede_usuarios', 'sede_usuarios.user_id', '=', 'users.id')
+            ->where('role_id', '4')
+            ->where('rama_derecho.subrama', "CIVIL-COMERCIAL")
+            ->where('users.active', true)
+            ->where('users.active_asignacion', true)
+            ->where('sede_usuarios.sede_id', 1)
+            ->select('users.name','users.id', 'users.idnumber','rama_derecho.subrama')
+            ->orderBy('users.created_at', 'desc')->get()->toArray();
+
+            $segmento = Segmento::where('estado', true)
+            ->join('sede_segmentos as sg', 'sg.segmento_id', '=', 'segmentos.id')
+            ->where('sg.sede_id', session('sede')->id_sede)->first();
+
+        $asig_doc = \DB::select(
+            \DB::raw("SELECT `name`, `docidnumber`, COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
+        JOIN asignacion_caso ON `asignacion_docente_caso`.asig_caso_id = asignacion_caso.id
+        JOIN expedientes ON asignacion_caso.asigexp_id = expedientes.expid
+        JOIN users ON `asignacion_docente_caso`.`docidnumber` = users.idnumber
+        JOIN periodo ON asignacion_caso.periodo_id = periodo.id
+        JOIN segmentos ON periodo.id = segmentos.perid
+        JOIN sede_usuarios ON sede_usuarios.user_id = users.id
+        WHERE expedientes.exptipoproce_id = '1' 
+        AND sede_usuarios.sede_id = " . session('sede')->id_sede . "
+        AND users.idnumber !=79504911 
+        AND users.active=1 AND users.active_asignacion=1 
+        AND segmentos.id = $segmento->segmento_id 
+        GROUP BY `docidnumber` ORDER BY num_casos ASC
+         ")
+        );
+
+  dd($doceWithRama,$asig_doc); */
+ // NotaExt::message(); 
   // dd(N
 }
 );

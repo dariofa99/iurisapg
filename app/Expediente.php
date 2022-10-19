@@ -177,13 +177,14 @@ class Expediente extends Model
             JOIN segmentos ON periodo.id = segmentos.perid
             JOIN sede_usuarios ON sede_usuarios.user_id = users.id
             WHERE expedientes.exptipoproce_id = '1' AND users.active=1
+            AND users.idnumber != '79504911' 
             AND users.active_asignacion=1 AND segmentos.id = $segmento->segmento_id
             AND sede_usuarios.sede_id = " . session('sede')->id_sede . "
             GROUP BY `docidnumber` ORDER BY num_casos ASC
              ")
             );
 
-            $docentes = DB::table('users')
+             $docentes = DB::table('users')
                 ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
                 ->leftjoin('roles', 'role_user.role_id', '=', 'roles.id')
                 ->leftjoin('referencias_tablas', 'referencias_tablas.id', '=', 'users.cursando_id')
@@ -191,6 +192,7 @@ class Expediente extends Model
                 ->leftjoin('sedes', 'sedes.id_sede', '=', 'sede_usuarios.sede_id')
                 ->where('role_id', '4')
                 ->where('users.active', true)
+                ->where('users.idnumber', '<>','79504911')
                 ->where('users.active_asignacion', true)
                 ->where('sedes.id_sede', session('sede')->id_sede)
                 ->select(
@@ -201,9 +203,23 @@ class Expediente extends Model
                     DB::raw('CONCAT(users.name," ",users.lastname) as full_name'),
                     'role_user.role_id',
                     'roles.display_name'
-                )->orderBy('users.created_at', 'desc')->get();
-        
-      
+                )->orderBy('users.created_at', 'desc')->get(); 
+
+            /* $docentes = DB::table('users')
+            ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
+            ->leftjoin('roles', 'role_user.role_id', '=', 'roles.id')
+            ->leftjoin('user_has_ramasderecho', 'user_has_ramasderecho.user_id', '=', 'users.id')
+            ->leftjoin('rama_derecho', 'rama_derecho.id', '=', 'ramaderecho_id')
+            ->leftjoin('sede_usuarios', 'sede_usuarios.user_id', '=', 'users.id')
+            ->where('role_id', '4')
+            ->where('rama_derecho.subrama','<>', "UNAVI")
+            ->where('users.active', true)
+            ->where('users.active_asignacion', true)
+            ->where('sede_usuarios.sede_id', session('sede')->id_sede)
+            ->select('users.id', 'users.idnumber')
+            ->groupBy('idnumber')
+            ->orderBy('users.created_at', 'desc')->get()->toArray(); */ 
+
         if (count($docentes) > 0 and count($asig_doc) > 0) {
             if (count($docentes) == count($asig_doc)) {
                 $asignacion = new AsigDocenteCaso();

@@ -1,5 +1,7 @@
 /node_modules
 /public/act_temp
+/public/pdf_temp
+/public/pdf_temp/*.*
 /public/act_temp/*.*
 /public/storage
 /public/thumbnails/*.*

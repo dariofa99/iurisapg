@@ -1,5 +1,5 @@
  <!-- Left side column. contains the sidebar -->
-  <aside class="main-sidebar" >
+ <aside class="main-sidebar" >
     <!-- sidebar: style can be found in sidebar.less -->
     <section class="sidebar">
       <!-- Sidebar user panel -->
@@ -241,7 +241,7 @@
               <ul class="treeview-menu">       
                 <li><a href="/conciliaciones"> Ver conciliaciones </a></li>   
                 <li><a href="/audiencias"> Agenda audiencias </a></li>  
-          @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai'))))
+          @if(((currentUser()->can('adm_formatos_conciliaciones'))))
             <li><a href="{{route('reportes.create')}}"> Administrar formatos </a></li>        
            @endif
               </ul>

@@ -20,15 +20,19 @@
     </a>
     @endif
     @if(!$reporte->is_created and !$reporte->has_firm and (currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-    <button type="button" data-status_id="{{$reporte->status_id}}" data-reporte_id="{{$reporte->reporte_id}}" id="btn_gene_pdf" class="btn btn-primary btn-sm btn_gene_pdf">Generar documento</button>
+    <button type="button" data-status_id="{{$reporte->status_id}}" data-reporte_id="{{$reporte->reporte_id}}" id="btn_gene_pdf" class="btn btn-primary btn-sm btn_gene_pdf">
+        Generar documento
+    </button>
     @endif
-    </td> 
-
-    
+    </td>     
     @endif
     <td>   
-
-       
+        @if(!$reporte->is_created and !$reporte->has_firm and (currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
+        <a href="/pdf/reportes/editar/temporal/{{$reporte->reporte->id}}/{{$conciliacion->id}}/{{ $reporte->status_id}}" class="btn_edit_con_pdf btn btn-primary btn-sm pull-right " data-id="45" id="btn_edcpdf_45">
+            Editar
+        </a>
+        @endif
+        
     </td>
     <td colspan="3">
         @if($reporte->is_created)
@@ -39,7 +43,8 @@
         @else
 
         @if(currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai') || currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']))      
-        <button  data-estado_id="{{$reporte->id}}" class="btn btn-success btn-sm  btn_asignar_firmantes"> Asignar firmantes</button>
+        <button  data-estado_id="{{$reporte->id}}" class="btn btn-success btn-sm  btn_asignar_firmantes">
+             Asignar firmantes</button>
         @endif
         @endif
            </td>

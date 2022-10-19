@@ -9,6 +9,8 @@ use App\Periodo;
 use App\TablaReferencia;
 use App\User;
 use App\Oficina;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\EstudiantesCursosExport;
 class TurnosController extends Controller
 {
 
@@ -34,6 +36,11 @@ class TurnosController extends Controller
            ->join('referencias_tablas as cursos','cursos.id','=','users.cursando_id')
            ->join('oficinas','oficinas.id','=','turnos.trnid_oficina')
            ->join('referencias_tablas as rd','rd.id','=','turnos.trnid_dia')
+           ->where(function($query) use ($request){
+            if ($request->has('data_search')) {
+                return $query->where('cursos.id',$request->data_search);
+            }
+           })        
            ->where('sedes.id_sede',session('sede')->id_sede)
            ->select("turnos.id as id",'users.idnumber','users.cursando_id','users.id as estudiante_id','users.name','users.lastname',
            'trnid_color','rc.ref_value as color_ref_value','rc.ref_nombre as color_nombre','cursos.id as curso_id',
@@ -62,7 +69,6 @@ class TurnosController extends Controller
             
             $colores = (object)$colores;
 
-//dd($turnos);
     		}elseif(!$request->ajax()){
                 $colores = DB::table('turnos')
             ->join('users','users.idnumber','=','turnos.trnid_estudent')
@@ -94,7 +100,8 @@ class TurnosController extends Controller
 //dd($estudiantes);
     		return  view('myforms.frm_turnos_students_list',[
                 'dias'=>$dias,'oficinas'=>$oficinas,'ref_horarios'=>$ref_horarios,
-                'ref_color'=>$ref_color,'turnos'=>$turnos,'cursando'=>$cursando,
+                'ref_color'=>$ref_color,
+                'turnos'=>$turnos,'cursando'=>$cursando,
                 'colores'=>$colores,'data_search'=>$data_search,
                 'estudiantes'=>$estudiantes]);
 	}
@@ -271,6 +278,35 @@ class TurnosController extends Controller
            $rasistenciadet->toArray()
 
             );
+     }
+
+     public function descargarTurnosExcel(Request $request){
+        $users = Turno::join('users','users.idnumber','=','turnos.trnid_estudent')
+            ->join('sede_usuarios','sede_usuarios.user_id','=','users.id')
+           ->join('sedes','sedes.id_sede','=','sede_usuarios.sede_id')
+           ->join('referencias_tablas as rc','rc.id','=','turnos.trnid_color')
+           ->join('referencias_tablas as rh','rh.id','=','turnos.trnid_horario')
+           ->join('referencias_tablas as cursos','cursos.id','=','users.cursando_id')
+           ->join('oficinas','oficinas.id','=','turnos.trnid_oficina')
+           ->join('referencias_tablas as rd','rd.id','=','turnos.trnid_dia')
+           ->where('sedes.id_sede',session('sede')->id_sede)
+           ->where(function($query) use ($request){
+            if ($request->has('data_search') and $request->get('data_search')!='') {
+                return $query->where('cursos.id',$request->data_search);
+            }
+           })  
+           ->select("turnos.id as id",'users.idnumber','users.cursando_id','users.id as estudiante_id','users.name','users.lastname',
+           'trnid_color','rc.ref_value as color_ref_value','rc.ref_nombre as color_nombre','cursos.id as curso_id',
+           'cursos.ref_nombre as curso_nombre','rh.ref_nombre as horario_nombre','trnid_horario','trnid_oficina',
+           'oficinas.nombre as oficina_nombre','rd.ref_nombre as dia_nombre','trnid_dia')
+           ->orderBy('trnid_color','asc')->get(); 
+
+           ob_end_clean(); // this
+           ob_start();
+           return Excel::download(new EstudiantesCursosExport($users), 'estudiantes_'.$request->data_search.'.xlsx');
+
+          // return view("report.estudiantes_cursos",compact("users"));
+         
      }
 
 }

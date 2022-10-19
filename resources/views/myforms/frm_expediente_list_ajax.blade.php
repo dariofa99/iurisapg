@@ -271,8 +271,8 @@
                                 <tr>
                                   
                                    <td colspan="2" style="text-align: center;">
-                                   <img src="{{ asset('thumbnails/'.$expediente->estudiante->image )}}" style="border-radius: 10px;-webkit-box-shadow: -9px 10px 9px 0px rgba(0,0,0,0.75);-moz-box-shadow: -9px 10px 9px 0px rgba(0,0,0,0.75);box-shadow: -9px 10px 9px 0px rgba(0,0,0,0.75); width: 180px;"  alt="User Image">
-                                   </td>
+                                    <img src="{{ is_file(public_path('thumbnails/'.$expediente->estudiante->image)) ? asset('thumbnails/'.$expediente->estudiante->image ) : asset('thumbnails/default.jpg' )}}" style="border-radius: 10px;-webkit-box-shadow: -9px 10px 9px 0px rgba(0,0,0,0.75);-moz-box-shadow: -9px 10px 9px 0px rgba(0,0,0,0.75);box-shadow: -9px 10px 9px 0px rgba(0,0,0,0.75); width: 180px;"  alt="User Image">
+                                  </td>
                                 </tr>
                                 @endif
                                 @if(!currentUser()->hasRole("solicitante"))

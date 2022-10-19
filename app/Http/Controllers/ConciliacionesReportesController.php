@@ -58,7 +58,7 @@ class ConciliacionesReportesController extends Controller
                     $reporte->has_firm = true;
                     break;
                    }
-                   
+                    
                 }
 
        });
@@ -126,6 +126,9 @@ class ConciliacionesReportesController extends Controller
                         'pdf_reporte_id'=>$request->estado_id,
                         'tipo_usuario_id'=>$request->type_user_id[$key],
                 ])->first();
+
+                
+
                // return response()->json($user);
                 if($user){
                     $referencia = TablaReferencia::find($request->type_user_id[$key]);   
@@ -133,6 +136,14 @@ class ConciliacionesReportesController extends Controller
                     $user_m->token = $user->token;
                     $user_m->codigo = $user->codigo;
                     $user_m->calidad = $referencia->ref_nombre;
+                    $user = DB::table("pdf_reportes_users")
+                    ->where('user_id',$us)
+                    ->where(['conciliacion_id'=>$request->conciliacion_id,
+                        'pdf_reporte_id'=>$request->estado_id,
+                        'tipo_usuario_id'=>$request->type_user_id[$key],
+                    ])->update([
+                        'created_at'=>date('Y-m-d H:i:s')
+                    ]);
                     Mail::to($user_m)->send(new Firma($user_m));
                 }            
             }

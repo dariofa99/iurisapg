@@ -34,11 +34,9 @@ class ConciliacionesFirmasController extends Controller
         $user = DB::table('pdf_reportes_users')       
         ->where('pdf_reportes_users.token',$token)
         ->first();
-        //dd($user);
         $nowDate = Carbon::now();
-        $diff = $nowDate->diffInDays($user->created_at);
-       
-         if($user and $diff < 2){
+        $diff = $nowDate->diffInDays($user->created_at);       
+         if($user and $diff < 4){
             if($user->firmado == 1)  return view("myforms.conciliaciones_firmas.firmar_firmado");
             return view("myforms.conciliaciones_firmas.verificar_codigo",compact('token'));
         }
@@ -225,7 +223,7 @@ class ConciliacionesFirmasController extends Controller
              $newDateTime = Carbon::now()->addHours(1);
 
             return redirect()
-            ->route("show.documents",
+            ->route("show.documents", 
                                 [
                             'token' => $request->token]
             )     

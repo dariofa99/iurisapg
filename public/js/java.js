@@ -3264,7 +3264,12 @@ return false;
         var request = $(this).serialize()+"&conciliacion_id="+$("#conciliacion_id").val();
         asigExpedienteToConc(request);
         e.preventDefault()
-    })
+    });
+
+
+    $("#btn_descargar_turnos").on("click",function (e) {       
+            $(this).attr("href",'/turnos/descargar/curso?data_search='+$("#select_data_cursando").val());            
+       });
 
 }); //Fin del document ready
 

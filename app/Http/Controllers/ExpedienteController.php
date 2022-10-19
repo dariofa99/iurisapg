@@ -541,7 +541,7 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
 
         $subRama = $asignacion_caso->expediente->rama_derecho->subrama;
 
-      if ($request['exptipoproce_id']==1 and $subRama!='UNAVI') {     
+      if ($request['exptipoproce_id']==1) {     
         //solo para consultas de asesoria   
         $expediente->asigDocente($asignacion_caso);  // no tienen en cuenta la rama  del derecho
         //$expediente->asigDocenteSeguimiento($asignacion_caso, $expediente->exptipoproce_id); // si tiene en cuenta la rama del derecho        
