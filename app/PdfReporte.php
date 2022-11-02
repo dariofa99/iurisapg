@@ -19,6 +19,11 @@ class PdfReporte extends Model
         'is_copy'
     ];
 
+    public function aditional_data()
+    {
+        return $this->hasMany(PdfReporteAditionalData::class, 'reporte_id', 'id');
+    }
+
     public function destino()
     {
        return $this->belongsTo(PdfReporteDestino::class,'id','reporte_id');
@@ -40,11 +45,24 @@ class PdfReporte extends Model
            return $configuracion;
         }        
        return null;
-    } 
+    }  
 
     public function files(){
         return $this->belongsToMany(File::class,'pdf_reportes_has_files','pdf_reporte_id')
         ->withPivot('id','pdf_reporte_id','seccion','file_id','configuracion')->withTimestamps(); 
      } 
+
+     public function getDataValWShort($short_name){
+        $ref_data = $this->aditional_data()
+        ->join('references_data','references_data.id','pdf_report_personalized_values.reference_data_id')
+       // ->join('referencias_tablas','referencias_tablas.id','estadocivil_id')
+        ->where(['short_name'=>$short_name])->first();
+           //dd($ref_data)     ;
+        if($ref_data){
+            return $ref_data;
+        }
+
+       return false;
+    }
    
 }

@@ -212,13 +212,21 @@
                 </div>
             </div>
 
-            <div class="content_values_{{$view}}" style="display: none;margin-top:3px" id="audiencia_{{$view}}">
-                         
+            <div class="content_values_{{$view}}" style="display: none;margin-top:3px" id="audiencia_{{$view}}">                   
                 <div class="col-md-12">
                     <div class="form-group item_value">
                         <small data-table="conciliacion_audiencias" data-summernote="{{$mySummernote}}"   data-short_name="fecha_audiencia" class="item_con" user-type="general" data-name="fecha_audiencia">Fecha y hora de audiencia</small> 
                 </div>
                 </div>
+            </div>
+
+            <div class="content_values_{{$view}}" style="display: none;margin-top:3px" id="personalizado_{{$view}}">   
+                <div class="col-md-12">
+                <button class="btn" id="btn_create_category">+</button>    
+                </div>                
+                @include('myforms.conciliaciones.componentes.categories_ajax',[
+                    'mySummernote'=>$mySummernote,                    
+                ])
             </div>
                 
 

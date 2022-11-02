@@ -30,19 +30,23 @@
     <label for="description">Utilizar en</label>
    <select required name="table" id="table" class="form-control">      
        <option value="users">Usuarios</option> 
-       <option value="conciliaciones">Conciliaciones</option>     
+       <option value="conciliaciones">Conciliaciones</option> 
+       <option value="pdf_reportes">Reportes</option>     
    </select>
 </div>
 
 <div class="form-group">
   <label for="description">Parte</label>
- <select style="width: 100%"  required multiple name="parte[]" id="parte" class="form-control select2">
+ <select style="width: 100%" multiple required name="parte[]" id="parte" class="form-control select2">
      
      <option value="solicitante">Solicitante</option>
      <option value="rep_legal_solicitante">Representante legal - solicitante</option>
      <option value="apoderado_solicitante">Apoderado de la parte solicitante</option>
      <option value="solicitada" >Solicitada</option>
      <option value="rep_legal_solicitada">Representante legal - solicitada</option>
+
+     <option value="solicitante">No aplica</option>
+
 </select>
 </div>
 

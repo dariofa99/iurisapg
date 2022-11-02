@@ -14,7 +14,6 @@ use App\AsigDocenteCaso;
 use App\Segmento;
 use App\HistorialDatosCaso;
 
-
 class Expediente extends Model
 {
     use Notifiable;
@@ -65,12 +64,7 @@ class Expediente extends Model
         'expfecha_res',
         //'expcierrecasocpto',
         'expcierrecasonotaest',
-        'expcierrecasonotadocen'
-
-
-
-
-
+        'expcierrecasonotadocen',
     ];
 
     /**
@@ -87,7 +81,8 @@ class Expediente extends Model
     public function conciliaciones()
     {
         return $this->belongsToMany(Conciliacion::class, 'conc_has_exp', 'exp_id', 'conciliacion_id')
-            ->withPivot('id', 'conciliacion_id', 'exp_id', 'type_status_id', 'user_id')->withTimestamps();
+            ->withPivot('id', 'conciliacion_id', 'exp_id', 'type_status_id', 'user_id')
+            ->withTimestamps();
     }
 
     public function estudiante()
@@ -98,7 +93,6 @@ class Expediente extends Model
     {
         return $this->belongsTo(RamaDerecho::class, 'expramaderecho_id', 'id');
     }
-
 
     public function solicitante()
     {
@@ -148,28 +142,29 @@ class Expediente extends Model
     public function solicitudes()
     {
         return $this->belongsToMany(Solicitud::class, 'solicitud_has_exp', 'exp_id')
-            ->withPivot('solicitud_id', 'exp_id')->withTimestamps();
+            ->withPivot('solicitud_id', 'exp_id')
+            ->withTimestamps();
     }
 
     public function sedes()
     {
         return $this->belongsToMany(Sede::class, 'sede_expedientes', 'expediente_id', 'sede_id')
-            ->withPivot('id', 'sede_id', 'expediente_id')->withTimestamps();
+            ->withPivot('id', 'sede_id', 'expediente_id')
+            ->withTimestamps();
     }
 
-    public  function asigDocente($asignacion_caso)
+    public function asigDocente($asignacion_caso)
     {
-
         $segmento = Segmento::where('estado', true)
             ->join('sede_segmentos as sg', 'sg.segmento_id', '=', 'segmentos.id')
             ->where('sg.sede_id', session('sede')->id_sede)
             ->first();
 
+            $docente_unavi = $this->getDocentesByRama("UNAVI") ;
+            $docente_unavi = $docente_unavi[0];
 
-    
-            
-        $asig_doc = DB::select(
-            DB::raw("SELECT `docidnumber`, COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
+            $asig_doc = DB::select(
+            DB::raw("SELECT `docidnumber`, `name`,COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
             JOIN asignacion_caso ON `asignacion_docente_caso`.asig_caso_id = asignacion_caso.id
             JOIN expedientes ON asignacion_caso.asigexp_id = expedientes.expid
             JOIN users ON `asignacion_docente_caso`.`docidnumber` = users.idnumber
@@ -177,7 +172,7 @@ class Expediente extends Model
             JOIN segmentos ON periodo.id = segmentos.perid
             JOIN sede_usuarios ON sede_usuarios.user_id = users.id
             WHERE expedientes.exptipoproce_id = '1' AND users.active=1
-            AND users.idnumber != '79504911' 
+            AND users.idnumber != $docente_unavi->idnumber 
             AND users.active_asignacion=1 AND segmentos.id = $segmento->segmento_id
             AND sede_usuarios.sede_id = " . session('sede')->id_sede . "
             GROUP BY `docidnumber` ORDER BY num_casos ASC
@@ -192,7 +187,7 @@ class Expediente extends Model
                 ->leftjoin('sedes', 'sedes.id_sede', '=', 'sede_usuarios.sede_id')
                 ->where('role_id', '4')
                 ->where('users.active', true)
-                ->where('users.idnumber', '<>','79504911')
+                ->where('users.idnumber', '<>',$docente_unavi->idnumber)
                 ->where('users.active_asignacion', true)
                 ->where('sedes.id_sede', session('sede')->id_sede)
                 ->select(
@@ -204,22 +199,7 @@ class Expediente extends Model
                     'role_user.role_id',
                     'roles.display_name'
                 )->orderBy('users.created_at', 'desc')->get(); 
-
-            /* $docentes = DB::table('users')
-            ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
-            ->leftjoin('roles', 'role_user.role_id', '=', 'roles.id')
-            ->leftjoin('user_has_ramasderecho', 'user_has_ramasderecho.user_id', '=', 'users.id')
-            ->leftjoin('rama_derecho', 'rama_derecho.id', '=', 'ramaderecho_id')
-            ->leftjoin('sede_usuarios', 'sede_usuarios.user_id', '=', 'users.id')
-            ->where('role_id', '4')
-            ->where('rama_derecho.subrama','<>', "UNAVI")
-            ->where('users.active', true)
-            ->where('users.active_asignacion', true)
-            ->where('sede_usuarios.sede_id', session('sede')->id_sede)
-            ->select('users.id', 'users.idnumber')
-            ->groupBy('idnumber')
-            ->orderBy('users.created_at', 'desc')->get()->toArray(); */ 
-
+              //  dd($docentes,$asig_doc); 
         if (count($docentes) > 0 and count($asig_doc) > 0) {
             if (count($docentes) == count($asig_doc)) {
                 $asignacion = new AsigDocenteCaso();
@@ -233,7 +213,7 @@ class Expediente extends Model
                     $found_key = array_search($docente->idnumber, array_column($asig_doc, 'docidnumber'));
                     if ($found_key === false) {
                         $asignacion = new AsigDocenteCaso();
-                        $asignacion->docidnumber =  $docente->idnumber;
+                        $asignacion->docidnumber = $docente->idnumber;
                         $asignacion->asig_caso_id = $asignacion_caso->id;
                         $asignacion->user_created_id = \Auth::user()->idnumber;
                         $asignacion->user_updated_id = \Auth::user()->idnumber;
@@ -245,7 +225,7 @@ class Expediente extends Model
         } elseif (count($docentes) > 0) {
             foreach ($docentes as $key => $docente) {
                 $asignacion = new AsigDocenteCaso();
-                $asignacion->docidnumber =  $docente->idnumber;
+                $asignacion->docidnumber = $docente->idnumber;
                 $asignacion->asig_caso_id = $asignacion_caso->id;
                 $asignacion->user_created_id = \Auth::user()->idnumber;
                 $asignacion->user_updated_id = \Auth::user()->idnumber;
@@ -253,11 +233,12 @@ class Expediente extends Model
                 break;
             }
         }
+
+        //dd($docentes,$asig_doc); 
     }
 
     public function asigDocenteSeguimiento($asignacion_caso, $tipoproce)
     {
-
         $asig_doc = $this->getDocentesAsigByRama($tipoproce);
 
         $subRama = $asignacion_caso->expediente->rama_derecho->subrama;
@@ -279,7 +260,7 @@ class Expediente extends Model
 
             if ($docexiste == 0) {
                 $casoasignado = 1;
-                //dd($docenterama->idnumber,$subRama);
+               // dd($docenterama->idnumber,$subRama,"Aqui 1");
                 $asignacion = new AsigDocenteCaso();
                 $asignacion->docidnumber = $docenterama->idnumber;
                 $asignacion->asig_caso_id = $asignacion_caso->id;
@@ -292,6 +273,7 @@ class Expediente extends Model
         }
         if ($casoasignado == 0) {
             asort($arraydocentescompleto);
+            //dd($docenterama->idnumber,$subRama,"Aqui 2");
             foreach ($arraydocentescompleto as $key => $numecasos) {
                 $asignacion = new AsigDocenteCaso();
                 $asignacion->docidnumber = $key;
@@ -319,28 +301,35 @@ class Expediente extends Model
             ->where('users.active_asignacion', true)
             ->where('sede_usuarios.sede_id', session('sede')->id_sede)
             ->select('users.id', 'users.idnumber')
-            ->orderBy('users.created_at', 'desc')->get()->toArray();
+            ->orderBy('users.created_at', 'desc')
+            ->get()
+            ->toArray();
     }
 
     private function getDocentesAsigByRama($tipoproce)
     {
         $segmento = Segmento::where('estado', true)
             ->join('sede_segmentos as sg', 'sg.segmento_id', '=', 'segmentos.id')
-            ->where('sg.sede_id', session('sede')->id_sede)->first();
+            ->where('sg.sede_id', session('sede')->id_sede)
+            ->first();
         return $asig_doc = DB::select(
-            DB::raw("SELECT `docidnumber`, COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
+            DB::raw(
+                "SELECT `docidnumber`, COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
         JOIN asignacion_caso ON `asignacion_docente_caso`.asig_caso_id = asignacion_caso.id
         JOIN expedientes ON asignacion_caso.asigexp_id = expedientes.expid
         JOIN users ON `asignacion_docente_caso`.`docidnumber` = users.idnumber
         JOIN periodo ON asignacion_caso.periodo_id = periodo.id
         JOIN segmentos ON periodo.id = segmentos.perid
         JOIN sede_usuarios ON sede_usuarios.user_id = users.id
-        WHERE expedientes.exptipoproce_id = '$tipoproce' 
-        AND sede_usuarios.sede_id = " . session('sede')->id_sede . "
-        AND users.active=1 AND users.active_asignacion=1 
-        AND segmentos.id = $segmento->segmento_id 
+        WHERE expedientes.exptipoproce_id = '$tipoproce'
+        AND sede_usuarios.sede_id = " .
+                    session('sede')->id_sede .
+                    "
+        AND users.active=1 AND users.active_asignacion=1
+        AND segmentos.id = $segmento->segmento_id
         GROUP BY `docidnumber` ORDER BY num_casos ASC
-         ")
+         ",
+            ),
         );
     }
     function getDocenteAsig()
@@ -348,11 +337,12 @@ class Expediente extends Model
         $asig = $this->getAsignacion();
         // dd($asig);
         try {
-
-            $docente = $asig->asig_docente()->where('asignacion_docente_caso.activo', 1)
+            $docente = $asig
+                ->asig_docente()
+                ->where('asignacion_docente_caso.activo', 1)
                 ->first()->docente;
 
-            return  $docente;
+            return $docente;
         } catch (\ErrorException $e) {
             $user = new User();
             $user->name = 'Sin asignar';
@@ -363,19 +353,20 @@ class Expediente extends Model
 
     function getAsignacion()
     {
-        $asig = $this->asignaciones()->where('asigest_id', $this->estudiante->idnumber)
-            ->where('activo', 1)->first();
+        $asig = $this->asignaciones()
+            ->where('asigest_id', $this->estudiante->idnumber)
+            ->where('activo', 1)
+            ->first();
 
         try {
-            return  $asig;
+            return $asig;
         } catch (\ErrorException $e) {
-            return "Error";
+            return 'Error';
         }
     }
 
     function getDaysOrColorForClose($item = '', $value = false)
     {
-
         /* $asig = $this->asignaciones()->where('asigest_id',$this->estudiante->idnumber)
         ->where('periodo_id',$periodo->id)
         ->orderBy('fecha_asig','desc')->first();  */
@@ -384,26 +375,30 @@ class Expediente extends Model
         try {
             $fecha_asig = Carbon::parse($asig->fecha_asig);
             $fecha_asig->addDays(31);
-            $now =  Carbon::now();
+            $now = Carbon::now();
             $days = $now->diffInDays($fecha_asig, false);
 
             if ($days <= 0) {
-                if (($days == 0)) {
+                if ($days == 0) {
                     $color = 'gray !important';
                     $days = 'Evaluado por sistema';
                     //$days = $now->diffInDays($fecha_asig,false);
-                    if ($value) $days = true;
+                    if ($value) {
+                        $days = true;
+                    }
                 } else {
                     $color = 'gray !important';
                     $days = 'Evaluado por sistema';
                     //$days = $now->diffInDays($fecha_asig,false);
-                    if ($value) $days = $days;
+                    if ($value) {
+                        $days = $days;
+                    }
                 }
             } elseif ($days > 0 && $days <= 10) {
                 //rojo
                 $color = '#CB4335 !important';
                 if ($value) {
-                    $days =  $days;
+                    $days = $days;
                 } else {
                     $days = $days . ' Días';
                 }
@@ -412,7 +407,7 @@ class Expediente extends Model
                 $color = '#F4D03F !important';
 
                 if ($value) {
-                    $days =  $days;
+                    $days = $days;
                 } else {
                     $days = $days . ' Días';
                 }
@@ -421,34 +416,34 @@ class Expediente extends Model
                     //naranja
                     $color = '#2ECC71 !important';
                     if ($value) {
-                        $days =  $days;
+                        $days = $days;
                     } else {
                         $days = $days . ' Días';
                     }
                 } else {
                     $color = '#2ECC71 !important';
                     if ($value) {
-                        $days =  30;
+                        $days = 30;
                     } else {
                         $days = '30 Días';
                     }
                 }
             }
 
-
-
-
-            if ($item == 'color') return $color;
-            if ($item == 'dias')  return $days;
-            return  'Función sin argumento';
+            if ($item == 'color') {
+                return $color;
+            }
+            if ($item == 'dias') {
+                return $days;
+            }
+            return 'Función sin argumento';
         } catch (\ErrorException $e) {
-            return  'Error';
+            return 'Error';
         }
     }
 
     function getActuacions($expid)
     {
-
         $acts = DB::table('actuacions')
             ->join('revisiones_actuacion as rv', 'rv.rev_actid', '=', 'actuacions.id')
             ->join('expedientes', 'expedientes.expid', '=', 'actuacions.actexpid')
@@ -457,9 +452,9 @@ class Expediente extends Model
                 DB::raw('SUM(if(actestado_id="138" OR actestado_id="136", if(parent_rev_actid = rv.rev_actid, 1, 0), if(actestado_id="104" OR actestado_id="139", 1, 0))) AS aprobado'),
                 DB::raw('SUM(if(actestado_id="101", 1, 0)) AS pendiente'),
                 DB::raw('SUM(if(actestado_id="102", if(DATEDIFF(`fecha_limit`, now())>0 AND DATEDIFF(`fecha_limit`, now())<3, 1, 0), if(actestado_id="140", if(DATEDIFF(`fecha_limit`, now())>0 AND DATEDIFF(`fecha_limit`,now())<3, 1, 0), 0))) AS time
-         ')
+         '),
             )
-            ->where(['actuacions.actexpid' => $expid,])
+            ->where(['actuacions.actexpid' => $expid])
             ->whereRaw('expedientes.expidnumberest = actuacions.actidnumberest')
             ->first();
 
@@ -471,7 +466,6 @@ class Expediente extends Model
                 // return 'circle-red';
             }
         }
-
 
         if ($acts->pendiente > 0) {
             if (\Auth::user()->hasRole('estudiante')) {
@@ -500,21 +494,18 @@ class Expediente extends Model
 
     public function verifyNotReq($date = null)
     {
-
         if ($date == null) {
             $date = Carbon::now();
             $date = $date->subDays(15);
             $date = $date->format('Y-m-d');
         }
-        $reqs =  DB::table('requerimientos')
-            ->where(
-                [
-                    'evaluado' => false,
-                    'reqidest' => $this->expidnumberest,
-                    'reqexpid' => $this->expid,
-                    ['reqfecha', '<=', $date]
-                ]
-            )
+        $reqs = DB::table('requerimientos')
+            ->where([
+                'evaluado' => false,
+                'reqidest' => $this->expidnumberest,
+                'reqexpid' => $this->expid,
+                ['reqfecha', '<=', $date],
+            ])
             ->select('requerimientos.id')
             ->get();
 
@@ -525,13 +516,7 @@ class Expediente extends Model
     {
         $padresAct = DB::table('actuacions')
             ->join('revisiones_actuacion', 'actuacions.id', '=', 'revisiones_actuacion.parent_rev_actid')
-            ->where([
-                ['actestado_id', '<>', '136'],
-                ['actestado_id', '<>', '138'],
-                ['actestado_id', '<>', '139'],
-                ['actidnumberest', $this->expidnumberest],
-                ['actexpid', $this->expid]
-            ])
+            ->where([['actestado_id', '<>', '136'], ['actestado_id', '<>', '138'], ['actestado_id', '<>', '139'], ['actidnumberest', $this->expidnumberest], ['actexpid', $this->expid]])
             ->select('actuacions.id')
             ->groupBy('actuacions.id')
             ->get();
@@ -544,29 +529,32 @@ class Expediente extends Model
                 $date = $date->format('Y-m-d');
             }
 
-            $hijosAct = DB::select(DB::raw("SELECT rev_actid, actestado_id, actuacions.actfecha,actnombre FROM actuacions, revisiones_actuacion
+            $hijosAct = DB::select(
+                DB::raw("SELECT rev_actid, actestado_id, actuacions.actfecha,actnombre FROM actuacions, revisiones_actuacion
         WHERE actuacions.id = revisiones_actuacion.rev_actid
-        AND parent_rev_actid = $actpa->id          
+        AND parent_rev_actid = $actpa->id
         AND actestado_id <> 136 AND actestado_id <> 138
-        ORDER BY rev_actid DESC LIMIT 1"));
+        ORDER BY rev_actid DESC LIMIT 1"),
+            );
 
-
-            if (count($hijosAct) > 0 and $hijosAct[0]->actestado_id != 104 and $hijosAct[0]->actestado_id != 139 and $hijosAct[0]->actfecha <= $date and $hijosAct[0]->actfecha >= '2018-08-21')   $hijos[] = $hijosAct;
+            if (count($hijosAct) > 0 and $hijosAct[0]->actestado_id != 104 and $hijosAct[0]->actestado_id != 139 and $hijosAct[0]->actfecha <= $date and $hijosAct[0]->actfecha >= '2018-08-21') {
+                $hijos[] = $hijosAct;
+            }
         }
-        // dd($hijos);  
+        // dd($hijos);
         return $hijos;
 
         /*  SELECT actuacions.`id` FROM actuacions, revisiones_actuacion
         WHERE
          actuacions.`id`= revisiones_actuacion.`parent_rev_actid` AND `actexpid` = '2019B-1'
           AND  `actidnumberest` = ''
-         GROUP BY actuacions.`id` 
+         GROUP BY actuacions.`id`
 
 
-         SELECT actuacions.`id` FROM actuacions, revisiones_actuacion 
+         SELECT actuacions.`id` FROM actuacions, revisiones_actuacion
          WHERE actuacions.`id`= revisiones_actuacion.`parent_rev_actid`
         AND `actexpid` = '2019B-1' AND actestado_id <> '136'
-          AND actestado_id <> '138' GROUP BY actuacions.`id` 
+          AND actestado_id <> '138' GROUP BY actuacions.`id`
            AND  `actidnumberest` = ''
          */
 
@@ -576,27 +564,16 @@ class Expediente extends Model
         
          SELECT rev_actid, actestado_id FROM actuacions, revisiones_actuacion
           WHERE actuacions.`id`= revisiones_actuacion.`rev_actid`
-           AND parent_rev_actid = '8682' 
+           AND parent_rev_actid = '8682'
            AND actestado_id <> '136' AND actestado_id <> '138'
             ORDER BY rev_actid DESC LIMIT 1 */
     }
 
-    public function  setNotActLimit($date = null)
+    public function setNotActLimit($date = null)
     {
         $padresAct = DB::table('actuacions')
             ->join('revisiones_actuacion', 'actuacions.id', '=', 'revisiones_actuacion.parent_rev_actid')
-            ->where([
-                ['actestado_id', '<>', '136'],
-                ['actestado_id', '<>', '138'],
-                ['actestado_id', '<>', '139'],
-                ['actestado_id', '<>', '174'],
-                ['actestado_id', '<>', '175'],
-                ['actestado_id', '<>', '176'],
-                ['actestado_id', '<>', '177'],
-                ['actestado_id', '<>', '178'],
-                ['actidnumberest', $this->expidnumberest],
-                ['actexpid', $this->expid]
-            ])
+            ->where([['actestado_id', '<>', '136'], ['actestado_id', '<>', '138'], ['actestado_id', '<>', '139'], ['actestado_id', '<>', '174'], ['actestado_id', '<>', '175'], ['actestado_id', '<>', '176'], ['actestado_id', '<>', '177'], ['actestado_id', '<>', '178'], ['actidnumberest', $this->expidnumberest], ['actexpid', $this->expid]])
             ->select('actuacions.id')
             ->groupBy('actuacions.id')
             ->get();
@@ -604,20 +581,22 @@ class Expediente extends Model
         $hijos = [];
         $segmento = Segmento::join('sede_segmentos as sg', 'sg.segmento_id', '=', 'segmentos.id')
             ->where('sg.sede_id', session('sede')->id_sede)
-            ->where('estado', true)->first();
+            ->where('estado', true)
+            ->first();
         if (count($padresAct) > 0) {
             foreach ($padresAct as $key => $actpa) {
-                $hijosAct = DB::select(DB::raw("SELECT rev_actid, actestado_id, actuacions.actfecha,actnombre,fecha_limit FROM actuacions, revisiones_actuacion
+                $hijosAct = DB::select(
+                    DB::raw("SELECT rev_actid, actestado_id, actuacions.actfecha,actnombre,fecha_limit FROM actuacions, revisiones_actuacion
                 WHERE actuacions.id = revisiones_actuacion.rev_actid
-                AND parent_rev_actid = $actpa->id          
+                AND parent_rev_actid = $actpa->id
                 AND actestado_id <> 136 AND actestado_id <> 138
-                ORDER BY rev_actid DESC LIMIT 1"));
+                ORDER BY rev_actid DESC LIMIT 1"),
+                );
                 if ($hijosAct[0]->fecha_limit !== null) {
                     $percent = 100;
                     $date = Carbon::now()->format('Y-m-d');
                     $fecha_limit = Carbon::parse($hijosAct[0]->fecha_limit);
-                    if (count($hijosAct) > 0 and $hijosAct[0]->actestado_id != 104 and $hijosAct[0]->actestado_id != 101  and $hijosAct[0]->actestado_id != 139 and $hijosAct[0]->fecha_limit !== null and $fecha_limit <  $date) {
-
+                    if (count($hijosAct) > 0 and $hijosAct[0]->actestado_id != 104 and $hijosAct[0]->actestado_id != 101 and $hijosAct[0]->actestado_id != 139 and $hijosAct[0]->fecha_limit !== null and $fecha_limit < $date) {
                         $hijos[] = $hijosAct;
                         // dd( $date.'---'.$fecha_limit);
                         $actuacion = Actuacion::find($hijosAct[0]->rev_actid);
@@ -651,7 +630,7 @@ class Expediente extends Model
         if (trim($data) != '') {
             switch ($criterio) {
                 case 'codido_exp':
-                    return $query->where('expid', 'like', "%" . $data);
+                    return $query->where('expid', 'like', '%' . $data);
                     break;
                 case 'estudiante':
                 case 'estudiante_num':
@@ -662,7 +641,7 @@ class Expediente extends Model
                     break;
                 case 'consultante':
                 case 'consultante_num':
-                    //return $query->where('expidnumber', $data); 
+                    //return $query->where('expidnumber', $data);
                     return $query->Orwhere(['expidnumberest' => $data, 'expidnumber' => $data]);
 
                     break;
@@ -679,25 +658,27 @@ class Expediente extends Model
                     return $query->where('expramaderecho_id', $data);
                     break;
                 case 'color':
-
-                    $now =  Carbon::now();
-                    $now2 =  Carbon::now();
-
+                    $now = Carbon::now();
+                    $now2 = Carbon::now();
 
                     if ($data == 'green') {
-                        return $query->where('exptipoproce_id', 1)
+                        return $query
+                            ->where('exptipoproce_id', 1)
                             ->where('expedientes.expestado_id', '!=', 2)
                             ->where('asignacion_caso.fecha_asig', '>=', $now->subDays(11));
                     } elseif ($data == 'amarillo') {
-                        return $query->where('exptipoproce_id', 1)
+                        return $query
+                            ->where('exptipoproce_id', 1)
                             ->where('expedientes.expestado_id', '!=', 2)
-                            ->whereBetween('asignacion_caso.fecha_asig', array($now->subDays(20), $now2->subDays(11)));
+                            ->whereBetween('asignacion_caso.fecha_asig', [$now->subDays(20), $now2->subDays(11)]);
                     } elseif ($data == 'rojo') {
-                        return $query->where('exptipoproce_id', 1)
+                        return $query
+                            ->where('exptipoproce_id', 1)
                             ->where('expedientes.expestado_id', '!=', 2)
-                            ->whereBetween('asignacion_caso.fecha_asig', array($now->subDays(30), $now2->subDays(20)));
+                            ->whereBetween('asignacion_caso.fecha_asig', [$now->subDays(30), $now2->subDays(20)]);
                     } elseif ($data == 'gris') {
-                        return $query->where('exptipoproce_id', 1)
+                        return $query
+                            ->where('exptipoproce_id', 1)
                             ->where('expedientes.expestado_id', '!=', 2)
                             ->where('asignacion_caso.fecha_asig', '<=', $now->subDays(30));
                     }
@@ -734,11 +715,8 @@ class Expediente extends Model
 
     public function scopeRangoFechas($query, $fechaini, $fechafin)
     {
-
-
-
-        if ($fechaini <> '' and $fechafin <> '') {
-            $query->whereBetween('asignacion_caso.created_at', array($fechaini, $fechafin))->get();
+        if ($fechaini != '' and $fechafin != '') {
+            $query->whereBetween('asignacion_caso.created_at', [$fechaini, $fechafin])->get();
         }
     }
 
@@ -747,7 +725,7 @@ class Expediente extends Model
         $ids = substr($this->expid, 6);
         $id = strlen($ids);
 
-        $ind = ($id) + 1;
+        $ind = $id + 1;
         $letra = substr($this->expid, 4, -$ind);
         if ($letra == 'B') {
             return $ids;
@@ -763,20 +741,20 @@ class Expediente extends Model
             $id = 0;
         }
         //dd($id);
-        $id_f = $year . "B-" . ($id + 1);
+        $id_f = $year . 'B-' . ($id + 1);
         return $id_f;
     }
 
-
-
     function get_nota_prov($concepto)
     {
-
-        $notas = $this->notas()->where(['orgntsid' => 1])->get();
+        $notas = $this->notas()
+            ->where(['orgntsid' => 1])
+            ->get();
 
         $periodo = Periodo::join('sede_periodos as sp', 'sp.periodo_id', '=', 'periodo.id')
             ->where('sp.sede_id', session('sede')->id_sede)
-            ->where('estado', true)->first();
+            ->where('estado', true)
+            ->first();
         $n_conocimiento = [];
         $n_etica = [];
         $n_aplicacion = [];
@@ -784,7 +762,6 @@ class Expediente extends Model
         if ($periodo) {
             foreach ($notas as $key => $nota) {
                 if ($nota->perid == $periodo->id) {
-
                     //Provisionales
                     if ($nota->orgntsid == 1 and $nota->tpntid == 2) {
                         // echo $nota->nota."<br>";
@@ -796,13 +773,13 @@ class Expediente extends Model
                             ];
                         }
                         if ($nota->cptnotaid == 2 and $nota->estidnumber == $this->expidnumberest) {
-                            $n_aplicacion[] =  [
+                            $n_aplicacion[] = [
                                 'nota' => $nota->nota,
                                 'id' => $nota->id,
                             ];
                         }
                         if ($nota->cptnotaid == 3 and $nota->estidnumber == $this->expidnumberest) {
-                            $n_etica[] =  [
+                            $n_etica[] = [
                                 'nota' => $nota->nota,
                                 'id' => $nota->id,
                             ];
@@ -837,27 +814,25 @@ class Expediente extends Model
             }
             $response = [
                 'promedio' => $promedio,
-                'id' => 00
+                'id' => 00,
             ];
             return $response;
             //  echo "$promedio";
-
-
         }
         return 0;
     }
-
-
 
     function get_notas_caso($periodo = null)
     {
         //obtiene las notas de totales del caso//en todos los segmentos
         $periodo = Periodo::join('sede_periodos as sp', 'sp.periodo_id', '=', 'periodo.id')
             ->where('sp.sede_id', session('sede')->id_sede)
-            ->where('estado', true)->first();
+            ->where('estado', true)
+            ->first();
         $segmentos = Segmento::join('sede_segmentos as sg', 'sg.segmento_id', '=', 'segmentos.id')
             ->where('sg.sede_id', session('sede')->id_sede)
-            ->where('perid', $periodo->periodo_id)->get();
+            ->where('perid', $periodo->periodo_id)
+            ->get();
         $notas = [];
         //  dd($segmentos);
         foreach ($segmentos as $key => $segmento) {
@@ -876,7 +851,7 @@ class Expediente extends Model
                     'nota_aplicacion' => $nota_aplicacion,
                     'nota_etica' => $nota_etica,
                     'nota_final' => $nota_final,
-                    'nota_concepto' => $nota_concepto
+                    'nota_concepto' => $nota_concepto,
                 ];
             }
         }
@@ -916,7 +891,7 @@ class Expediente extends Model
         });
 
         static::deleted(function($service_request){
-                Event::fire('nat_general_request.deleted',$service_request); 
+                Event::fire('nat_general_request.deleted',$service_request);
         });*/
     }
     //////////////////////////
@@ -940,16 +915,16 @@ class Expediente extends Model
     }
     public function fechaVigente($fecha_db)
     {
-        $meses = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        $dias = ["", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+        $meses = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        $dias = ['', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
 
-        $now =  Carbon::now();
+        $now = Carbon::now();
         $now = $now->format('d-m-Y');
         $fecha_db = Carbon::parse($fecha_db);
         $fecha2_db = $fecha_db;
         $fecha_db = $fecha_db->format('d-m-Y');
         if ($now < $fecha_db) {
-            return $dias[$fecha2_db->dayOfWeek] . ", " . $fecha2_db->day . " de " . $meses[$fecha2_db->month] . " del " . $fecha2_db->year;
+            return $dias[$fecha2_db->dayOfWeek] . ', ' . $fecha2_db->day . ' de ' . $meses[$fecha2_db->month] . ' del ' . $fecha2_db->year;
         }
         return false;
     }

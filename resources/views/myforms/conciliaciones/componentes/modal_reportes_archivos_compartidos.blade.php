@@ -83,10 +83,8 @@
                             <div class="form-group" id="lbl_copy">
                                
                                 Clave:  <label id="lbl_clave">  xB6yhf</label><br>
-                                Enlace:
-                                 <label id="lbl_url">                                   
-                                        https://iurisapp.udenar.edu.co/firmar/pdf/verify/$2y$10$fmNc1vs8t3HzCcjFTCirB.pHstzax8hvlGGyVhfXd7Ty165ryDje/ 
-                                 </label>
+                                Enlace:                                
+                                 <label id="lbl_url"></label>
                             
                             </div>
                            </div>

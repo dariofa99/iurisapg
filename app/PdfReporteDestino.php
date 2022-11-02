@@ -25,7 +25,7 @@ class PdfReporteDestino extends Model
     public function users()
     {
         return $this->belongsToMany(User::class,'pdf_reportes_users','pdf_reporte_id')
-        ->withPivot('revocado','pdf_reporte_id','tipo_firma_id','conciliacion_id','tipo_usuario_id','user_id','token','codigo','firmado')
+        ->withPivot('id','revocado','fecha_firma','pdf_reporte_id','tipo_firma_id','conciliacion_id','tipo_usuario_id','user_id','token','codigo','firmado')
         ->withTimestamps();
     } 
 

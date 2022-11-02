@@ -88,7 +88,7 @@ class User extends Authenticatable
     } 
     public function tipo_pdf_firmante()    {
        return $this->belongsToMany(TablaReferencia::class,'pdf_reportes_users','user_id','tipo_firma_id')
-       ->withPivot('user_id','tipo_usuario_id','conciliacion_id','token','codigo','tipo_firma_id')->withTimestamps();
+       ->withPivot('id','user_id','tipo_usuario_id','conciliacion_id','token','codigo','tipo_firma_id')->withTimestamps();
     }  
     public function conciliaciones()
     {

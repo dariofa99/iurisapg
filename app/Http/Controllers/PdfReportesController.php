@@ -52,7 +52,7 @@ class PdfReportesController extends Controller
         $file_enc = $reporte->files()->where('seccion','encabezado')->first();
         $encab_conf = $file_enc != null ? json_decode($file_enc->pivot->configuracion) : null;            
        
-        $bodytag =  $this->getBody($reporte->report_keys,$reporte->reporte,$conciliacion);
+        $bodytag =  $this->getBody($reporte,$conciliacion);
        
         $pdf = PDF::loadView('pdf.conciliacion', 
         [
@@ -93,13 +93,16 @@ class PdfReportesController extends Controller
         $file_enc = $reporte->files()->where('seccion','encabezado')->first();
         $encab_conf = $file_enc != null ? json_decode($file_enc->pivot->configuracion) : null;      
        }else{
+        $reporte = new PdfReporte();
+        $reporte->report_keys=$request->report_keys;
+        $reporte->reporte = $request->reporte;
         $file_pie =null;
         $pie_conf = null;          
         $file_enc = null;
         $encab_conf = null;      
        }
         
-        $bodytag = $this->getBody($request->report_keys,$request->reporte,$conciliacion);   
+        $bodytag = $this->getBody($reporte,$conciliacion);   
         $config = $this->setConfig($request)     ;
       //  dd($file_enc)    ;
         $pdf = \PDF::loadView('pdf.conciliacion', [

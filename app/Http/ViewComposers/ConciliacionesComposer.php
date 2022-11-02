@@ -15,6 +15,7 @@ use App\MotivoAsigCaso;
 use DB;
 use App\Sede;
 use App\TablaReferencia;
+use App\ReferencesData;
 
 
 
@@ -41,17 +42,24 @@ class ConciliacionesComposer
 			'tabla_ref'=>'conc_hechos_preten'])
 		->where('ref_nombre','<>','Sin definir')
 		->pluck('ref_nombre','id'); 
+
 		$types_firma_users = TablaReferencia::where(['categoria'=>'type_user_firm_conciliacion',
 		'tabla_ref'=>'pdf_reportes_users'])
 		->where('ref_nombre','<>','Sin definir')
 		->pluck('ref_nombre','id');
+
+		$categories_report = ReferencesData::where(['categories'=>'pdf_reportes',
+		'table'=>'pdf_reportes'])
+		->where('name','<>','Sin definir')
+		->get();
 
 //dd("s");
 		$view->with([
 			'types_firma_users'=>	$types_firma_users ,
 			'types_status'=>$types_status,
 			'types_users'=>$types_users,
-			'types_status_pretension'=>$types_status_pretension
+			'types_status_pretension'=>$types_status_pretension,
+			'categories_report'=>$categories_report
 		]);
 	}
 

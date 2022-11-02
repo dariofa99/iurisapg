@@ -176,7 +176,7 @@ console.log(estado_exp)
 		var bnt_rev_anexo_true =" <button "+estadoBtn+" type='button' value="+value.parent.id+" class='btn btn-default btn-sm btn_change_status' style='color:#777'>Quitar revisado</button>"
 		var bnt_return_actestado =" <button "+estadoBtn+" type='button' id="+value.parent.actestado_id+"	 value="+value.parent.id+" class='btn btn-warning btn-sm btn_change_status' style='color:#fff'>Volver a correcciones</button>"
 			
-		if((value.user.name == 'docente' || value.user.name == 'estudiante') && (estado_exp != 1 && estado_exp !=  3)){
+		if((value.user.name == 'docente' || value.user.name == 'docente_prueba' || value.user.name == 'estudiante') && (estado_exp != 1 && estado_exp !=  3)){
 			btn_editar = '';
 			btn_eliminar = '';
 			btn_revisar = '';
@@ -194,12 +194,12 @@ console.log(estado_exp)
 					btnsParent +=""+btn_editar+" "+btn_eliminar;
 				}
             }
-			if (value.user.name == 'docente') {
+			if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {
 				btnsParent = btn_detalles;
 				if (value.docenteasig) {
 					btnsParent +=  btn_revisar;;
 				}  
-		
+				console.log(btnsParent);
 			}
 			if (value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
 				btnsParent = btn_detalles + btn_revisar + btn_editar + btn_eliminar;
@@ -216,7 +216,7 @@ console.log(estado_exp)
 				btnsParent += btn_add_anexo;
 		       	}
 ////console.log(value.user.name)
-			if (value.user.name == 'docente') {		
+			if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {		
 				btnsParent = btn_detalles;	
 				if (value.docenteasig) {
 					btnsParent += btn_edit_revision;;
@@ -240,7 +240,7 @@ console.log(estado_exp)
         if (!firmado && !con_respuesta) btnsParent += btn_add_anexo;
 				if(!con_respuesta && firmado) btnsParent += btn_add_respuesta;
 			}
-			if (value.user.name == 'docente') {
+			if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {
 			    btnsParent = btn_detalles;
       }
       if (value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
@@ -256,7 +256,7 @@ console.log(estado_exp)
 			if (value.user.name == 'estudiante') {				
 				btnsParent = btn_detalles+""+btn_editar+" "+btn_eliminar;
 			}
-			if (value.user.name == 'docente') {
+			if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {
 				btnsParent = btn_detalles;
 				value.docenteasig ? btnsParent += bnt_rev_anexo_false :'';
              }
@@ -273,7 +273,7 @@ console.log(estado_exp)
 			if (value.user.name == 'estudiante') {				
 				btnsParent = btn_detalles;
 			}
-			if (value.user.name == 'docente') {
+			if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {
 				btnsParent = btn_detalles;
 				value.docenteasig ? btnsParent += bnt_rev_anexo_true : '';
 				
@@ -291,7 +291,7 @@ console.log(estado_exp)
 			if (value.user.name == 'estudiante') {				
 				btnsParent = btn_detalles;
 			}
-			if (value.user.name == 'docente') {
+			if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {
 				btnsParent = btn_detalles;
 			
              }
@@ -311,7 +311,7 @@ console.log(estado_exp)
 					btnsParent = btn_detalles + btn_ag_correccion;
 				
 				}
-				if (value.user.name == 'docente') {
+				if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {
 					
 					if (value.children.length<=0) {					
 						btnsParent = btn_detalles;
@@ -340,7 +340,7 @@ console.log(estado_exp)
 						btnsParent = btn_editar;
 					
 					}
-					if (value.user.name == 'docente') {						
+					if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {						
 						btnsParent = btn_detalles; 					
 					}
 					 if (value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
@@ -360,7 +360,7 @@ console.log(estado_exp)
 						btnsParent = btn_detalles + btn_editar;;
 					
 					}
-					if (value.user.name == 'docente') {						
+					if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {						
 						btnsParent = btn_detalles + btn_revisar; 					
 					}
 					 if (value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
@@ -380,7 +380,7 @@ console.log(estado_exp)
 					btnsParent = btn_detalles + btn_editar;;
 				
 				}
-				if (value.user.name == 'docente') {						
+				if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {						
 					btnsParent = btn_detalles; 					
 				}
 				 if (value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
@@ -400,7 +400,7 @@ console.log(estado_exp)
 					btnsParent = btn_detalles ;
 				
 				}
-				if (value.user.name == 'docente') {					
+				if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {					
 					if (value.children.length<=0) {					
 						btnsParent = btn_detalles;
 						if (value.user.idnumber==value.parent.actusercreated) {
@@ -449,7 +449,7 @@ var con=0;
 						var bnt_rev_firmado_true =" <button "+estadoBtn+" type='button' value="+child.id+" class='btn btn-default btn-sm btn_change_status' style='color:#777'>Quitar revisado</button>"
 						var bnt_return_actestado_child =" <button "+estadoBtn+" type='button' id="+child.actestado_id+" value="+child.id+" class='btn btn-warning btn-sm btn_change_status' style='color:#ffffff'>Volver a correcciones</button>"
 						
-						if((value.user.name == 'docente' || value.user.name == 'estudiante') && (estado_exp != 1 && estado_exp !=  3)){
+						if((value.user.name == 'docente' || value.user.name == 'docente_prueba' || value.user.name == 'estudiante') && (estado_exp != 1 && estado_exp !=  3)){
 							btn_editar_child = '';
 							btn_eliminar_child = '';
 							btn_revisar_child = '';
@@ -502,7 +502,7 @@ var con=0;
 							}			
 			            	btnsParent = btn_detalles+""+btn_add_anexo;
 			            }
-			            if (value.user.name=='docente') {
+			            if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {
 										btnsParent = btn_detalles;
 								 btnsChildren =btn_detalles_child ;
 							if (value.docenteasig) btnsChildren +=  btn_revisar_child;
@@ -520,7 +520,7 @@ var con=0;
 						if (value.user.name == 'estudiante') {
 								btnsChildren = btn_detalles_child;
 				        }
-							if (value.user.name == 'docente') {
+							if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {
 								btnsParent = btn_detalles;
 								btnsChildren = btn_detalles_child;
 								
@@ -561,7 +561,7 @@ var con=0;
 				            	
 				            }
 
-							if (value.user.name == 'docente') {
+							if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {
 								btnsChildren =  btn_detalles_child;
 				                btnsParent = btn_detalles;
 				            }
@@ -583,7 +583,7 @@ var con=0;
 				            	btnsChildren += btn_eliminar_child;			            	
 				            }
 
-							if (value.user.name == 'docente' || value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
+							if (value.user.name == 'docente' || value.user.name == 'docente_prueba' || value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
 								btnsChildren = btn_detalles_child;
 								if(!con_respuesta){
 									value.docenteasig ? btnsChildren += bnt_rev_firmado_false :''; 					
@@ -609,7 +609,7 @@ var con=0;
 				            	
 				            }
 
-							if (value.user.name == 'docente' || value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
+							if (value.user.name == 'docente' || value.user.name == 'docente_prueba' || value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
 								btnsChildren = btn_detalles_child;
 								if(!con_respuesta){
 									value.docenteasig ? btnsChildren += bnt_rev_firmado_true :''; 
@@ -632,7 +632,7 @@ var con=0;
 							
 						}
 
-			if (value.user.name == 'docente') {
+			if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {
 				btnsChildren =  btn_detalles_child; 
 								btnsParent = btn_detalles;
 						}

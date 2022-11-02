@@ -24,7 +24,7 @@ Actualizando formato
             
     </div>
 </div>
-
+@include('myforms.conciliaciones.componentes.modal_create_categoria')
 @stop
 
 @push('scripts')

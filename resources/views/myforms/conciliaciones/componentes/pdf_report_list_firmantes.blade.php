@@ -17,9 +17,15 @@
                             @endforeach
                             </select>    
                              
-                            @if(array_key_exists($user->id."-".$user->pivot->tipo_usuario_id, $tipos_estados)  and $tipos_estados[$user->id."-".$user->pivot->tipo_usuario_id] == 1 ) <small>
+                            @if(array_key_exists($user->id."-".$user->pivot->tipo_usuario_id, $tipos_estados)  and $tipos_estados[$user->id."-".$user->pivot->tipo_usuario_id] == 1 )
+                             <small>
                                 <i>
-                                    Ya se firmó el documento 
+                                    Ya se firmó el documento
+                                    @if (auth()->user()->can('revoc_firma_formatos_conciliac') and $tipos[$user->id."-".$user->pivot->tipo_usuario_id]!=209)
+                                        <a href="#" class="btn_revock_tipo_firmas" data-id="{{$pivots_id[$user->id."-".$user->pivot->tipo_usuario_id]}}">Revocar firma </a>
+                                    @endif 
+                                    
+                                    
                                </i>    
                             </small> 
                             @endif

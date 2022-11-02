@@ -209,6 +209,8 @@ $cursando = TablaReferencia::where(['categoria'=>'cursando','tabla_ref'=>'turnos
 ->pluck('ref_nombre','id');
 
 $estudiantes = $this->getEstudiantes();
+
+
     $turnos = Turno::join('users','users.idnumber','=','turnos.trnid_estudent')
     ->join('sede_usuarios','sede_usuarios.user_id','=','users.id')
     ->join('sedes','sedes.id_sede','=','sede_usuarios.sede_id')
@@ -231,7 +233,7 @@ $estudiantes = $this->getEstudiantes();
         $sala_alterna_url=$request->root()."/audiencia"."/salaalaterna"."/".$salaalterna->token_access;
     }
         if (!$audiencia) {  //si no existe lo crea
-            $audiencia="";
+            $audiencia=""; 
         }
        return  view('myforms.conciliaciones.edit',[
         'cursando'=>$cursando,
@@ -427,6 +429,7 @@ $estudiantes = $this->getEstudiantes();
 
     public function editEstado(Request $request){       
         $estado = ConciliacionEstado::find($request->estado_id);
+        $estado->type_status;
         return response()->json($estado);
     }
 
@@ -707,9 +710,7 @@ $estudiantes = $this->getEstudiantes();
 
 public function generateDocuments(Request $request){
 
-    /*   return response()->json([
-        'user'=>$request->all()
-    ]);   */
+    
     $conciliacion = Conciliacion::find($request->conciliacion_id);
     $estado = ConciliacionEstado::find($request->conc_estado_id);
    
@@ -719,19 +720,20 @@ public function generateDocuments(Request $request){
         ->where('reporte_id',$request->reporte_id)
         ->get();     
       
+      //  return response()->json(['user'=>$pdfs]);   
+
         foreach ($pdfs as $key_1 => $pdf_repor) {
             //obtengo el pdf temporal            
-            $reporte_t = ConciliacionPdfTemporal::where('parent_reporte_pdf_id',$pdf_repor->reporte_id)
+            $reporte_t = ConciliacionPdfTemporal::where('reporte_pdf_id',$pdf_repor->reporte_id)
             ->first();
-           //dd($reporte_t);
             if($reporte_t){  
                 $reporte =     $reporte_t->reporte_child;          
-                $bodytag = $this->getBody($reporte->report_keys,$reporte->reporte,$conciliacion);
-                $reporte->delete();
+                $bodytag = $this->getBody($reporte,$conciliacion);
+               // $reporte->delete();
                 $name = $reporte->nombre_reporte;
                 $config = json_decode($reporte->configuraciones); 
             }else{                            
-                $bodytag = $this->getBody($pdf_repor->reporte->report_keys,$pdf_repor->reporte->reporte,$conciliacion);
+                $bodytag = $this->getBody($reporte,$conciliacion);
                 $name = $pdf_repor->reporte->nombre_reporte;
                 $config = json_decode($pdf_repor->reporte->configuraciones); 
             }
@@ -784,13 +786,11 @@ public function generateDocuments(Request $request){
                           
                 $verification_token = str_replace("/","",bcrypt(\Str::random(50)));
                 $clave = \Str::random(6);
-                $Rgenerate =ConciliacionEstadoReporteGenerado::create(
-                        [                                             
+                $Rgenerate =ConciliacionEstadoReporteGenerado::create([                                             
                             'fecha_exp_token'=>Carbon::now()->addDay(),
                             'conciliacion_id'=>$conciliacion->id,                               
                             'status_id'=>$request->status_id,                   
-                            'reporte_id'=>$pdf_repor->reporte_id,
-                            
+                            'reporte_id'=>$pdf_repor->reporte_id,                            
                         ]);
                         $generate =ConciliacionEstadoFileCompartido::create(
                             [ 
@@ -812,7 +812,7 @@ public function generateDocuments(Request $request){
                    
                 }   
                 
-                $pdf_repor = PdfReporte::find($request->reporte_id)->delete();
+               // $pdf_repor = PdfReporte::find($request->reporte_id)->delete();
           
         }
 

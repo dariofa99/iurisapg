@@ -5,6 +5,7 @@
 
 
 use Carbon\Carbon;
+use App\ReferencesData;
 
 
 function currentUser()
@@ -253,4 +254,10 @@ if ( ! function_exists('icon_link_to_route')) {
 
     }
 }
+  function getAditionalDataByShortName($short_name,$table){
+    return $aditional_data = ReferencesData::where('short_name',$short_name)
+    ->where('table',$table)
+    ->first();
+
+  }
 ?>

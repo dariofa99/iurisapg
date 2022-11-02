@@ -7,7 +7,7 @@
     </div>
     <div class="col-md-8">
         <small>
-            {{$compartido->token}}  
+           {{url('/firmar/pdf/verify/')}}/{{$compartido->token}}  
         </small>
     </div>
     <div class="col-md-1">

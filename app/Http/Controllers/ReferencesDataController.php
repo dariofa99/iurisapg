@@ -44,13 +44,37 @@ class ReferencesDataController extends Controller
     public function store(Request $request)
     {
        //dd($request->all());
+        $this->guardar($request);
+        $categories = $this->getCategories();
+        $view =  view('myforms.categories.partials.ajax.index',compact('categories'))->render();
+        $response=[];
+        $response['render_view'] = $view;
+        return response()->json( $response);
+
+    }
+
+    public function storeFromReports(Request $request)
+    {
+       //dd($request->all());
+        $this->guardar($request);
+        $categories = $this->getCategories();
+        $view =  view('myforms.categories.partials.ajax.index',compact('categories'))->render();
+        $response=[];
+        $response['render_view'] = $view;
+        return response()->json( $response);
+
+    }
+
+   
+
+    private function guardar(Request $request){
         $request['categories'] = $request->table;
         $referencia = ReferencesData::create($request->all());
  
         if($request->has('option_name')){
             foreach ($request->option_name as $key => $option) {
                 $insert = DB::table("references_data_options")
-                ->insert([
+                ->insert([ 
                     'value'=>$option,
                     'references_data_id'=>$referencia->id,
                     'active_other_input'=>$request->active_other_input[$key]
@@ -73,12 +97,6 @@ class ReferencesDataController extends Controller
             }
            
         }
-        $categories = $this->getCategories();
-        $view =  view('myforms.categories.partials.ajax.index',compact('categories'))->render();
-        $response=[];
-        $response['render_view'] = $view;
-        return response()->json( $response);
-
     }
 
     /**

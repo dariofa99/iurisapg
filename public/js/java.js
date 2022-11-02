@@ -2651,14 +2651,10 @@ return false;
     });
 
     $("#myformEditEstadoPretension").on("submit",function (e) {
-
         var request = $(this).serialize()+"&conciliacion_id="+$("#conciliacion_id").val();
         var id = $("#myformEditEstadoPretension input[name=id]").val()
         updateConciliacionHechoPretencion(request,id);
-        //var request = $(this).serialize()
-      //  updatePretensionEstado(request)
-        e.preventDefault()
-        
+        e.preventDefault();        
     });
 
     $("#form_expediente_edit").on("submit",function (e) {
@@ -3271,7 +3267,239 @@ return false;
             $(this).attr("href",'/turnos/descargar/curso?data_search='+$("#select_data_cursando").val());            
        });
 
+
+    $("#btn_create_category").on("click",function(e){
+        $("#myModal_create_category_report").modal("show")
+    }) ;  
+
+    $("#myModal_create_category_report input[name='name']").on('keyup',function (e) {
+        var cadena = $(this).val();
+        var minusculas = cadena.toLowerCase();
+        var espacios = minusculas.replace(/\s+/g, "_");
+        var final = espacios.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+       // var final = "[-"+sin_tildes+"-]";
+        $("#myModal_create_category_report input[name='short_name']").val(final)
+
+    });
+
+    $("#myformCreateCategoryReport").on("submit",function(e) {
+        var request = $(this).serialize();
+        storeFromReports(request)
+        e.preventDefault()
+    });
+
+    $("#myModal_reportes_pdf_estados").on("click",".btn_add_data_personalized",function(e) {
+        var request = {
+            "reporte_id":$(this).attr("data-reporte_id")
+        };
+        getFromReports(request)
+        e.preventDefault()
+    });
+    
+    $("#myFormEditPersonalizedReportValues").on("submit",function(e) {
+        var request = $(this).serialize();
+        insertPersonalizedReportValues(request)
+        e.preventDefault();
+    });
+
+    $("#myModal_reportes_pdf_estados").on("click",'.btn_revock_tipo_firmas',function(e) {
+        e.preventDefault();
+        var request = {
+            "pivot_id":$(this).attr("data-id")
+        }
+        Swal.fire({
+            title: "Esta seguro que desea revocar la firma?",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, revocar!',
+            cancelButtonText: 'No, cancelar!'
+          }).then((result) => {
+            if (result.value) {    
+                revockFirma(request);         
+            }
+          }); 
+      
+
+       
+
+    })
+
 }); //Fin del document ready
+
+function revockFirma(request) {
+    var route = "/conciliacion/reporte/revock/firma";
+    $.ajax({
+        url: route,
+        type: "POST", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {
+            if(res.error){
+                Swal.fire({
+                    title: res.message,                    
+                    type: "error",                    
+                    confirmButtonColor: "#3085d6",                   
+                    confirmButtonText: "Cerrar",                    
+                });
+            }else{
+                $("#myModal_reportes_pdf_estados").modal("hide");
+                toastr.success("Se ha guardado con éxito", "Correcto!", {
+                    positionClass: "toast-bottom-right",
+                    timeOut: "4000",
+                });
+            }
+           
+           
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+}
+
+function insertPersonalizedReportValues(request) {
+    var route = "/conciliacion/reporte/store/personalized/values";
+    $.ajax({
+        url: route,
+        type: "POST", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {
+            if(res.error){
+                Swal.fire({
+                    title: res.message,                    
+                    type: "error",                    
+                    confirmButtonColor: "#3085d6",                   
+                    confirmButtonText: "Cerrar",                    
+                });
+            }else{
+                $("#myModal_reportes_pdf_estados").modal("hide");
+                toastr.success("Se ha guardado con éxito", "Correcto!", {
+                    positionClass: "toast-bottom-right",
+                    timeOut: "4000",
+                });
+            }
+           
+           
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+}
+function getFromReports(request) {
+    var route = "/categorias/get/from/reports";
+    $.ajax({
+        url: route,
+        type: "GET", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {
+            if(res.error){
+                Swal.fire({
+                    title: res.message,                    
+                    type: "error",                    
+                    confirmButtonColor: "#3085d6",                   
+                    confirmButtonText: "Cerrar",                    
+                });
+            }else{
+                $("#myFormEditPersonalizedReportValues input[name='reporte_id']").val(request.reporte_id)
+                $("#table_personalized_values_pdf tbody").html(res.render_view)
+                $("#content_user_pdf_firmas").hide();
+                $("#content_user_pdf_list").hide();
+                $("#content_personalized_values_pdf").show();
+            }
+           
+           
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+}
+
+function storeFromReports(request) {
+    var route = "/categorias/store/from/reports";
+    $.ajax({
+        url: route,
+        type: "POST", 
+        datatype: "json",
+        data: request,
+        cache: false,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("X-CSRF-TOKEN", $("#token").attr("content"));
+            $("#wait").show();
+        },
+        /*muestra div con mensaje de 'regristrado'*/
+        success: function (res) {
+            if(res.error){
+                Swal.fire({
+                    title: res.message,                    
+                    type: "error",                    
+                    confirmButtonColor: "#3085d6",                   
+                    confirmButtonText: "Cerrar",                    
+                });
+            }else{
+                Swal.fire({
+                    title: res.message,
+                    html: "<h4>De clic en OK para cargar los cambios o refresque la página</h4>",
+                    type: "info",                    
+                    confirmButtonColor: "#3085d6",                    
+                    confirmButtonText: "OK",                    
+                }).then((result) => {
+                    if (result.value) {
+                        window.location.reload(true)
+                    }
+                });
+            }
+           
+           
+            $("#wait").hide();
+        },
+        error: function (xhr, textStatus, thrownError) {
+            /* alert(
+                "Hubo un error con el servidor ERROR::" + thrownError,
+                textStatus
+            ); */
+            $("#wait").hide();
+        },
+    });
+}
 
 function darBajaExpediente(request) {
     var route = "/expedientes/dar/baja";
@@ -4540,6 +4768,7 @@ function getPdfReportesConciliacion(request) {
             $("#myReportPdfList tbody").html("");
             $("#alertmyReportList").hide();
             $("#content_user_pdf_firmas").hide();
+            $("#content_personalized_values_pdf").hide();
             $("#content_user_pdf_list").show();
            
                 conc_estado_id = response.conc_estado_id
@@ -5048,9 +5277,12 @@ function editConciliacionEstado(request) {
         success: function (res) {
             $("#myformCreateEstado").attr("id", "myformEditEstado");
             $("#myformEditEstado input[name=estado_id]").val(res.id);
+            $("#myformEditEstado select[name=type_status_id]").prop("disabled",true)
+
             $("#myformEditEstado select[name=type_status_id]").val(
                 res.type_status_id
             );
+
             $("#myformEditEstado textarea[name=concepto]").val(res.concepto);
             $("#myformEditEstado button[type=submit]").text("Actualizar");
             $("#myModal_create_estado .modal-title").text("Actualizado estado");

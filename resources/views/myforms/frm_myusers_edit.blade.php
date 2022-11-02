@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 @section('area_forms')
-
+Rol: {{$user->roles[0]->name}}
 @include('msg.alerts')
 @if ($errors->any())
     <div class="alert alert-danger">

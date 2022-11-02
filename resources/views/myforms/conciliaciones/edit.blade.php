@@ -129,6 +129,7 @@
     @include('myforms.conciliaciones.componentes.modal_add_notas')
     @include('myforms.conciliaciones.componentes.modal_edit_notas')
     @include('myforms.conciliaciones.componentes.modal_reportes_archivos_compartidos')
+    
 @stop
 
 @push('scripts')

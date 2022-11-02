@@ -44,12 +44,14 @@
            
                 <button type="button" id="btn_cancelar_asig_user" class="btn btn-default btn-sm ">Cancelar</button>
                 
-                @if(currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai'))
+                @if(currentUser()->can('gen_doc_pdf_conciliaciones'))
                 <button type="button" data-status_id="0" data-reporte_id="0" id="btn_generar_pdf" class="btn btn-success btn-sm btn_gene_pdf">Generar documento</button>
-                <button type="button" id="btn_revocar_firmas" data-estado_id="0" data-reporte_id="0" class="btn btn-danger btn-sm  btn_revocar_firmas"> Revocar firmas</button>
-
                 @endif
-               
+               @if(currentUser()->can('revoc_firma_formatos_conciliac'))
+               <button type="button" id="btn_revocar_firmas" data-estado_id="0" data-reporte_id="0" class="btn btn-danger btn-sm  btn_revocar_firmas">
+                 Revocar firmas electrónicas
+                </button>
+               @endif
 
             </div>
             <div class="col-md-3">
@@ -84,8 +86,31 @@
                     </tbody>
                 </table>
             </div>
-        </form>
-       
+        </form>       
+    </div>
+    <div class="row" id="content_personalized_values_pdf" style="display: none">
+        <form id="myFormEditPersonalizedReportValues">
+           <input type="hidden" name="reporte_id">
+        <div class="col-md-12">
+                 <table class="table" id="table_personalized_values_pdf">
+                <thead>
+                    <th>
+                        Campo
+                    </th>
+                    <th>
+                        Valor
+                    </th>
+                </thead>
+                <tbody>                 
+                                   
+                </tbody>
+                </table>
+               
+        </div>
+        <div class="col-md-4">
+            <button type="submit">Enviar</button>
+        </div>
+    </form>
     </div>
 @endslot
 @endcomponent

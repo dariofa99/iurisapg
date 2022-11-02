@@ -79,9 +79,9 @@
               'tipo_firma_id'=>$user->pivot->tipo_firma_id,
             ])->first()->ref_nombre}}</b></td>
           </tr>
-         
+          
           <tr>
-            <td class="table_tr_firm">Firmado el {{getSmallDateWithHour($user->pivot->created_at)}} en calidad de 
+            <td class="table_tr_firm">Firmado el {{getSmallDateWithHour($user->pivot->fecha_firma)}} en calidad de 
              <b> {{$user->tipo_conciliacion()->where([
                 'conciliacion_id'=>$user->pivot->conciliacion_id,
                 'tipo_usuario_id'=>$user->pivot->tipo_usuario_id,

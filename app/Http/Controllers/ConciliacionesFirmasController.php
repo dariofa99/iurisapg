@@ -124,7 +124,9 @@ class ConciliacionesFirmasController extends Controller
             $user = DB::table('pdf_reportes_users')      
             ->where('pdf_reportes_users.codigo',$codigo)
             ->where('pdf_reportes_users.token',$token)
-            ->update(['firmado'=>1]);     
+            ->update([
+              'firmado'=>1,
+              'fecha_firma'=>date("Y-m-d H:i:s")]);     
             return view("myforms.conciliaciones_firmas.firmar_firmado");
              
          }
@@ -141,10 +143,8 @@ class ConciliacionesFirmasController extends Controller
       ->where('pdf_reportes_users.revocado',0)
       ->first();      
       if($user){
-         // if($user->firmado == 0)  return view("myforms.conciliaciones_firmas.firmar_firmado");
-          $pdf_report = PdfReporteDestino::find($user->pdf_reporte_id);   
-          //dd($user);           
-          return view("myforms.conciliaciones_firmas.firmar_revocar",compact('pdf_report','user'));
+        $pdf_report = PdfReporteDestino::find($user->pdf_reporte_id);   
+        return view("myforms.conciliaciones_firmas.firmar_revocar",compact('pdf_report','user'));
       }
       abort(303);
 

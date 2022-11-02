@@ -196,7 +196,8 @@ class TurnosController extends Controller
            ->where('sedes.id_sede',session('sede')->id_sede)
            ->select('referencias_tablas.ref_nombre as cursando','users.active','users.id','users.idnumber',
              DB::raw('CONCAT(users.name," ",users.lastname) as full_name')
-             ,'role_user.role_id', 'roles.display_name')->orderBy('users.created_at', 'desc')->get();
+             ,'role_user.role_id', 'roles.display_name')
+             ->orderBy('users.created_at', 'desc')->get();
 
       return ($users);
      }
