@@ -677,8 +677,8 @@ class Expediente extends Model
                             'tbl_org_id' => $actuacion->id,
                         ];
                         $actuacion->actestado_id = 139;
-                        //$actuacion->save();
-                        //$actuacion->asignarNotas($data);
+                        $actuacion->save();
+                        $actuacion->asignarNotas($data);
                     }
                 }
             }

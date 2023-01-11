@@ -66,6 +66,7 @@ class Kernel extends HttpKernel
 
         
         'perfil' => \App\Http\Middleware\Perfil::class,
+        'mantenimiento' => \App\Http\Middleware\CheckForMaintenanceMode::class,
         'confirm_email' => \App\Http\Middleware\ConfirmarCorreo::class,
         'front' => \App\Http\Middleware\Front::class,
     ];

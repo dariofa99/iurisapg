@@ -683,9 +683,9 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
                   'docidnumber'=>\Auth::user()->idnumber, 
                   'tbl_org_id'=>$expediente->id, 
                 ]; 
-         // $expediente->asignarNotas($data);
-            $expediente->expestado_id = 5; 
-         // $expediente->save();
+          $expediente->asignarNotas($data);
+          $expediente->expestado_id = 5; 
+          $expediente->save();
         }
         }
       }

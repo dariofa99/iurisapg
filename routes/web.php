@@ -692,11 +692,12 @@ dd($id_num);
 
 );
 
-Route::get('/', function () {
+/* Route::get('/', function () {
   return view('mantenimiento');
  //  return view('welcome');
 });
-Route::get('/login', function () {
+*/
+Route::get('/mantenimiento', function () {
   return view('mantenimiento');
  //  return view('welcome');
-});
+}); 
