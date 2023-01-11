@@ -16,7 +16,7 @@ class Conciliacion extends Model
     protected $table = 'conciliaciones';
 
     protected $fillable = [
-        'fecha_cita',
+        'fecha_radicado',
         'num_conciliacion',
         'auto_admisorio',
         'estado_id',
@@ -28,7 +28,7 @@ class Conciliacion extends Model
 
     public function usuarios()
     {
-       return $this->belongsToMany(User::class,'conciliacion_has_user','conciliacion_id')
+       return $this->belongsToMany(User::class,'conciliacion_has_user','conciliacion_id','user_id')
        ->withPivot('user_id','estado_id','tipo_usuario_id','conciliacion_id','id')->withTimestamps();
     } 
 
@@ -95,7 +95,7 @@ class Conciliacion extends Model
     
     public function files(){
         return $this->belongsToMany(File::class,'conciliacion_has_files','conciliacion_id')
-        ->withPivot('id','concepto','file_id','type_status_id','user_id')->withTimestamps(); 
+        ->withPivot('id','concepto','file_id','type_status_id','user_id','category_id')->withTimestamps(); 
      }  
 
      public function expedientes(){
@@ -136,15 +136,22 @@ class Conciliacion extends Model
     }
 
     public function getUser($tipo_usuario){
-      $user =  $this->usuarios()->where('tipo_usuario_id',$tipo_usuario)->first();
- 
+      $user =  $this->usuarios()->where('tipo_usuario_id',$tipo_usuario)
+      ->orderBy('conciliacion_has_user.created_at', 'desc')
+      ->first(); 
         if(!$user){ 
             $user = new User();
-        }
-      
-    return $user;
-
+        }        
+        return $user;
     }
+
+    public function getUsersByType($tipo_usuario){
+        $users =  $this->usuarios()->where('tipo_usuario_id',$tipo_usuario)->get(); 
+          if(!$users){ 
+              $users = new User();
+          }        
+          return $users;
+      }
 
     public function scopeFilter($query,$request){
 

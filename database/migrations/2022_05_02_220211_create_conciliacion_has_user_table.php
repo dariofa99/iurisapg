@@ -37,7 +37,12 @@ class CreateConciliacionHasUserTable extends Migration
             ->onDelete('cascade')->onUpdate('cascade');
             $table->integer('type_status_id')->unsigned();
             $table->foreign('type_status_id')->references('id')->on('referencias_tablas')
-            ->onDelete('cascade')->onUpdate('cascade');   
+            ->onDelete('cascade')->onUpdate('cascade');
+            
+            $table->integer('category_id')->unsigned();
+            $table->foreign('category_id')->references('id')->on('referencias_tablas')
+            ->onDelete('cascade')->onUpdate('cascade');
+
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users')
             ->onDelete('cascade')->onUpdate('cascade');         

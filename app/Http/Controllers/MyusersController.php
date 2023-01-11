@@ -440,6 +440,20 @@ class MyusersController extends Controller
 
   public function getDocentes(Request $request){
             $users = $this->userService->getDocentes();
+            if (currentUser()->hasRole("amatai") or currentUser()->hasRole("diradmin") || currentUser()->hasRole('dirgral')) {
+              array_push($users,[
+                'active'=>1,
+                'display_name'=>"Docente",
+                "full_name"=>auth()->user()->name." ".auth()->user()->lastname,
+                "id"=>auth()->user()->id,
+                "idnumber"=>auth()->user()->idnumber,
+                "ref_nombre"=>"Sin definir",
+                "role_id"=>4
+              ]);
+            }
+          
+
+           // return response()->json(["name"=>'user']);
 
        if ($request->ajax()) {
             return response()->json($users);

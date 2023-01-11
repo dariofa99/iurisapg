@@ -43,7 +43,10 @@
     
     Fecha radicado:
 
-    @if($conciliacion->fecha_redicado != '0000-00-00') {{$conciliacion->fecha_radicado}} @else --- @endif
+    @if($conciliacion->fecha_redicado != '0000-00-00') {{$conciliacion->fecha_radicado}}
+   
+    
+    @else --- @endif
 
 </label>
 
@@ -54,35 +57,78 @@
 @section('area_forms')
 
 @include('msg.success')
+
+{{-- {{dd($conciliacion->getUsersByType(196))}} --}}
+ 
+{{-- {{dd(currentUser()->conciliaciones()
+->where(['conciliacion_id'=>$conciliacion->id,'tipo_usuario_id'=>203])->get())}} --}} 
 <div class="row">
     <div class="col-md-12">
         <ul class="nav nav-tabs">
-            <li class="active"><a class="urlactive" data-toggle="tab" href="#home">Información de Solicitud</a></li>
-            @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('secretaria') || currentUser()->hasRole('docente') || currentUser()->hasRole('amatai')))
-            || ((currentUserInConciliacion($conciliacion->id,['autor']))))
+            @if(currentUser()->can('ver_form_conciliacion') 
+            || (currentUserInConciliacion($conciliacion->id,['conciliador','asistente','autor'])))
+            <li class="active">
+                <a class="urlactive" data-toggle="tab" href="#home">Información de Solicitud</a>
+            
+            </li>
+            @endif
+
+            @if( currentUser()->can('ver_documentos_conciliacion') ||
+             (currentUserInConciliacion($conciliacion->id,['conciliador','asistente'])
+            and $conciliacion->getUser(203)->pivot->user_id == auth()->user()->id and 
+            $conciliacion->getUser(203)->pivot->estado_id == 230
+            ))
+
+            <li>
+                <a class="urlactive" data-toggle="tab" href="#documentos">Documentos </a>
+            </li>
+            @endif
+        
+            @if((currentUser()->can('ver_comentarios_conciliacion'))
+            || ((currentUserInConciliacion($conciliacion->id,['autor'])))
+            || ($conciliacion->getUser(203)->pivot->user_id == auth()->user()->id and $conciliacion->getUser(203)->pivot->estado_id == 230)
+            )
          
-         <li><a class="urlactive" data-toggle="tab" href="#menu1">Comentarios</a></li>
+         <li>
+            <a class="urlactive" data-toggle="tab" href="#menu1">Comentarios</a>
+        </li>
 
          @endif
-         @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-         || ((currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']))) 
-         || ($conciliacion->getUser(199)->hasRole('estudiante') and currentUserInConciliacion($conciliacion->id,['autor'])))
+         @if(((currentUser()->can('ver_estados_conciliacion')))
+         || ((currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']) and (
+            ($conciliacion->getUser(203)->pivot->user_id == auth()->user()->id
+             and $conciliacion->getUser(203)->pivot->estado_id == 230)))) 
+         || ($conciliacion->getUser(199)->hasRole('estudiante') and currentUserInConciliacion($conciliacion->id,['autor']))
+         )
             <li><a class="urlactive" data-toggle="tab" href="#menu2">Estado de la solicitud</a></li>
         @endif
-        @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-        || ((currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']))))
+
+        @if((currentUser()->can('ver_asignaciones_conciliacion'))
+        || ((currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']) 
+        and (($conciliacion->getUser(203)->pivot->user_id == auth()->user()->id
+             and $conciliacion->getUser(203)->pivot->estado_id == 230)))))
        
             <li><a class="urlactive" data-toggle="tab" href="#menu3">Asignaciones</a></li>
             @endif
 
-            @if($audiencia!='' || currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']) || currentUser()->hasRole('amatai'))
+            @if($audiencia!='' || (currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']) and ( 
+            ($conciliacion->getUser(203)->pivot->user_id == auth()->user()->id
+             and $conciliacion->getUser(203)->pivot->estado_id == 230)))
+            || currentUser()->can('ver_audiencia_conciliacion'))
 
             <li><a class="urlactive" data-toggle="tab" href="#menu4">Audiencia</a></li>
             @endif
-            @if(((currentUser()->can('act_conciliacion') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-            || ($conciliacion->getUser(199)->hasRole('estudiante') and (currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar']))))
-           
-            <li><a class="urlactive" data-toggle="tab" href="#menu5">Notas</a></li>
+
+            @if((currentUser()->can('act_conciliacion'))
+            || ($conciliacion->getUser(199)->hasRole('estudiante') and
+             currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar'])
+             and currentUser()->conciliaciones()->where([
+                'conciliacion_id'=>$conciliacion->id
+             ])->first()->pivot->estado_id != 231
+             ))
+            <li>
+                <a class="urlactive" data-toggle="tab" href="#menu5">Notas</a>
+            </li>
             @endif
             @if(((currentUser()->can('act_conciliacion')))
             || ($conciliacion->getUser(199)->hasRole('estudiante') and (currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar','autor']))))
@@ -93,6 +139,10 @@
           </ul>
 
           <div class="tab-content">
+            <div id="documentos" class="tab-pane fade">
+                @include('myforms.conciliaciones.documentos')
+              </div>
+
             <div id="home" class="tab-pane fade in active">
               @include('myforms.conciliaciones.conciliacion_form')
             </div>
@@ -129,6 +179,7 @@
     @include('myforms.conciliaciones.componentes.modal_add_notas')
     @include('myforms.conciliaciones.componentes.modal_edit_notas')
     @include('myforms.conciliaciones.componentes.modal_reportes_archivos_compartidos')
+    @include('myforms.conciliaciones.componentes.modal_respuestas_asignaciones')
     
 @stop
 
@@ -138,4 +189,12 @@
 <script src="https://meet.jit.si/external_api.js"></script>
 {!! Html::script('js/config_jitsi.js?v=3')!!}
 @include('myforms.conciliaciones.script')
+<script>
+     var request = 
+        {
+            "conciliacion_id":$("#conciliacion_id").val()
+        }
+     descargarAllPdfConcEstado(request)
+     getColorTurno($("#audiencia_fecha").val())
+</script>
 @endpush

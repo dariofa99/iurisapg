@@ -175,7 +175,7 @@ class SegmentosController extends Controller
 			Session::flash('message-danger', 'Atención..! No hay una fecha de corte activa');
 			return response()->json(['saved'=>false]);
 		}
-		//dd($segmento);
+		//dd($segmento); 
 
 		$dateini = Carbon::parse($segmento->fecha_inicio);
 		$dateiniciocorte = $dateini->format('Y-m-d 00:00:01');

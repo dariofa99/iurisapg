@@ -25,12 +25,9 @@ class CreateConciliacionEstadosFilesTable extends Migration
             $table->integer('file_id')->unsigned();
             $table->foreign('file_id')->references('id')->on('files')
             ->onDelete('cascade')->onUpdate('cascade');
-
-            /* $table->integer('type_id')->unsigned();
-            $table->foreign('type_id')->references('id')->on('referencias_tablas')
-            ->onDelete('cascade')->onUpdate('cascade'); */
-
-
+            $table->integer('user_id')->unsigned();
+            $table->foreign('user_id')->references('id')->on('users')
+            ->onDelete('cascade')->onUpdate('cascade'); 
             $table->timestamps();
         });
     }

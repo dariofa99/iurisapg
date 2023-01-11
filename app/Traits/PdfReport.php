@@ -4,6 +4,7 @@ namespace App\Traits;
 use Illuminate\Http\Request;
 use App\AudienciaConciliacion;
 use App\PdfReporteAditionalData;
+use Carbon\Carbon;
 
 trait PdfReport
 {
@@ -15,15 +16,16 @@ trait PdfReport
             if (count($json) > 0) {
                 // dd($json);
                 foreach ($json as $key => $data) {
-                    // dd($data );
+                    
                     foreach (
                         $conciliacion
                             ->usuarios()
                             ->where('tipo_usuario_id', $data->user_type)
+                            ->orderBy('conciliacion_has_user.created_at', 'desc')
                             ->get()
                         as $key_2 => $user
                     ) {
-                        // dd($user );
+                        
                         if ($data->table == 'users') {
                             $label = $data->short_name;
                             $value = $user->$label;
@@ -54,7 +56,7 @@ trait PdfReport
                             $hechos_cadena .= '</ul>';
                             $bodytag = str_replace($data->name, $hechos_cadena, $bodytag);
                             //  $bodytag .= $hechos_cadena;
-                            //dd($bodytag );
+                           
                         }
                     } elseif ($data->table == 'conciliacion_audiencias') {
                         $audiencia = AudienciaConciliacion::where('id_conciliacion', $conciliacion->id)->first();
@@ -66,7 +68,6 @@ trait PdfReport
                     } elseif ($data->table == 'pdf_reportes' and $reporte->id!=null) {
                         $ref_data = getAditionalDataByShortName($data->short_name, 'pdf_reportes');
                         if ($ref_data) {
-                           // dd($reporte);
                             $personalized_data = PdfReporteAditionalData::where([
                                 'reference_data_id' => $ref_data->id,
                                 'reference_data_option_id' => $ref_data->options()->first()->id,
@@ -76,6 +77,49 @@ trait PdfReport
                                 $bodytag = str_replace($data->name, $personalized_data->value, $bodytag);
                             }
                         }
+                    }elseif($data->table == 'conciliaciones'){
+                        if($data->short_name == 'fecha_hora_radicado'){                            
+                            $fecha_ra = Carbon::parse($conciliacion->fecha_radicado);
+                            $hora_ra = $fecha_ra->toTimeString();
+                            if($hora_ra > '18:00:00' and $hora_ra < '23:59:59'){
+                                
+                                if($fecha_ra->dayOfWeek == 5){
+                                    $fecha_ra = $fecha_ra->addDay('3');   
+                                    $fecha_ra->setTimeFromTimeString('08:00:00')   ;                          
+                                    
+                                }elseif($fecha_ra->dayOfWeek==6){
+                                    $fecha_ra = $fecha_ra->addDay('2');   
+                                    $fecha_ra->setTimeFromTimeString('08:00:00')   ;                          
+                                    
+                                }elseif($fecha_ra->dayOfWeek==0){
+                                    $fecha_ra = $fecha_ra->addDay('1');   
+                                    $fecha_ra->setTimeFromTimeString('08:00:00')   ;                          
+                                    
+                                }else{
+                                    $fecha_ra = $fecha_ra->addDay('1');   
+                                    $fecha_ra->setTimeFromTimeString('08:00:00')   ;                          
+                                    
+                                }
+                                                              
+                            }elseif($hora_ra >= '00:00:00' and $hora_ra < '08:00:00'){
+                                $fecha_ra->setTimeFromTimeString('08:00:00')   ;                          
+                                 
+                            }else{
+                               
+                            }
+                            $fecha_ra = getLongDateWithHour($fecha_ra);
+                            $bodytag = str_replace($data->name,$fecha_ra, $bodytag);
+                        }
+
+                        if($data->short_name == 'numero_radicado'){
+                            $bodytag = str_replace($data->name, $conciliacion->num_conciliacion, $bodytag);
+                        }
+
+                        if($data->short_name == 'mes_anio_actual'){
+                            $fecha = getMonthAndYear(date('Y-m-d'));
+                            $bodytag = str_replace($data->name, $fecha, $bodytag);
+                        }
+                        
                     }
                 }
             }

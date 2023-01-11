@@ -391,15 +391,13 @@ function llenarTablaListRole(respu) {
     row += '</td>';
     row += '</tr>';
 
-    row += ' <tr>'
-
+    row += ' <tr class="fila_roles">';
     row += '<td>';
     row += '</td>';
     for (var i = respu.roles.length - 1; i >= 0; i--) {
         row += ' <td width="10%" >';
         row += '<b>' + respu.roles[i].display_name + '</b>';
         row += '<br>Marcar todo <input class="btn_check_selall" type="checkbox" id="check_selall-' + respu.roles[i].id + '">';
-
         row += '  </td>';
     }
     row += '</tr>';

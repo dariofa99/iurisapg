@@ -29,7 +29,7 @@ class CreateConcHasExpTable extends Migration
             $table->foreign('user_id')->references('id')->on('users')
             ->onDelete('cascade')->onUpdate('cascade');       
             $table->integer('actuacion_id')->unsigned();
-            $table->foreign('actuacion_id')->references('id')->on('users')
+            $table->foreign('actuacion_id')->references('id')->on('actuacions')
             ->onDelete('cascade')->onUpdate('cascade');  
             $table->timestamps();           
         });

@@ -93,7 +93,7 @@ animation: spin 5s infinite;
                     ¡LO SENTIMOS!
                 </div>
                 <p style="color:#000;font-weight: 600;font-size: 20px;">Estamos realizando mantenimiento.</p>
-                <p style="color:#000;font-weight: 600;font-size: 20px;" >IURIS estará disponible desde las 8:00 AM del -viernes- 28 de septiembre.</p>
+                <p style="color:#000;font-weight: 600;font-size: 20px;" >IURIS estará disponible desde las 7:00 AM del -Miércoles- 11 de enero.</p>
 <p> <div id="wait"><img src="{{asset('img/logo2.png')}}" id="load" width="67" height="71" /></div>
 </p>
             </div>

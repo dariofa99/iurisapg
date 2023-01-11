@@ -705,3 +705,45 @@ body{
 #table_list_user_asig button{
 	margin-top: 1px !important;
 }
+
+.fila_roles{		
+	background-color: #ffffff;
+	margin-bottom: 200px;
+}
+.container_img{
+	
+	overflow: hidden;
+}
+.container_img img{
+	width: 30px;
+	height: 20px;
+}
+.container_img span{
+	
+	color: #0f0f0f;
+}
+.editable {	
+	height: 500px;
+	border: 1px solid #ccc;
+	padding: 5px;
+	resize: both;
+	overflow: auto;
+  }
+  #content_mail{
+	position: relative;
+	
+  }
+
+  .content_mail{
+	top: 7px;
+	z-index: 10;
+	position: absolute;
+	left: 10px;
+  }
+
+  .content_mail span{
+	border: 1px solid gray;
+	padding: 3px;
+	background-color: gray;
+	border-radius: 4px;
+  }

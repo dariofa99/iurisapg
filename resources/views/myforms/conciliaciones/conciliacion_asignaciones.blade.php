@@ -21,6 +21,7 @@
                 <th>
                    Tipo
                 </th>
+                
                 <th>
                     Fecha asignación
                 </th>

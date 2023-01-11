@@ -11,24 +11,7 @@ $(document).ready(function(){
 
    
     $( "#audiencia_fecha" ).change(function() {
-        let namecolors = ['Amarrillo','Azul','Verde','Gris','Rojo'];
-        let daycolors = ["#fdd835","#0073b7","#00a65a","#a0afb3","#f56954"];
-        var fecha1 = moment("2021-10-18");
-        var day_fecha_ini= fecha1.day() - 1;// dia de la smeana de la fecha inicial lunes 0
-        var fecha1 = fecha1.subtract(day_fecha_ini, "days");//inicia la semana siempre en lunes
-        var fecha2 = moment(this.value);
-        var semday = fecha2.day(); // dia de la semana, lunes inicia en 1
-        var day = semday-1;//lunes inicia en 0
-        var semanas = fecha2.diff(fecha1, 'weeks');
-        var y = 0;
-        for (var i = 0; i < semanas; i++) {
-            y++
-            if (y==5) {y=0}
-        }
-        var daysemcolor= day+y;
-        if (daysemcolor > 4) {daysemcolor=daysemcolor-5;}
-        $( "#audiencia_label_color_day" ).css("background-color", daycolors[daysemcolor])
-                                        .html(namecolors[daysemcolor]);
+        getColorTurno(this.value);
     });
 
 
@@ -98,7 +81,26 @@ $(document).ready(function(){
 
 });//fin document ready
 
-
+function getColorTurno(value){
+    let namecolors = ['Amarrillo','Azul','Verde','Gris','Rojo'];
+        let daycolors = ["#fdd835","#0073b7","#00a65a","#a0afb3","#f56954"];
+        var fecha1 = moment($("#prdfecha_inicio").val());//moment("2022-10-18");
+        var day_fecha_ini= fecha1.day() - 1;// dia de la smeana de la fecha inicial lunes 0
+        var fecha1 = fecha1.subtract(day_fecha_ini, "days");//inicia la semana siempre en lunes
+        var fecha2 = moment(value);
+        var semday = fecha2.day(); // dia de la semana, lunes inicia en 1
+        var day = semday-1;//lunes inicia en 0
+        var semanas = fecha2.diff(fecha1, 'weeks');
+        var y = 0;
+        for (var i = 0; i < semanas; i++) {
+            y++
+            if (y==5) {y=0}
+        }
+        var daysemcolor= day+y;
+        if (daysemcolor > 4) {daysemcolor=daysemcolor-5;}
+        $( "#audiencia_label_color_day" ).css("background-color", daycolors[daysemcolor])
+                                        .html(namecolors[daysemcolor]);
+}
 
 function getChat(request) {
    
@@ -408,7 +410,7 @@ $("#btm_save_date_audiencia").on('click', function () {
             error: function (xhr, textStatus, thrownError) {
                 $("#wait").css("display", "none");
                 alert(
-                    "Hubo un error con el servidor ERROR::" + thrownError,
+                    "Hubo un error con el servidor ERROR:" + thrownError,
                     textStatus
                 );
             },
@@ -420,14 +422,14 @@ $("#btm_save_date_audiencia").on('click', function () {
             timer: 5000,
         });
     }
-
+ 
 })
 
 $("#btm_edit_date_audiencia").on('click', function () {
     $(this).css("display","none")
     $(".edit_audiencia").css("display","block")
     $(".edit_audiencia_existe").css("display","none")
-})
+});
 $("#btm_cancel_date_audiencia").on('click', function () {
     $(this).css("display","none")
     $("#btm_edit_date_audiencia").css("display","block")
@@ -534,14 +536,20 @@ function Updaterolest_conciliacion(idnumber) {
     var idconciliacion = $("#select_rol_est_conciliacion"+idnumber).attr('data-id')
     var textselect = $('select[id="select_rol_est_conciliacion'+idnumber+'"] option:selected').text()
     console.log(textselect)
+    var email_categoria = '';
+    if(idrol==203 || idrol==204){
+        email_categoria = 'mensaje_sol_conciliador'
+    }else{
+
+    }
     var route = "/conciliacion/update/est/rolconciliacion";
     $.ajax({
-        url: route,
+        url: route, 
         headers: { "X-CSRF-TOKEN": token },
         type: "POST",
         datatype: "json",
         data: {
-            id:idnumber, idrol:idrol, idconciliacion:idconciliacion
+            id:idnumber, idrol:idrol, idconciliacion:idconciliacion,categoria:email_categoria
         },
         cache: false,
         beforeSend: function (xhr) {
@@ -574,7 +582,7 @@ function Updaterolest_conciliacion(idnumber) {
                     }
 
                 }
-                window.location.reload(true)
+               // window.location.reload(true)
             } else {
                 Toast.fire({
                     title: 'Error en la asignación, contactar al administrador.',

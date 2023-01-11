@@ -59,7 +59,7 @@ Registrado
 					</div>
 @endif
 
-@if(currentUser()->hasRole("docente") or currentUser()->hasRole("amatai") or currentUser()->hasRole("diradmin"))
+@if(currentUser()->hasRole("docente") or currentUser()->hasRole("amatai") or currentUser()->hasRole("diradmin") || currentUser()->hasRole('dirgral'))
 
 
 					<div class="col-md-12">
@@ -104,7 +104,7 @@ Registrado
 
 @endif
 
-@if(currentUser()->hasRole("docente") or currentUser()->hasRole("amatai") or currentUser()->hasRole('diradmin'))
+@if(currentUser()->hasRole("docente") or currentUser()->hasRole("amatai") or currentUser()->hasRole('diradmin') || currentUser()->hasRole('dirgral'))
 					<div class="col-md-12">
 						<div class="form-group">
 							{!!Form::label('Motivo') !!}
@@ -154,10 +154,10 @@ Registrado
 
 
 
-@if($expediente->getDocenteAsig()->idnumber == currentUser()->idnumber or currentUser()->hasRole("estudiante") or currentUser()->hasRole("amatai") or currentUser()->hasRole("diradmin"))
+@if($expediente->getDocenteAsig()->idnumber == currentUser()->idnumber or currentUser()->hasRole("estudiante") or currentUser()->hasRole("amatai") or currentUser()->hasRole("diradmin") or currentUser()->hasRole('dirgral'))
 
 <div class="col-md-12" align="right">
-@if((currentUser()->hasRole("estudiante") and ($expediente->getDaysOrColorForClose('dias',true)>9 || $expediente->exptipoproce_id !=1 )and ($expediente->estado->id == 1 || $expediente->estado->id == 3)) || (currentUser()->hasRole("docente") and $expediente->estado->id == 4) || (currentUser()->hasRole("amatai") or currentUser()->hasRole("diradmin")))
+@if((currentUser()->hasRole("estudiante") and ($expediente->getDaysOrColorForClose('dias',true)>=5 || $expediente->exptipoproce_id !=1 )and ($expediente->estado->id == 1 || $expediente->estado->id == 3)) || (currentUser()->hasRole("docente") and $expediente->estado->id == 4) || (currentUser()->hasRole("amatai")  or currentUser()->hasRole("diradmin") or currentUser()->hasRole('dirgral')))
 		<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal_exp_edit_cierre_caso" id="btn_trigger_exp_edit_cierre_caso">
 		Actualizar Solicitud de cierre 
 		</button>

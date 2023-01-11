@@ -11,7 +11,7 @@
 
 <div class="row">
    
-   <div class="col-md-4">
+   <div class="col-md-6">
     <label> Nombre del formato </label>
     <input type="text" required class="form-control"  name="nombre_reporte"
      @if($view and ($view=='update') and isset($reportes) and count($reportes)>0)
@@ -21,6 +21,20 @@
      @endif >
 
     </div>
+    <div class="col-md-2">
+        <label> Categoria </label>
+        <select name="categoria_id" id="categoria_id" class="form-control form-control-sm">              
+            @forelse($types_categories_report as $key => $types_categorie)
+                <option @if($view and ($view=='update') and isset($reportes) and count($reportes)>0 and $reportes[count($reportes)-1]->categoria_id == $key )
+                 selected
+                @endif value="{{$key}}">{{$types_categorie}}</option>
+            @empty
+            <option value="">Sin categoria</option>
+            @endforelse                        
+        </select>
+    
+        </div>
+        
     <div class="col-md-4">
         @if($view and $view=='update')  
         @if(isset($reportes))
@@ -139,14 +153,17 @@
         <div class="row" >
             <div class="col-md-12">
                <select id="select_values_{{$view}}" data-view="{{$view}}" class="form-control select_values">
-                   <option value="solicitante_{{$view}}">Parte solicitante</option>
+                                  
+                <option value="solicitante_{{$view}}">Parte solicitante</option>
                    <option value="rep_legal_solicitante_{{$view}}">Rep. Legal parte solicitante</option>               
                    <option value="apoderado_solicitante_{{$view}}">Apoderado parte solicitante</option>
                    <option value="solicitada_{{$view}}">Parte solicitada</option>
+                   <option value="conciliador_{{$view}}">Conciliador</option>
                    <option value="rep_legal_solicitada_{{$view}}">Rep. Legal parte solicitada</option>
                    <option value="hechos_pretensiones_{{$view}}">Hechos - Pretensiones</option>
                    <option value="audiencia_{{$view}}">Audiencia</option>
                    <option value="personalizado_{{$view}}">Personalizado</option>
+                   <option value="info_conciliacion_{{$view}}">Información de conciliación</option> 
                </select>
                
             </div>
@@ -155,6 +172,16 @@
                 @include('myforms.conciliaciones.componentes.reportes_values',[
                     'tipo_usuario_id'=>205,
                     'parte'=>'solicitante',
+                    'view'=>"solicitante_values",
+                    'mySummernote'=>$mySummernote,
+                    
+                ]) 
+            </div>
+
+            <div class="content_values_{{$view}}" style="display: none" id="conciliador_{{$view}}">
+                @include('myforms.conciliaciones.componentes.reportes_values',[
+                    'tipo_usuario_id'=>203,
+                    'parte'=>'conciliador',
                     'view'=>"solicitante_values",
                     'mySummernote'=>$mySummernote,
                     
@@ -229,6 +256,28 @@
                 ])
             </div>
                 
+            <div class="content_values_{{$view}}" style="display: none;margin-top:3px" id="info_conciliacion_{{$view}}">                   
+                <div class="col-md-12">
+                    <div class="form-group item_value">
+                        <small data-table="conciliaciones" data-summernote="{{$mySummernote}}"   data-short_name="numero_radicado" class="item_con" user-type="conciliacion" data-name="numero_radicado">
+                            Número de radicado
+                        </small>
+                     
+                </div>
+                <div class="form-group item_value">                                 
+                    <small data-table="conciliaciones" data-summernote="{{$mySummernote}}"   data-short_name="fecha_hora_radicado" class="item_con" user-type="conciliacion" data-name="fecha_hora_radicado">
+                        Fecha y hora de radicado
+                    </small>
+                </div>
+
+                <div class="form-group item_value">                                 
+                    <small data-table="conciliaciones" data-summernote="{{$mySummernote}}"   data-short_name="mes_anio_actual" class="item_con" user-type="conciliacion" data-name="mes_anio_actual">
+                       Mes y año actual
+                    </small>
+                </div>
+
+                </div>
+            </div>
 
     </div>
 

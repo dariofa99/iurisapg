@@ -11,10 +11,20 @@
 |
 */
 
+use App\Conciliacion;
+use App\ConciliacionEstado;
+use App\Expediente;
 use App\Mail\Firma;
+use App\Notifications\SolicitudRadicarConciliacion;
+use App\Periodo;
 use App\Segmento;
 use App\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Route;
 
 Route::get('webservice','WebServicesController@index');
 
@@ -32,6 +42,7 @@ Route::get('terminosycondiciones', function () {
   return view('auth.terminosycondiciones');
 });
 Route::get('conciliaciones/download/file/{file_id}', 'ConciliacionesController@downloadFile'); 
+Route::get('conciliaciones/enviar/correo', 'ConciliacionesController@enviarCorreo'); 
 Route::get('videos', function () {
   return view('videos');
 });
@@ -325,6 +336,7 @@ Route::get('conciliacion/chat/{chatroom}', 'AudienciaController@getChangeChatRoo
 
 //PDF >Reportes
 
+Route::get('pdf/reportes/get', 'PdfReportesController@getReportes');
 
 Route::get('pdf/reportes/generate/{conciliacion}/{reporte}/{estado}', 'PdfReportesController@loadPdf')->name('pdf.generate');
 Route::post('pdf/reportes/preview', 'PdfReportesController@loadPdfPreview')->name('pdf.generate');
@@ -469,11 +481,27 @@ Route::get('/login', function () {
 /* Route::get('/', function () {
   return redirect('/dashboard');
 }); */
+
+Route::get('/pruebaaj', 'ConciliacionesController@prueba');
+
 Route::get('/prueba', function () {
  // $user = User::find(1);
   //Mail::to('darioj99@gmail.com')->send(new Firma($user));
 
-   $doceWithRama = \DB::table('users')
+  $expediente = Expediente::where('expid', "2022B-103")->first();
+  //
+  $fecha = $expediente->setNotActLimit();
+
+  dd($fecha);
+  $us = User::where("email",'darioj99@gmail.com')->first();
+  $mensaje =  ConciliacionEstado::first();
+   Notification::send($us, new SolicitudRadicarConciliacion( $mensaje ));
+
+   return view('myforms.mails.solicitud_radicado_conciliacion',[
+    'mensaje'=>"heols",
+    'url'=>url('/conciliaciones/1/edit')
+]);;
+   $doceWithRama = DB::table('users')
             ->leftjoin('role_user', 'users.id', '=', 'role_user.user_id')
             ->leftjoin('roles', 'role_user.role_id', '=', 'roles.id')
             ->leftjoin('user_has_ramasderecho', 'user_has_ramasderecho.user_id', '=', 'users.id')
@@ -491,8 +519,8 @@ Route::get('/prueba', function () {
             ->join('sede_segmentos as sg', 'sg.segmento_id', '=', 'segmentos.id')
             ->where('sg.sede_id', session('sede')->id_sede)->first();
 
-        $asig_doc = \DB::select(
-            \DB::raw("SELECT `name`, `docidnumber`, COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
+        $asig_doc = DB::select(
+            DB::raw("SELECT `name`, `docidnumber`, COUNT(`docidnumber`) AS num_casos FROM `asignacion_docente_caso`
         JOIN asignacion_caso ON `asignacion_docente_caso`.asig_caso_id = asignacion_caso.id
         JOIN expedientes ON asignacion_caso.asigexp_id = expedientes.expid
         JOIN users ON `asignacion_docente_caso`.`docidnumber` = users.idnumber
@@ -556,7 +584,26 @@ Route::get('/prueba', function () {
   // dd(N
 });
 
-Route::get('/prueba_', function () {
+Route::get('/pruebas', function () {
+  $periodo = Periodo::where('estado','1')
+  ->first();
+  $con_ul = Conciliacion::where('periodo_id',$periodo->id)
+  ->where('num_conciliacion','<>','CCEAH-000-00-00')
+  ->orderBy('created_at','desc')->first();            
+  if($con_ul==null){
+      $id_num ='001';
+  }else{
+      $id_num = intval(explode('-',$con_ul->num_conciliacion)[1]) + 1;
+      //dd($id_num);
+
+      if($id_num<10)  $id_num =  '00'.$id_num;
+      if($id_num>10 and $id_num<100)  $id_num =  '0'.$id_num;
+  }
+
+ // $porciones = explode("-", $con_ul->num_conciliacion);
+
+dd($id_num);
+
   $segmento = Segmento::where('estado', true)
             ->join('sede_segmentos as sg', 'sg.segmento_id', '=', 'segmentos.id')
             ->where('sg.sede_id', session('sede')->id_sede)
@@ -644,3 +691,12 @@ Route::get('/prueba_', function () {
 }
 
 );
+
+Route::get('/', function () {
+  return view('mantenimiento');
+ //  return view('welcome');
+});
+Route::get('/login', function () {
+  return view('mantenimiento');
+ //  return view('welcome');
+});

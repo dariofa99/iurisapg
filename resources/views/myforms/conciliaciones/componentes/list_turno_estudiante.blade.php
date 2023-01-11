@@ -54,12 +54,12 @@
 
                                 </select>
                             </td>
-                            @if(currentUser()->hasRole('amatai') || currentUser()->hasRole('diradmin') || currentUser()->hasRole("dirgral") || (currentUser()->hasRole('estudiante') and currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar'])))
+                            @if(currentUser()->hasRole('amatai') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('diradmin') || currentUser()->hasRole("dirgral") || (currentUser()->hasRole('estudiante') and currentUserInConciliacion($conciliacion->id,['conciliador','auxiliar'])))
                             <td>
                                 <a style="display: none;" class="btn btn-success" id="btn_UpdateRol_est{{$turno->idnumber}}" onclick="Updaterolest_conciliacion('{{$turno->idnumber}}')"><i class="fa fa-check-square"> </i> Actualizar</a>
                                 <a style="display: none;" class="btn btn-warning" id="btn_hide_edit_rol_conciliacion_est{{$turno->idnumber}}" onclick="hideupdaterolest('{{$turno->idnumber}}')"><i class="fa fa-close"> </i> Cancelar</a>
                                 <a class="btn btn-primary" id="btn_habilityEditRol_Est{{$turno->idnumber}}" data-state="" onclick="editRolEstudentAudiencia('{{$turno->idnumber}}')"><i class="fa fa-edit"> </i>Editar</a>
-                            </td>
+                            </td> 
                             @endif
                         </tr>
                        

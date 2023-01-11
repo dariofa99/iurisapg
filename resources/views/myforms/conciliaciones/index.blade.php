@@ -150,7 +150,7 @@
         Estado
     </th>
     <th>
-        Fecha radicado
+        Conciliador/Asistente
     </th>
     <th>
         Acciones
@@ -160,7 +160,13 @@
     @foreach($conciliaciones as $key => $conciliacion)
     <tr>
         <td>
-            {{$conciliacion->num_conciliacion}}
+          <div class="container_img">
+            <img src="{{asset('dist/img/folder_icon.png')}}" alt="">
+            <span>
+              {{$conciliacion->num_conciliacion}}
+            </span>
+          </div>
+       
         </td>
         <td>
             @if(count($conciliacion->usuarios()->where('tipo_usuario_id',205)->get())>0)
@@ -179,10 +185,25 @@
         </td>
         
         <td>
-            {{ $conciliacion->fecha_radicado =='0000-00-00' ? "Sin fecha": getSmallDateWithHour($conciliacion->fecha_radicado)}}
+           
+          @if(count($conciliacion->usuarios()->whereIn('tipo_usuario_id',[203,204])
+         // ->where("conciliacion_has_user.estado_id",)
+          ->get())>0)
+          {{$conciliacion->usuarios()
+          ->whereIn('tipo_usuario_id',[203,204])
+          ->orderBy('conciliacion_has_user.created_at','desc')
+          ->first()->name}}
+          {{$conciliacion->usuarios()
+          ->whereIn('tipo_usuario_id',[203,204])
+          ->orderBy('conciliacion_has_user.created_at','desc')
+          ->first()->lastname}}
+          @else
+          Sin usuarios
+          @endif
+        
         </td>
         <td>
-            <a href="/conciliaciones/{{$conciliacion->id}}/edit" class="btn btn-primary">Editar</a>
+            <a href="/conciliaciones/{{$conciliacion->id}}/edit" class="btn btn-sm btn-primary">Abrir</a>
         </td>
     </tr>
     @endforeach

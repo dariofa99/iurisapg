@@ -24,4 +24,9 @@ class File extends Model
         ->withPivot('id','concepto','file_id','type_status_id','user_id')->withTimestamps(); 
      } 
 
+     public function userinestado(){
+      return $this->belongsToMany(User::class,'conciliacion_estados_files','file_id','user_id')
+      ->withPivot('id','file_id','con_status_id','user_id','conciliacion_id')->withTimestamps(); 
+   } 
+
 }

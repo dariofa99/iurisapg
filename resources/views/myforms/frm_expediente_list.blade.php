@@ -87,7 +87,7 @@
 
               <option @if(isset($request['tipo_busqueda']) and $request['tipo_busqueda'] == 'fecha_rango' ) selected @endif  value="fecha_rango">Rango Fechas</option>
               
-              <option @if((isset($request['tipo_busqueda']) and $request['tipo_busqueda'] == 'all'))) selected @endif value="all">Todo</option>
+              <option @if((isset($request['tipo_busqueda']) and $request['tipo_busqueda'] == 'all')) selected @endif value="all">Todo</option>
               
 
             </select>
@@ -120,7 +120,7 @@
                    {!!Form::select('data',[],null,['class' => ' input-search  selectpicker input-select disabled-fun1', 'data-live-search'=>'true', 'required' => 'required','id'=>'select_data_users', 'data-width'=>'500px', 'data-live-search-placeholder'=>'Escriba el nombre',$disb] ); !!}
                 </div> 
             </div>
-
+ 
             <div id="input_select_consultantes" class="inputs" @if(isset($request['tipo_busqueda']) and ($request['tipo_busqueda'] == 'consultante' || $request['tipo_busqueda'] == 'idnumber_doc')) style="display: block;" <?php $disb2 = '' ?> @else style="display: none;"  <?php $disb2 = 'disabled' ?> @endif>
                 <div class="input-group">
                    {!!Form::select('data',[],null,['class' => ' input-search  selectpicker input-select disabled-fun2', 'data-live-search'=>'true', 'data-select-origen'=>'consultante', 'required' => 'required','id'=>'select_data_consultantes','data-width'=>'500px','data-live-search-placeholder'=>'Escriba el nombre',$disb2] ); !!}

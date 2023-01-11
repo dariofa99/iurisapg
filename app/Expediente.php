@@ -372,16 +372,55 @@ class Expediente extends Model
         ->orderBy('fecha_asig','desc')->first();  */
         $asig = $this->getAsignacion();
         $response = [];
+        $periodo = Periodo::join('sede_periodos as sp', 'sp.periodo_id', '=', 'periodo.id')
+            ->where('sp.sede_id', session('sede')->id_sede)
+            ->where('estado', true)
+            ->first();
         try {
-            $fecha_asig = Carbon::parse($asig->fecha_asig);
-            $fecha_asig->addDays(31);
             $now = Carbon::now();
-            $days = $now->diffInDays($fecha_asig, false);
+            $vacaciones_text = DB::table("vacaciones_periodo")            
+            ->whereDate('fecha_fin','>=',$now)
+            ->where("periodo_id",$periodo->id)->first();
+            $fecha_asig = Carbon::parse($asig->fecha_asig); 
+            $fecha_max = Carbon::parse($asig->fecha_asig)->addDays(31);            
+            $_vacaciones = DB::table("vacaciones_periodo")            
+            ->whereDate('fecha_inicio','>=',$fecha_asig)
+            ->whereDate('fecha_fin','<=',$fecha_max)
+            ->where("periodo_id",$periodo->id)->first();
+            if($_vacaciones){
+                $fecha_vaca_in = Carbon::parse($_vacaciones->fecha_inicio);
+                $fecha_vaca_fin = Carbon::parse($_vacaciones->fecha_fin);
+                $days_vac = $fecha_vaca_in->diffInDays($fecha_vaca_fin, false);
+                $fecha_max->addDays($days_vac);
+                $days = $now->diffInDays($fecha_max, false);                
+            }else{
+            $_vacaciones = DB::table("vacaciones_periodo")            
+            ->whereDate('fecha_inicio','<=',$fecha_max)
+            ->whereDate('fecha_fin','>=',$fecha_max)
+            ->where("periodo_id",$periodo->id)->first();
+                if($_vacaciones){
+                    $fecha_vaca_in = Carbon::parse($_vacaciones->fecha_inicio);
+                    $fecha_vaca_fin = Carbon::parse($_vacaciones->fecha_fin);
+                    if($fecha_max >  $fecha_vaca_in and $fecha_max <  $fecha_vaca_fin){
+                        $days_pas = $fecha_vaca_in->diffInDays($fecha_max, false);
+                        $days_vac = $fecha_vaca_in->diffInDays($fecha_vaca_fin, false);
+                        $days = $days_pas + $days_vac;
+                        //dd($days,$fecha_asig,$days_pas,$days_vac );
+                        if($fecha_vaca_fin < $now){
+                            $days = $fecha_vaca_fin->diffInDays($now, false);
+                            $days =   $days_pas - $days;                        
+                        }                   
+                    }                      
+                } else{
+                    $days = $now->diffInDays($fecha_max, false);
+                }              
 
+            }
+            $dias = $days;
             if ($days <= 0) {
                 if ($days == 0) {
                     $color = 'gray !important';
-                    $days = 'Evaluado por sistema';
+                    $days = 'Evaluado por sistema'; 
                     //$days = $now->diffInDays($fecha_asig,false);
                     if ($value) {
                         $days = true;
@@ -425,16 +464,22 @@ class Expediente extends Model
                     if ($value) {
                         $days = 30;
                     } else {
-                        $days = '30 Días';
+                        $days = '+30 Días';
                     }
                 }
             }
 
-            if ($item == 'color') {
+            if ($item == 'color') {                
+                if ($_vacaciones and $dias > 0 && $dias <= 10) {
+                    return $color = '#CB4335 !important';
+                }               
                 return $color;
             }
             if ($item == 'dias') {
-                return $days;
+                if ($value and $_vacaciones) {
+                    return $days;
+                }
+                return $vacaciones_text ? "Vacaciones" : $days;
             }
             return 'Función sin argumento';
         } catch (\ErrorException $e) {
@@ -571,6 +616,7 @@ class Expediente extends Model
 
     public function setNotActLimit($date = null)
     {
+        $fecha_limit = Carbon::now();
         $padresAct = DB::table('actuacions')
             ->join('revisiones_actuacion', 'actuacions.id', '=', 'revisiones_actuacion.parent_rev_actid')
             ->where([['actestado_id', '<>', '136'], ['actestado_id', '<>', '138'], ['actestado_id', '<>', '139'], ['actestado_id', '<>', '174'], ['actestado_id', '<>', '175'], ['actestado_id', '<>', '176'], ['actestado_id', '<>', '177'], ['actestado_id', '<>', '178'], ['actidnumberest', $this->expidnumberest], ['actexpid', $this->expid]])
@@ -584,6 +630,13 @@ class Expediente extends Model
             ->where('estado', true)
             ->first();
         if (count($padresAct) > 0) {
+            $periodo = Periodo::join('sede_periodos as sp', 'sp.periodo_id', '=', 'periodo.id')
+            ->where('sp.sede_id', session('sede')->id_sede)
+            ->where('estado', true)
+            ->first();
+            $vacaciones = DB::table("vacaciones_periodo")         
+            ->where("periodo_id",$periodo->id)->get();
+
             foreach ($padresAct as $key => $actpa) {
                 $hijosAct = DB::select(
                     DB::raw("SELECT rev_actid, actestado_id, actuacions.actfecha,actnombre,fecha_limit FROM actuacions, revisiones_actuacion
@@ -596,9 +649,18 @@ class Expediente extends Model
                     $percent = 100;
                     $date = Carbon::now()->format('Y-m-d');
                     $fecha_limit = Carbon::parse($hijosAct[0]->fecha_limit);
+                    if(count($vacaciones)>0){
+                        if($vacaciones[0]->fecha_inicio <= $fecha_limit && $vacaciones[0]->fecha_fin <= $fecha_limit ){                            
+                            $inicio = Carbon::parse($vacaciones[0]->fecha_inicio); //moment(vacaciones[0].fecha_inicio, 'YYYY-MM-DD');
+                            $fin = Carbon::parse($vacaciones[0]->fecha_fin);//moment(vacaciones[0].fecha_fin, 'YYYY-MM-DD');
+                            $days_vac = $inicio->diffInDays($fin, false);
+                            $fecha_limit->addDays($days_vac);                                         
+                        }
+                    }
+                    
+
                     if (count($hijosAct) > 0 and $hijosAct[0]->actestado_id != 104 and $hijosAct[0]->actestado_id != 101 and $hijosAct[0]->actestado_id != 139 and $hijosAct[0]->fecha_limit !== null and $fecha_limit < $date) {
-                        $hijos[] = $hijosAct;
-                        // dd( $date.'---'.$fecha_limit);
+                        $hijos[] = $hijosAct;                        
                         $actuacion = Actuacion::find($hijosAct[0]->rev_actid);
                         $data = [
                             'ntaaplicacion' => 0,
@@ -615,11 +677,13 @@ class Expediente extends Model
                             'tbl_org_id' => $actuacion->id,
                         ];
                         $actuacion->actestado_id = 139;
-                        $actuacion->save();
-                        $actuacion->asignarNotas($data);
+                        //$actuacion->save();
+                        //$actuacion->asignarNotas($data);
                     }
                 }
             }
+
+            return  $fecha_limit;
         }
         // dd($hijos);
         // return $hijos;

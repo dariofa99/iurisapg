@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Http\Requests\Request;
+use Illuminate\Database\Eloquent\Collection;
 
 interface UsersService {
 
@@ -9,5 +10,6 @@ interface UsersService {
     public function getDocentes():Array;
     public function getEstudiantes():Array;
     public function getDocentesByRama($rama):Array;
+    public function getUsersByPermissionName($permission):Collection; 
 
 }

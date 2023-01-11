@@ -11,14 +11,20 @@ use App\Turno;
 use App\TablaReferencia;
 use App\Conciliacion;
 use App\AudienciaConciliacion;
+use App\Notifications\SolicitudEstudiantesConciliacion;
+use App\PdfReporte;
+use App\PdfReporteDestino;
 use App\SalasAlternasConciliacion;
 use App\Sede;
 use Facades\App\Facades\NewPush;
 use App\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Notification;
+use App\Traits\PdfReport as TraitPdf;
 class AudienciaController extends Controller
 {
+    use TraitPdf;
     public function getSalasAudiencia(Request $request,$id,$cont){
         $conciliacion = Conciliacion::find($id);
         $numusers=$conciliacion->usuarios->count();
@@ -194,6 +200,7 @@ class AudienciaController extends Controller
         $user = User::where('idnumber',$request->id)->first();
         $state = '0';
         $action = '';
+        $conciliacion = Conciliacion::find($request->idconciliacion);
         $conciliacion_has_user = DB::table('conciliacion_has_user')->where([
             'conciliacion_id' => $request->idconciliacion,
             'user_id' => $user->id,
@@ -215,17 +222,42 @@ class AudienciaController extends Controller
             }
         } else {
             if ($request->idrol != '000') {
-                $insert_conciliacion_has_user = DB::table('conciliacion_has_user')->insert([
+                $conciliacion->usuarios()->attach($user->id,[
                     'tipo_usuario_id' => $request->idrol,
                     'conciliacion_id' => $request->idconciliacion,
                     'user_id' => $user->id,
-                    'estado_id'=>1
+                    'estado_id'=>229
                 ]);
-                $state = $insert_conciliacion_has_user;
+              /*   $insert_conciliacion_has_user = DB::table('conciliacion_has_user')->insert([
+                    'tipo_usuario_id' => $request->idrol,
+                    'conciliacion_id' => $request->idconciliacion,
+                    'user_id' => $user->id,
+                    'estado_id'=>229
+                ]); */
+                $state = 1;
                 $action = 'insert';
             }
         }
-        return compact('state','action');
+        //$users = User::whereIn('email',$request->correo_send)->get();
+        $reportes = PdfReporteDestino::whereHas('reporte', function (Builder $query) {
+            $query->where('is_copy', 0);
+        })
+            /* ->whereHas('temporales', function (Builder $query) use ($request) {
+                $query->where('conciliacion_id', $request->conciliacion_id);
+            }) */
+            //    ->with('users')
+            ->where('tabla_destino','=','conciliaciones_email')
+            ->where('categoria',$request->categoria)
+            ->get();
+         //   return response()->json($request->all());
+        
+        if(count($reportes) > 0 AND $request->idrol=='203') $reporte = PdfReporte::find($reportes[0]->reporte_id);
+        if(count($reportes) > 0 AND $request->idrol=='204') $reporte = PdfReporte::find($reportes[0]->reporte_id);
+        if(isset($reporte)) {
+            $bodytag =  $this->getBody($reporte,$conciliacion);    
+            Notification::send($user, new SolicitudEstudiantesConciliacion( $bodytag ,$conciliacion ));
+        }
+        return compact('state','action','user');
 
     }
 

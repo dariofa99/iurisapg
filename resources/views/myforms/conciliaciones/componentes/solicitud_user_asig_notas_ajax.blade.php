@@ -26,6 +26,12 @@ $tipos=[];
       @endforeach
       
     </td>
+    <td>
+      <span class="badge" style="display: block; background-color:{{$user->estado_conciliacion()->where(['tipo_usuario_id'=>$user->pivot->tipo_usuario_id,'conciliacion_id'=>$conciliacion->id])->first()->color}}">
+          {{$user->estado_conciliacion()->where(['tipo_usuario_id'=>$user->pivot->tipo_usuario_id,'conciliacion_id'=>$conciliacion->id])->first()->ref_nombre}}
+
+      </span>
+  </td>
     <td>{{getSmallDateWithHour($user->pivot->created_at)}}</td>
     <td>   
 

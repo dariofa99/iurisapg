@@ -20,6 +20,8 @@ use App\ConciliacionEstadoFileCompartido;
 use App\ConciliacionEstadoReporteGenerado;
 use App\Expediente;
 use App\Mail\VerifyPdfReportConciliacion;
+use App\Notifications\RespuestaRadicarConciliacion;
+use App\Notifications\SolicitudRadicarConciliacion;
 use App\PdfReporte;
 use App\PdfReporteDestino;
 use App\Periodo;
@@ -30,16 +32,21 @@ use PDF;
 use Str;
 use Storage;
 use App\SalasAlternasConciliacion;
+use App\Services\UsersService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 class ConciliacionesController extends Controller
 {
     use TraitPdf;
-    public function __construct()
+    private $userService;
+
+    public function __construct(UsersService $userService)
     {
+      $this->userService = $userService;
       $this->middleware('permission:ver_conciliaciones',   ['only' => ['index']]);
       $this->middleware('auth',['except'=>['downloadFile']]);
     }
@@ -58,7 +65,10 @@ class ConciliacionesController extends Controller
         ->where(function($query){
             if(!currentUser()->can('ver_all_conciliaciones')){
                 $query->whereHas('usuarios',function($query1){
-                    $query1->where('user_id',auth()->user()->id);
+                    $query1->where([
+                        'user_id'=>auth()->user()->id,
+                ]);
+                
                 });
             }       
         })
@@ -85,8 +95,8 @@ class ConciliacionesController extends Controller
         $periodo = Periodo::where('estado','1')
         ->first();
         $conciliacion = Conciliacion::create([
-            'fecha_radicado'=>date('Y-m-d'),
-            'num_conciliacion'=>"0000-00",
+            //'fecha_radicado'=>Carbon::parse('1900-01-01 00:00:00'),
+            'num_conciliacion'=>"CCEAH-0-00-00",
             'categoria_id'=>173,
             'estado_id'=>174,
             'periodo_id'=> $periodo->id,
@@ -222,7 +232,7 @@ $estudiantes = $this->getEstudiantes();
     ->select("turnos.id as id",'users.idnumber','users.cursando_id','users.id as estudiante_id','users.name','users.lastname',
     'trnid_color','rc.ref_value as color_ref_value','rc.ref_nombre as color_nombre','cursos.id as curso_id',
     'cursos.ref_nombre as curso_nombre','rh.ref_nombre as horario_nombre','trnid_horario','rd.ref_nombre as dia_nombre','trnid_dia')
-    ->orderBy('trnid_color','asc')->get();
+    ->orderBy('trnid_color','desc')->get();
  
     $conciliacion = Conciliacion::find($id);
     $numusers=$conciliacion->usuarios->count();
@@ -287,23 +297,29 @@ $estudiantes = $this->getEstudiantes();
        $conciliacion = Conciliacion::find($request->conciliacion_id);
        $conciliacion->estado_id = $request->type_status_id;
        if($request->type_status_id == 181 )  $conciliacion->auto_admisorio = intval($conciliacion->auto_admisorio)+1;
+       
         if($request->type_status_id == 178 ){
-            $periodo = Periodo::where('estado','1')->first();      
-            $year = Date('Y');
-            $month = Date('m');       
+            $periodo = Periodo::where("estado",1)->first();
+            $date_fin = Carbon::parse($periodo->prdfecha_fin)->year;
+            $date_ini = Carbon::parse($periodo->prdfecha_inicio)->year;
             $con_ul = Conciliacion::where('periodo_id',$periodo->id)
-            ->where('num_conciliacion','<>','0000-00')
-            ->orderBy('created_at','desc')->first();
-            
+            ->where('num_conciliacion','<>','CCEAH-000-00-00')
+            ->orderBy('created_at','desc')->first();     
             if($con_ul==null){
-                $id_num ='01';
+                $id_num ='001';
             }else{
-                $id_num =  explode('-',$con_ul->num_conciliacion)[1] + 1;
-                if($id_num<10)  $id_num =  '0'.$id_num;
+                $id_num = intval(explode('-',$con_ul->num_conciliacion)[1]) + 1;
+                if($id_num<10)  $id_num =  '00'.$id_num;
+                if($id_num>10 and $id_num<100)  $id_num =  '0'.$id_num;
+                $numero = "CCEAH-".$id_num."-".substr($date_ini,-2)."-".substr($date_fin,-2);
+                $conciliacion->num_conciliacion = $numero;
             }
+
+            
+
+
            // dd($id_num);
-            if($conciliacion->num_conciliacion=='0000-00')$conciliacion->num_conciliacion = $year."".$month."-".$id_num;
-            if($conciliacion->fecha_radicado=='0000-00-00')$conciliacion->fecha_radicado = date('Y-m-d');
+            
         }
        $conciliacion->save();   
 
@@ -383,8 +399,21 @@ $estudiantes = $this->getEstudiantes();
             $actuacion = $conciliacion->actuaciones[0];
             $actuacion->actestado_id = $conciliacion->estado_id;
             $actuacion->save();
+            if(isset($file)){
+                $actuacion->files()->attach($file); 
+            }
         };
     }
+
+    if($conciliacion->estado_id==225){
+       
+        //if($conciliacion->fecha_radicado=='0000-00-00')
+        $conciliacion->fecha_radicado = date('Y-m-d H:i:s');
+        $conciliacion->save();
+        $users = $this->userService->getUsersByPermissionName('recibir_correos_conciliacion_r');
+        Notification::send($users, new SolicitudRadicarConciliacion($estado));
+    }
+
         $view = view('myforms.conciliaciones.componentes.conciliacion_estados_ajax',compact('conciliacion'))->render();
         return response()->json([
             'view'=>$view
@@ -498,11 +527,13 @@ $estudiantes = $this->getEstudiantes();
             $conciliacion->files()->attach($file,[
                 'type_status_id'=>1,
                 'concepto'=>$request->concept,
-                'user_id'=>auth()->user()->id 
+                'user_id'=>auth()->user()->id ,
+                "category_id"=>$request->category_id,
             ]);                   
 		}
+        $category = $request->category_id;
         $conciliacion = Conciliacion::find($request->conciliacion_id);
-        $view = view("myforms.conciliaciones.componentes.anexos_ajax",compact("conciliacion"))->render();
+        $view = view("myforms.conciliaciones.componentes.anexos_ajax",compact("conciliacion",'category'))->render();
         return response()->json([
             'view'=>$view
         ]);
@@ -733,7 +764,7 @@ public function generateDocuments(Request $request){
                 $name = $reporte->nombre_reporte;
                 $config = json_decode($reporte->configuraciones); 
             }else{                            
-                $bodytag = $this->getBody($reporte,$conciliacion);
+                $bodytag = $this->getBody($pdf_repor->reporte,$conciliacion);
                 $name = $pdf_repor->reporte->nombre_reporte;
                 $config = json_decode($pdf_repor->reporte->configuraciones); 
             }
@@ -903,4 +934,32 @@ public function asigExpediente(Request $request){
     }  
 }
 
+public function prueba(Request $request){
+  
+    $us = $this->userService->getUsersByPermissionName("recibir_correos_conciliacion_r");
+    dd($us);
+    $us = json_decode($us);
+    return response()->json($us);
+    $mensaje =  ConciliacionEstado::find(153);
+   Notification::send($us, new SolicitudRadicarConciliacion( $mensaje ));
+
+}
+
+public function enviarCorreo(Request $request){
+    $conciliacion = Conciliacion::find($request->conciliacion_id);
+    if($request->has('correo_send')){
+        $users = User::whereIn('email',$request->correo_send)->get();   
+    }else{
+        $users = $this->userService->getUsersByPermissionName('recibir_correos_conciliacion_r');       
+    }
+    if($request->has('pivot_id')){
+        $update = $conciliacion->usuarios()
+        ->where('conciliacion_has_user.id',$request->pivot_id)->first();
+        $update->pivot->estado_id = $request->user_estado_id;
+        $update->pivot->save();
+    }
+     Notification::send($users, new RespuestaRadicarConciliacion( $request->cuerpo_correo ,$conciliacion ));
+
+    return response()->json($users);
+}
 } 

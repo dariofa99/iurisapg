@@ -660,7 +660,7 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
       
         if($days<=0 || $days===true) {   
          
-          if($expediente->expestado_id != 5 AND $expediente->expestado_id != 2){
+        if($expediente->expestado_id != 5 AND $expediente->expestado_id != 2){
         $notas =  $expediente->get_has_nota_final();
        
         if (count($notas) <= 0) {
@@ -683,9 +683,9 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
                   'docidnumber'=>\Auth::user()->idnumber, 
                   'tbl_org_id'=>$expediente->id, 
                 ]; 
-          $expediente->asignarNotas($data);
-          $expediente->expestado_id = 5;
-          $expediente->save();
+         // $expediente->asignarNotas($data);
+            $expediente->expestado_id = 5; 
+         // $expediente->save();
         }
         }
       }
@@ -1494,9 +1494,10 @@ if ((!$request->all()) || (!$request->get('tipo_busqueda'))) {
     if($expediente){
       $periodo = Periodo::where('estado','1')
       ->first();
+
       $conciliacion = Conciliacion::create([
-        'fecha_radicado'=>date('Y-m-d'),
-        'num_conciliacion'=>"0000-00",
+        //'fecha_radicado'=>date('Y-m-d'),
+        'num_conciliacion'=>"CCEAH-000-00-00",
         'categoria_id'=>173,
         'estado_id'=>174, 
         'periodo_id'=> $periodo->id,

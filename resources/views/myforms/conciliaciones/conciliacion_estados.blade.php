@@ -9,9 +9,9 @@
 <div class="col-md-7">
 
 </div>
-    <div class="col-md-3">
-        <input type="button" value="Descargar todos los documentos" class="btn btn-default btn-block btn-sm" id="btn_download_all_pfd">
-    </div>
+    {{-- <div class="col-md-3">
+        <input type="button" value="Descargar todos los documentos" class="btn btn-info btn-block btn-sm" id="btn_download_all_pfd">
+    </div> --}}
 </div>
 
 <div class="row">

@@ -11,7 +11,7 @@
         @if(($conciliacion->estado_id==174 || $conciliacion->estado_id==176 || $conciliacion->estado_id==194))
             @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
                 || ((currentUserInConciliacion($conciliacion->id,['autor','auxiliar']))))
-            <button type="button" id="btn_create_document" class="btn btn-primary btn-sm pull-right">Agregar anexo</button>
+            <button type="button" data-category="232" id="btn_create_document" class="btn_create_document btn btn-primary btn-sm pull-right">Agregar anexo</button>
             @endif
         @endif
         
@@ -35,7 +35,9 @@
                 </th>
             </thead>
             <tbody>
-                @include('myforms.conciliaciones.componentes.anexos_ajax')
+                @include('myforms.conciliaciones.componentes.anexos_ajax',[
+                    'category'=>232
+                ])
             </tbody>
         </table>
     </div>

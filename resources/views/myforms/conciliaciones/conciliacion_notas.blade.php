@@ -17,6 +17,9 @@
                       Tipo
                    </th>
                    <th>
+                    Estado
+                 </th>
+                   <th>
                        Fecha asignación
                    </th>
                  {{--   <th>

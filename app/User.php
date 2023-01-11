@@ -86,6 +86,11 @@ class User extends Authenticatable
        return $this->belongsToMany(TablaReferencia::class,'conciliacion_has_user','user_id','tipo_usuario_id')
        ->withPivot('user_id','tipo_usuario_id','conciliacion_id')->withTimestamps();
     } 
+    public function estado_conciliacion()    {
+        return $this->belongsToMany(TablaReferencia::class,'conciliacion_has_user','user_id','estado_id')
+        ->withPivot('user_id','tipo_usuario_id','conciliacion_id')->withTimestamps();
+     } 
+
     public function tipo_pdf_firmante()    {
        return $this->belongsToMany(TablaReferencia::class,'pdf_reportes_users','user_id','tipo_firma_id')
        ->withPivot('id','user_id','tipo_usuario_id','conciliacion_id','token','codigo','tipo_firma_id')->withTimestamps();
@@ -93,7 +98,7 @@ class User extends Authenticatable
     public function conciliaciones()
     {
        return $this->belongsToMany(Conciliacion::class,'conciliacion_has_user','user_id','conciliacion_id')
-       ->withPivot('user_id','tipo_usuario_id','conciliacion_id','estado_id')->withTimestamps();
+       ->withPivot('user_id','tipo_usuario_id','conciliacion_id','estado_id','id')->withTimestamps();
     } 
 
     public function estado_civil()

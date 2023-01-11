@@ -29,10 +29,10 @@
                       </div> --}}
                      <h4>
                         {{$notification->data["type_notification"]}}
-                        <small><i class="fa fa-clock-o"> </i> {{TiempoTrans($notification->created_at)}}</small>
+                        
                       </h4>
                       <p> {{substr($notification->data["mensaje"], 0, 100) }} </p> 
-                      
+                      <small><i class="fa fa-clock-o"> </i> {{TiempoTrans($notification->created_at)}}</small>
                     </a>
                   </li>
                   <!-- end message -->                  

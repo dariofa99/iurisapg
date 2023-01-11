@@ -16,7 +16,8 @@ class PdfReporte extends Model
         'report_keys',
         'nombre_reporte',
         'configuraciones',
-        'is_copy'
+        'is_copy',
+        'categoria_id'
     ];
 
     public function aditional_data()

@@ -14,7 +14,8 @@ class PdfReporteDestino extends Model
     protected $fillable = [ 
         'tabla_destino',
         'reporte_id',
-        'status_id'
+        'status_id',
+        'categoria'
     ];
 
     public function reporte()

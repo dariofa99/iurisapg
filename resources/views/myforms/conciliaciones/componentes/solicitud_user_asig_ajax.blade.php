@@ -3,7 +3,10 @@
   
     <td>{{$user->name}} {{$user->lastname}}</td>
     <td>{{$user->email}}</td>
-    <td>{{$user->tipo_conciliacion()->where('tipo_usuario_id',$user->pivot->tipo_usuario_id)->first()->ref_nombre}}</td>
+    
+    <td>{{$user->tipo_conciliacion()->where(['tipo_usuario_id'=>$user->pivot->tipo_usuario_id,'conciliacion_id'=>$conciliacion->id])->first()->ref_nombre}}</td>
+   
+    
     <td>{{getSmallDateWithHour($user->pivot->created_at)}}</td>
     <td width="20%">
         @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai'))))
@@ -21,7 +24,7 @@
             Quitar sanción
         </button> 
         @endif
-        
+         
 @endif
 
         @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))

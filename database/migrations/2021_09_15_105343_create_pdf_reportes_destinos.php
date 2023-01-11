@@ -22,6 +22,7 @@ class CreatePdfReportesDestinos extends Migration
             $table->integer('status_id')->unsigned();
             $table->foreign('status_id')->references('id')->on('referencias_tablas')
             ->onDelete('cascade')->onUpdate('cascade');
+            $table->string('categoria')->nullable(); 
             $table->timestamps();
         });
     }

@@ -3,6 +3,7 @@ namespace App\Repositories;
 
 use App\Services\UsersService;
 use App\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -29,6 +30,21 @@ class UsersRepository extends BaseRepository implements UsersService{
           ->orderBy('users.created_at', 'desc')->get();
 
         return $user->toArray();
+    }
+
+    
+    public function getUsersByPermissionName($permission) : Collection{
+
+      $users = User::join('role_user as ru', 'users.id','=', 'ru.user_id')
+        ->join('roles','roles.id','=','ru.role_id')
+        ->join('permission_role','permission_role.role_id','=','roles.id')
+        ->join('permissions','permissions.id','=','permission_role.permission_id')
+        //->where('users.type_status_id','<>',15)
+        ->where('permissions.name',$permission)
+        ->select("users.id",'users.email','users.name')
+        ->get();
+
+        return $users;
     }
 
     public function getDocentes(): array

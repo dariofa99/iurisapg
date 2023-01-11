@@ -58,10 +58,9 @@ function fechasSem($criterio)
 function TiempoTrans($criterio)
 {       
 
-    Carbon::setLocale('es');
-       
-    $date=Carbon::now(); 
-    $fecha = $criterio->diffForHumans();  
+    Carbon::setLocale('es');       
+    $date=Carbon::parse($criterio); 
+    $fecha = $date->diffForHumans();  
 
     return $fecha;
 
@@ -84,6 +83,24 @@ function getSmallDateWithHour($date){
     return $fecha;
 }
 
+
+function getLongDateWithHour($date){
+    $created_at = Carbon::parse($date);   
+
+    $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    $fecha = $created_at->day.' '.$meses[($created_at->month)-1]." del ".$created_at->year." a las ".$created_at->format('g:i A');
+   
+    return $fecha;
+}
+
+function getMonthAndYear($date){
+    $created_at = Carbon::parse($date);   
+
+    $meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+    $fecha = $meses[($created_at->month)-1]." de ".$created_at->year;
+   
+    return $fecha;
+}
 
 function fechaActual()
 {       

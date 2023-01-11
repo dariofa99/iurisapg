@@ -113,8 +113,8 @@ var estadoBtn='';
 var btnsParent ='';
 var btnsChildren = '';
 var estado_exp = $("#expestado_id").val();
-console.log(estado_exp)
-	$(res).each(function(key, value){
+
+	$(res.actuaciones).each(function(key, value){
 		var aprobado = false;
 		var revisado = false;
 		var firmado = false;
@@ -147,15 +147,22 @@ console.log(estado_exp)
 		}else{
 			textodescarga="Sin Archivo";
 			btnDescargaArchivoEs = "<label>"+textodescarga+"</label>";
+			if(value.parent.files.length>0){
+				rutadescarga= "/descargar/documento/"+value.parent.files[0].id;
+				textodescarga="Descargar archivo";
+				btnDescargaArchivoEs ="<a href='"+rutadescarga+"' target='_blank' >"+textodescarga+"</a>";
+			}
 		}
 		var btn_detalles = "<button "+estadoBtn+" type='button' value="+value.parent.id+"  OnClick='Mostrar(this,0,\"myModal_act_details\")' class='btn btn-success btn-sm'> Detalles </button>";
 		var btn_editar = " <button "+estadoBtn+" type='button' value="+value.parent.id+"  OnClick='Mostrar(this,0,\"myModal_act_edit\");' class='btn btn-primary btn-sm'  > Editar </button> ";
 		
 		//Botones
-		if(value.parent.actcategoria_id==223 && value.parent.conciliaciones.length > 0){			
+		//console.log(value.user.name);
+		if((value.user.name == 'docente' || value.user.name == 'docente_prueba') && value.parent.actestado_id!='177'  && value.parent.actcategoria_id==223 && value.parent.conciliaciones.length > 0){
+					
 		  btn_detalles = "<a style='margin-left:2px' "+estadoBtn+" target='_blank' href='/conciliaciones/"+value.parent.conciliaciones[0].id+"/edit' value="+value.parent.id+" class='btn btn-success btn-sm'> Detalles </a>";
 		}
-		if(value.parent.actcategoria_id==223 && (value.parent.actestado_id==176 || value.parent.actestado_id==174) && value.parent.conciliaciones.length > 0){			
+		if(value.parent.actcategoria_id==223 && (value.parent.actestado_id==177 || value.parent.actestado_id==176 || value.parent.actestado_id==174 || value.parent.actestado_id==175) && value.parent.conciliaciones.length > 0){			
 			btn_editar = "<a style='margin-left:2px' "+estadoBtn+" target='_blank' href='/conciliaciones/"+value.parent.conciliaciones[0].id+"/edit' value="+value.parent.id+" class='btn btn-primary btn-sm'> Editar </a>";
 		}
 		var btn_eliminar = " <button "+estadoBtn+" type='button' value="+value.parent.id+"  OnClick='eliminarAct(this);' class='btn btn-danger btn-sm'  >Eliminar</button> " ;
@@ -199,7 +206,7 @@ console.log(estado_exp)
 				if (value.docenteasig) {
 					btnsParent +=  btn_revisar;;
 				}  
-				console.log(btnsParent);
+				
 			}
 			if (value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
 				btnsParent = btn_detalles + btn_revisar + btn_editar + btn_eliminar;
@@ -208,9 +215,9 @@ console.log(estado_exp)
 
 
 			}else if(value.parent.actestado_id=='102'){				
-				color='yellow';
+				color='blue';
 				estadoBtn = '';
-				if (value.user.name == 'estudiante') {
+				if (value.user.name == 'estudiante') { 
                 btnsParent = btn_detalles; 
 				btnsParent += btn_ag_correccion;
 				btnsParent += btn_add_anexo;
@@ -373,7 +380,8 @@ console.log(estado_exp)
 					}
 
 			}else if(value.parent.actestado_id==176){
-					
+				//realizar correcciones
+
 				color='#4FEFEE';
 				if (value.user.name == 'estudiante') {		
 					//const btn_ag_correccion = " <button " + estadoBtn + " type='button' value=" + value.parent.id + "  OnClick='Mostrar(this," + value.parent.actestado_id + ",\"myModal_act_add_revision\");' class='btn btn-primary btn-sm' > Agr. Actuación </button> ";
@@ -381,7 +389,8 @@ console.log(estado_exp)
 				
 				}
 				if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {						
-					btnsParent = btn_detalles; 					
+					btnsParent = btn_detalles; 		
+					btnsParent += btn_edit_revision;			
 				}
 				 if (value.user.name == 'amatai' || value.user.name =='diradmin' || value.user.name == 'dirgral') {
 					btnsParent = btn_detalles;
@@ -397,7 +406,7 @@ console.log(estado_exp)
 				color='#4FEFEE';
 				if (value.user.name == 'estudiante') {		
 					//const btn_ag_correccion = " <button " + estadoBtn + " type='button' value=" + value.parent.id + "  OnClick='Mostrar(this," + value.parent.actestado_id + ",\"myModal_act_add_revision\");' class='btn btn-primary btn-sm' > Agr. Actuación </button> ";
-					btnsParent = btn_detalles ;
+					btnsParent = btn_detalles + btn_editar ;
 				
 				}
 				if (value.user.name == 'docente' || value.user.name == 'docente_prueba') {					
@@ -463,7 +472,7 @@ var con=0;
 							textodescarga="Descargar Archivo ";
 							btnDescargaArchivoChild ="<a href='"+rutadescarga+"' target='_blank' >"+textodescarga+"</a> ";
 						}else{
-
+							
 							rutadescarga= "#"+child.id;
 							textodescarga="Sin Archivo";
 							btnDescargaArchivoChild ="<label>Sin archivo</label> ";
@@ -651,7 +660,7 @@ var con=0;
 							actuacion_estado_child='No especificado';
 							color_child='ora';
 							estadoBtn = '';
-
+ 
 						}
 con++;			
 						
@@ -675,14 +684,19 @@ con++;
 		           	});
 
                 }
-		var dias = getDiffdays(value.parent.fecha_limit, value.parent.actfecha);
-		var color_bg = getDiffdaysColor(value.parent.fecha_limit, value.parent.actfecha,value.parent.id)   
-		if((dias<0 || value.children.length > 0) || (value.parent.actcategoria_id == 223)){
-			//alert(value.parent.actcategoria_id )
-			dias = value.parent.fecha_limit;	
-			color_bg = 'bg-gray';
-		} 
-		
+				
+
+					var dias = getDiffdays(value.parent.fecha_limit, value.parent.actfecha);
+					var color_bg = getDiffdaysColor(value.parent.fecha_limit, value.parent.actfecha,value.parent.id)  ;
+					var vacdia = 0;
+					if(res.vacaciones.length > 0){
+						vacdia = getDiffVacations(value.parent.fecha_limit,res.vacaciones);					
+					}
+					dias+=vacdia;
+					if((dias<0 && value.parent.actestado_id !=176)  || value.children.length > 0){						
+						dias = value.parent.fecha_limit == null ? moment(value.parent.created_at).format('MM/DD/YYYY'): value.parent.fecha_limit;	
+						color_bg = 'bg-gray';
+					} 
 				tabla.prepend("<tr role='row' class='odd row-parent'><td>"+ value.parent.actnombre +
 				"</td><td>"+value.parent.actdescrip+"</td><td><span style='background-color:"+color+"' class='pull-center badge'>"+
 				value.ref_nombre + "</span></td><td><span class='badge "+color_bg+"'>" +
@@ -697,6 +711,7 @@ con++;
 }
 
 function getDiffdays(fecha_limit,date_2=''){
+
 	if(fecha_limit!=null){
 		var given = moment(fecha_limit,"YYYY-MM-DD");
 		var current = moment().startOf('day');
@@ -704,6 +719,19 @@ function getDiffdays(fecha_limit,date_2=''){
 		return dias;
 	}
 	return date_2;	
+}
+
+function getDiffVacations(fecha_limit,vacaciones){
+	
+	if(vacaciones[0].fecha_inicio <= fecha_limit && vacaciones[0].fecha_fin <= fecha_limit ){
+		var admission = moment(vacaciones[0].fecha_inicio, 'YYYY-MM-DD');
+		var discharge = moment(vacaciones[0].fecha_fin, 'YYYY-MM-DD');
+		return moment.duration(discharge.diff(admission)).asDays();
+			 // 
+		//console.log(days,admission,discharge);
+	}
+	
+	return 0;	
 }
 
 function getDiffdaysColor(fecha_limit,actfecha='',id){
@@ -724,8 +752,7 @@ function getDiffdaysColor(fecha_limit,actfecha='',id){
 		}else if(x_percent<0){
 			color = 'bg-gray';
 			
-		}
-		//console.log(color);
+		}	
 		return color;
 	}
 	return actfecha;	
@@ -795,7 +822,11 @@ function Mostrar(btn,child_estado,modal){
 		$("#"+modal+" #actdescrip").text(res.actdescrip);
 		$("#actestado_id > option[value="+ res.actestado_id +"]").attr('selected',true);
 		$("#actestado > option[value="+ res.actestado_id +"]").attr('selected',true);
-	//	console.log(res)
+		if(res.actestado_id==176){//$("#actestado").attr('selected',true);
+			$("#actestado").prop('disabled',false).val(102);
+		}
+		
+		//alert(res.actestado_id)
 		if(res.actestado_id==102) $("#fecha_limit_doc").prop('disabled',false);
 
 		$("#actdocenrecomendac").text(res.actdocenrecomendac);
@@ -845,6 +876,9 @@ function llenarModalDetails(res){
 	$("#actdescrip_det").val(res.actdescrip);  
 	//$("#actestado_det > option[value="+ res.actestado_id +"]").attr('selected',true);
 	$("#actestado_det").val(res.actestado_id);
+	if(res.actestado_id==176){//$("#actestado").attr('selected',true);
+		$("#actestado_det").prop('disabled',true).val(102);
+	}
 	$("#fecha_limit_d").val(res.fecha_limit);
 	$("#label_nombre_docente").text(res.docente_update.name+' '+res.docente_update.lastname);
 	rutadescarga= "/actpdfdownload/"+res.id+"/docente";

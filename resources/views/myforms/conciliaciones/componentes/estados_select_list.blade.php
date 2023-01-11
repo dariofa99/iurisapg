@@ -17,18 +17,30 @@
     @endif
     @endif
 
+    @if(auth()->user()->hasRole('estudiante') || currentUser()->hasRole('diradmin') || currentUser()->hasRole('amatai'))
+    @if($conciliacion->estado_id==177)
+    <option value="225"> Solicitar radicado </option>    
+    @endif
+    @endif
+
     @endif
 
 
-    @if(((currentUser()->hasRole('diradmin') ||  currentUser()->hasRole('amatai'))))
+    @if(((currentUser()->hasRole('diradmin') ||  currentUser()->hasRole('amatai') ||  currentUser()->hasRole('secretaria'))))
    
-    @if($conciliacion->estado_id==194 || $conciliacion->estado_id==177)
+    @if($conciliacion->estado_id==194 || $conciliacion->estado_id==225)
     <option value="178"> Radicar </option>
+    <option value="228"> Solicitar correcciones </option>
     @endif
     @endif
+ 
 
-
-
+@if(((currentUser()->hasRole('diradmin') ||  currentUser()->hasRole('amatai') ||  currentUser()->hasRole('estudiante'))))
+   
+    @if($conciliacion->estado_id==228)
+    <option value="225"> Solicitar radicado </option>  
+    @endif
+    @endif
     
 
     @if(currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai'))

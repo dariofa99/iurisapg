@@ -27,21 +27,18 @@ $(document).ready(function (e) {
     var summernote = $(".summernote");
     items_delete = [];
     summernote.summernote({
-        /*toolbar: [
-            // [groupName, [list of button]]
-            ["style", ["bold", "italic", "underline", "clear"]],
-            ["font", ["strikethrough", "superscript", "subscript"]],
-
-            ["fontsize", ["fontsize"]],
-            ["color", ["color"]],
-            ["para", ["ul", "ol", "paragraph"]],
-            ["height", ["height"]],
-            ["fontname", ["fontname"]],
-            ["picture", ["picture"]],
-            ["table", ["table"]],
-        ], */
-        height: 427,
-        popover: {
+        toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'underline', 'clear']],
+            ['fontname', ['fontname']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            //['table', ['table']],
+            ['insert', ['link']],
+            ['view', ['fullscreen', 'codeview', 'help']],
+        ],
+        height: 327,
+       /*  popover: {
             image: [
                 [
                     "image",
@@ -63,9 +60,9 @@ $(document).ready(function (e) {
                 ["font", ["bold", "underline", "clear"]],
                 ["para", ["ul", "paragraph"]],
                 ["table", ["table"]],
-                ["insert", ["link", "picture"]],
+                ["insert", ["link"]],
             ],
-        },
+        }, */
         // maxHeight:460
     });
     $(".item_con").on("mousedown", function (params) {
@@ -251,7 +248,7 @@ $(document).ready(function (e) {
             time: "fa fa-clock-o",
             date: "fa fa-calendar",
             up: "fa fa-arrow-up",
-            down: "fa fa-arrow-down",
+            down: "fa fa-arrow-down", 
         },
         //daysOfWeekDisabled: [7],
         allowInputToggle: true,
@@ -2082,19 +2079,23 @@ return false;
         }
     });
 
-    $("#btn_create_document").on("click", function (e) {
-        $("#myformEditConciliacionAnexo").attr(
-            "id",
-            "myformCreateConciliacionAnexo"
-        );
+    $(".btn_create_document").on("click", function (e) {
+      
+        $("#myformEditConciliacionAnexo").attr("id","myformCreateConciliacionAnexo");
         $("#myformCreateConciliacionAnexo")[0].reset();
-        $("#myformCreateConciliacionAnexo input[name=concept]").val(
-            $(this).attr("data-concept")
-        );
+        $("#myformCreateConciliacionAnexo input[name=concept]").val($(this).attr("data-concept"));
+        $("#myformCreateConciliacionAnexo input[name=category_id]").remove();
         $("#myformEditConciliacionAnexo input[name=conciliacion_file]").prop(
             "required",
             true
         );
+        $("#myformCreateConciliacionAnexo").append(
+            $("<input>",{
+                type:'hidden',
+                value:$(this).attr("data-category"),
+                name:"category_id"
+            })
+        )
         $("#myformCreateConciliacionAnexo button[type=submit]").text("Crear");
         $("#myModal_create_document .modal-title").text("Creando anexo");
         $("#myModal_create_document").modal("show");
@@ -2735,7 +2736,7 @@ return false;
         {
             "conciliacion_id":$("#conciliacion_id").val()
         }
-        descargarAllPdfConcEstado(request)
+        //descargarAllPdfConcEstado(request)
      });
 
      $(".btn_detalles_us_con").on("click",function(e){
@@ -3221,7 +3222,7 @@ return false;
             if (result.value) {    
                 var request = { 
                     "type_status_id":178,
-                    "concepto":"Radicada por solicitante",
+                    "concepto":"Radicada por secretaría",
                     "conciliacion_id":$("#conciliacion_id").val()
                    
                 }   
@@ -3230,6 +3231,18 @@ return false;
           }); 
 
     });   
+
+    $("#btn_notificar_conci_est").on("click",function () {
+        $("#content_mail_notificacion_conciliacion").show();
+        $("#content_files_conciliacion").hide();
+        var request = {
+            'conciliacion_id':$("#conciliacion_id").val(),
+            'tabla_destino':'conciliaciones_email',
+            'status_id':$(this).attr("data-estado"),
+            'categoria':'mensaje_radicado'
+        }
+        getReportes(request,'content_form_correo');
+    });
 
     $("#btn_nueva_conciliacion").on("click",function (e) {
     
@@ -3269,6 +3282,13 @@ return false;
 
 
     $("#btn_create_category").on("click",function(e){
+        var request = {
+            'conciliacion_id':$("#conciliacion_id").val(),
+            'tabla_destino':'conciliaciones_email',
+            'status_id':178
+        }
+        getReportes(request,'content_form_correo');
+
         $("#myModal_create_category_report").modal("show")
     }) ;  
 
@@ -3324,9 +3344,151 @@ return false;
 
        
 
-    })
+    });
 
+    
+    window.onscroll = function() {
+        var y = window.scrollY;      
+        if(y<390){
+            $(".fila_roles").css({"position":"relative","top":"0px"});
+            
+        }else{
+            $(".fila_roles").css({"position":"fixed","top":"50px"})
+        }   
+
+    };
+
+    $("#myFormEnviarCorreoConciliacion").on("submit",function(e){
+       
+        
+        var formatVal = $("#content_form_correo")
+        .summernote("code")
+        .trim();
+        //var correo = $("#content_form_correo").text();
+        $("#myFormEnviarCorreoConciliacion input[name=cuerpo_correo]").val(formatVal)
+        var request = $(this).serialize()+"&conciliacion_id="+$("#conciliacion_id").val();
+        console.log(request);
+        enviarCorreoConciliacion(request)
+        e.preventDefault();
+    });
+
+    $("#btn_notificarse").on("click",function () {
+        var request = {
+            'conciliacion_id':$("#conciliacion_id").val(),
+            'tabla_destino':'conciliaciones_email',
+            'status_id':$(this).attr("data-estado"),
+            'categoria':'mensaje_notificarse'
+        }
+        
+        getReportes(request,'content_form_correo_est_responder');
+        $("#myFormResponderCorreo input[name=user_estado_id]").val($(this).attr('data-user_estado'))
+        $("#myFormResponderCorreo input[name=pivot_id]").val($(this).attr('data-pivot_id'))
+        
+        $("#myModal_respuestas_asignaciones").modal("show");
+    });
+
+    $("#btn_notificarse_cancelar").on("click",function () {
+        var request = {
+            'conciliacion_id':$("#conciliacion_id").val(),
+            'tabla_destino':'conciliaciones_email',
+            'status_id':$(this).attr("data-estado"),
+            'categoria':'mensaje_notificarse_cancelar'
+        }
+        
+        getReportes(request,'content_form_correo_est_responder');
+        $("#myFormResponderCorreo input[name=user_estado_id]").val($(this).attr('data-user_estado'))
+        $("#myFormResponderCorreo input[name=pivot_id]").val($(this).attr('data-pivot_id'))
+        
+        $("#myModal_respuestas_asignaciones").modal("show");
+    });
+
+    $("#myFormResponderCorreo").on("submit",function (e) {
+        var formatVal = $("#content_form_correo_est_responder")
+        .summernote("code")
+        .trim();
+
+        $("#myFormResponderCorreo input[name=cuerpo_correo]").val(formatVal)
+        var request = $(this).serialize()+"&conciliacion_id="+$("#conciliacion_id").val();
+        console.log(request);
+        enviarCorreoConciliacion(request)
+        e.preventDefault();
+    });
+
+    $("#btn_subir_archivo_conciliacion").on("click",function(e){
+
+
+    });
+   
 }); //Fin del document ready
+
+function enviarCorreoConciliacion(request) {
+    var route = "/conciliaciones/enviar/correo" ;
+	
+	$.ajax({
+		url: route,		
+		type:'GET',
+		datatype: 'json',
+		data: request,
+		 beforeSend: function(xhr){
+
+      xhr.setRequestHeader('X-CSRF-TOKEN', $("#token").attr('content'));
+	    $("#wait").show(); 
+      },	
+		success:function(res){
+			$("#wait").hide();  
+		
+            $("#content_form_correo").html(res.view)
+            //$("#cuerpo_correo").html(res.body);
+			           // window.location.reload(true)
+		   
+
+		},
+    error:function(xhr, textStatus, thrownError){
+		alert("Hubo un error con el servidor ERROR::"+thrownError,textStatus);
+		$("#wait").css("display", "none");
+    }
+
+	});
+}
+
+function getReportes(request,idform) {
+    var route = "/pdf/reportes/get" ;
+	
+	$.ajax({
+		url: route,		
+		type:'GET',
+		datatype: 'json',
+		data: request,
+		 beforeSend: function(xhr){
+
+      xhr.setRequestHeader('X-CSRF-TOKEN', $("#token").attr('content'));
+	  $("#wait").show();  
+    },	
+		success:function(res){
+			$("#wait").hide();  
+            if(res.body){
+                $("#"+idform).summernote("code", res.body);
+            }else if(res.error){
+                toastr.error(res.error, "Algo falló!", {
+                    positionClass: "toast-bottom-right",
+                    timeOut: "4000",
+                });
+                $("#"+idform).summernote("code", "Escriba su mensaje aquí!");
+            }
+           // $("#content_form_correo").html(res.view)
+           
+            //$("#cuerpo_correo").html(res.body);
+			           // window.location.reload(true)
+		   
+
+		},
+    error:function(xhr, textStatus, thrownError){
+		alert("Hubo un error con el servidor ERROR::"+thrownError,textStatus);
+		$("#wait").css("display", "none");
+    }
+
+	});
+}
 
 function revockFirma(request) {
     var route = "/conciliacion/reporte/revock/firma";
@@ -4253,31 +4415,30 @@ function descargarAllPdfConcEstado(request) {
                     tr +=
                     `<tr>
                     <td>
-                    ${file.original_name}
+                    ${estado.concepto}
                     </td>
-                    <td width="5%">
-                    <a class="btn btn-block btn-warning" toltip="Vista previa del  documento" target="_blank" href="/conciliaciones/download/file/${file.pivot.file_id}">
-                    <i class="fa fa-eye"></i>
-                    </a>
-                    </td>
-                    <td>
-                    <input type="checkbox" checked data-name="${file.original_name}" class="input_filepdf_id" name=file_id[] value="${file.pivot.file_id}">
-                    </td>
-                  </tr>`;
+                    
+                        <td>
+                        ${file.original_name}
+                        </td>
+
+                        <td>
+                            
+                        </td>
+
+                    
+                        <td width="5%">
+                        <a class="btn btn-block btn-primary" toltip="Vista previa del  documento" target="_blank" href="/conciliaciones/download/file/${file.pivot.file_id}">
+                        <i class="fa fa-download"></i>
+                        </a>
+                        </td>                    
+                    </tr>`;
                 });                
             });
-            tr += `<tr>
-                    <td>                   
-                    </td>
-                    <td></td>
-                    <td width="5%">
-                    <a id="btn_desc_all_pdf" toltip="Descargar"  class="btn btn-block btn-success" href="#">
-                    <i class="fa fa-download"></i> Descargar todo
-                    </a>         
-                    </td>
-                  </tr>`;
+          
             $("#myReportPdfList tbody").html(tr);
-            $("#myModal_reportes_pdf_estados").modal("show");
+            $("#myReportPdfListPrincipal tbody").append(tr);
+           // $("#myModal_reportes_pdf_estados").modal("show");
             $("#wait").hide();
         },
         error: function (xhr, textStatus, thrownError) {
@@ -4870,6 +5031,7 @@ function editPdfReporte(id) {
             console.log(res);
             // $("#myModal_create_comentario").modal("hide");
             $("#myFormEditPdfReporte input[name=nombre_reporte]").val(res.nombre_reporte);
+            $("#myFormEditPdfReporte select[name=categoria_id]").val(res.categoria_id);
             if(res.configuraciones!=null){
                 $("#myFormEditPdfReporte input[name=top]").val(res.configuraciones.top);
                 $("#myFormEditPdfReporte input[name=right]").val(res.configuraciones.right);
@@ -10362,9 +10524,6 @@ function changeSelectSearchExp(value) {
             showElement("input_data", "id");
             showElement("input_text", "id");
             searchExpedientes();
-            //enabledInput('input_data', 'id');
-            // window.location ='/expedientes';
-            // location.reload();
             break;
         default:
     }

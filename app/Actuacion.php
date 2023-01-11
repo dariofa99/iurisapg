@@ -80,7 +80,10 @@ class Actuacion extends Model
         return $this->hasMany(Nota::class, 'tbl_org_id', 'id');
     }
 
-   
+    public function files(){
+        return $this->belongsToMany(File::class,'actuaciones_has_files','actuacion_id')
+        ->withPivot('id','file_id','actuacion_id')->withTimestamps(); 
+     }  
 
 
 } 

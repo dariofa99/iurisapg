@@ -8,6 +8,7 @@ use App\ConciliacionReporte;
 use App\PdfReporte;
 use App\PdfReporteDestino;
 use App\Traits\PdfReport as PdfTrait;
+use Illuminate\Database\Eloquent\Builder;
 use PDF;
 use Illuminate\Http\Request;
 use Storage;
@@ -130,14 +131,17 @@ class PdfReportesController extends Controller
        ])->get();
         return response()->json($asignacionReporte);
     }
+
     public function asignarReporte(Request $request){
         $asignacionReporte = PdfReporteDestino::where([
             'tabla_destino'=>$request->tabla_destino ,
-            'status_id'=>$request->status_id            
+            'status_id'=>$request->status_id     ,
+            'categoria'=>$request->has('categoria') ? $request->categoria : 'sin_categoria',       
        ])->delete();
        if($request->reporte_id and count($request->reporte_id)>0){
         foreach ($request->reporte_id as $reporte_id) {
             $asignacionReporte = PdfReporteDestino::create([
+                'categoria'=>$request->has('categoria') ? $request->categoria : 'sin_categoria',
                  'tabla_destino'=>$request->tabla_destino,
                  'status_id'=>$request->status_id,
                  'reporte_id'=>$reporte_id
@@ -239,4 +243,34 @@ class PdfReportesController extends Controller
         return response()->json($co_reporte);
     }
    
+    public function getReportes(Request $request){
+        
+       // return response()->json($request->all());
+
+        $reportes = PdfReporteDestino::whereHas('reporte', function (Builder $query) {
+            $query->where('is_copy', 0);
+        })
+            /* ->whereHas('temporales', function (Builder $query) use ($request) {
+                $query->where('conciliacion_id', $request->conciliacion_id);
+            }) */
+            //    ->with('users')
+            ->where($request->except(['_', 'conciliacion_id', 'conc_estado_id']))
+            ->where('categoria',$request->categoria)
+            ->get();
+       if(count($reportes)>0){
+            $conciliacion = Conciliacion::find($request->conciliacion_id);
+            $reporte = PdfReporte::find($reportes[0]->reporte_id);
+        // return response()->json($reporte);
+            $bodytag =  $this->getBody($reporte,$conciliacion);
+        // $view = view('myforms.conciliaciones.documentos_cuerpo_correo',compact('bodytag'))->render();
+            return response()->json([
+                'body'=> $bodytag,            
+            ]);
+       }
+       
+       return response()->json([
+        'error'=> "No hay modelos registrados",            
+    ]);
+    }
+
 }

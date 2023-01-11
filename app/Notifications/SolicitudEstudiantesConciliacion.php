@@ -2,13 +2,15 @@
 
 namespace App\Notifications;
 
+use App\Conciliacion;
+
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use App\Mail\CitacionEstudiantes as Mailable;
 
-class CitacionEstudiantes extends Notification
+
+class SolicitudEstudiantesConciliacion extends Notification
 {
     use Queueable;
 
@@ -17,10 +19,12 @@ class CitacionEstudiantes extends Notification
      *
      * @return void
      */
-    public function __construct()
+    public $mensaje;
+    public $conciliacion;
+    public function __construct($mensaje,$conciliacion)
     {
-        //
-        
+       $this->mensaje = $mensaje;  
+       $this->conciliacion = $conciliacion;        
     }
 
     /**
@@ -42,11 +46,13 @@ class CitacionEstudiantes extends Notification
      */
     public function toMail($notifiable)
     {
-      
-        return (new Mailable($notifiable))
-        ->subject('Citación estudiantes')
-        ->to($notifiable->to)
-        ->cc($notifiable->cc);
+       
+        return (new MailMessage($notifiable))
+        ->subject('Solicitud de conciliación')
+        ->view('myforms.mails.formato_correo',[
+                'mensaje'=>$this->mensaje,
+                'url'=>url('/conciliaciones/'.$this->conciliacion->id.'/edit')
+        ]);
 
     }
 
@@ -57,12 +63,11 @@ class CitacionEstudiantes extends Notification
      * @return array
      */
     public function toDatabase($notifiable)
-    {
-      
+    {      
         return [
-           'type_notification'=>'Citación',
-           'link_to'=>'/expedientes/'.$notifiable->expid.'/edit',
-           'mensaje'=>'Citación de '.$notifiable->docente_fullname.' Exp: '.$notifiable->expid
+           'type_notification'=>'Solicitud de conciliación',
+           'link_to'=>'/conciliaciones/'.$this->conciliacion->id.'/edit',
+           'mensaje'=>auth()->user()->name.' '.auth()->user()->lastname
         ];
     }
 }

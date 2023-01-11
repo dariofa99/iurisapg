@@ -125,7 +125,7 @@ class ConciliacionesReportesController extends Controller
             'tipos' => $tipos,
             'tipos_estados' => $tipos_estados,
             'pivots_id' => $pivots_id,
-            'all_firmas' => $all_firmas,
+            'all_firmas' => $all_firmas
         ];
         return response()->json($response);
     }
@@ -422,10 +422,13 @@ class ConciliacionesReportesController extends Controller
     public function getAllPdf(Request $request)
     {
         //
-        $conciliacion = Conciliacion::find($request->conciliacion_id);
-        $conciliacion->estados->each(function ($estado) {
-            $estado->files;
-        });
+        $conciliacion = Conciliacion::with('estados.files.userinestado')
+        ->find($request->conciliacion_id);
+        /* $conciliacion->estados->each(function ($estado) {
+            $estado->files->each(function ($file){
+                $file->userinconciliacion;
+            });
+        });  */
 
         // dd($conciliacion->estados);
         //$ocultar_menu = true;

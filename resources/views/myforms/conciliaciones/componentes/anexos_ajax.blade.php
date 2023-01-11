@@ -1,33 +1,23 @@
-@foreach($conciliacion->files as $key => $file)
+@foreach($conciliacion->files()->where(['category_id'=>$category])->get() as $key => $file)
                     <tr>
                         <td>
                             {{$file->pivot->concepto}}
                         </td>
                         <td>
-                            <a href="/conciliaciones/download/file/{{$file->pivot->file_id}}" target="_blank">{{$file->original_name}}</a> 
+                            {{$file->original_name}}
                         </td>
                         <td>
                             {{$file->userinconciliacion[0]->name}} {{$file->userinconciliacion[0]->lastname}}
                         </td>
-                        <td>
-                            @if(($conciliacion->estado_id==174 || $conciliacion->estado_id==176 || $conciliacion->estado_id==194))
-                           
-                            @if(((currentUser()->hasRole('diradmin') || currentUser()->hasRole('coord_centro_conciliacion') || currentUser()->hasRole('amatai')))
-                || (($file->pivot->user_id == auth()->user()->id)))
-       
-                            <button type="button" data-id="{{$file->pivot->file_id}}" class="btn btn-sm btn-primary btn_edit_anxcon" data-concept="{{$file->pivot->concepto}}">
-                                Editar
-                            </button>
-
-                            <button type="button" data-id="{{$file->pivot->file_id}}" class="btn btn-sm btn-danger btn_delete_anxcon">
-                                Eliminar
-                            </button>  
-                            
-                          @endif  
-                            @endif
+                     
+                            <td width="5%">
+                                <a class="btn btn-block btn-primary" toltip="Vista previa del  documento" target="_blank" href="/conciliaciones/download/file/{{$file->pivot->file_id}}">
+                                <i class="fa fa-download"></i>
+                                </a>
+                                </td> 
                             
 
 
-                        </td>
+                       
                     </tr>
                 @endforeach
