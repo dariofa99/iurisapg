@@ -89,7 +89,7 @@ function ListarTabla(datobandera){
      //se envia id para listar datos que cumplan con ese identificador
 		/*muestra div con mensaje de 'regristrado'*/
 		success:function(res){			
-			console.log(res); //muestra lo que retorna el controlador
+			//console.log(res); //muestra lo que retorna el controlador
 			llenarTabla(res,'datos');
 		},
     error:function(xhr, textStatus, thrownError){
@@ -561,7 +561,7 @@ var con=0;
 
 
 						}else if(child.actestado_id=='104'){
-							color_child='blue';
+							color_child='orange';
 							estadoBtn = '';
 							if (value.user.name == 'estudiante') {								 
 				                btnsChildren = btn_detalles_child;
@@ -675,7 +675,7 @@ var con=0;
 						}
 						
 						if(dias<=0) dias = child.fecha_limit;
-						var color_bg = getDiffdaysColor(child.fecha_limit, child.actfecha,child.id);
+						var color_bg = getDiffdaysColor(child.fecha_limit, act_fecha,child.id);
 
 						if(end_status.id != child.id && child.actestado_id!='136'){
 							dias = child.fecha_limit;
@@ -694,23 +694,21 @@ var con=0;
                 }
 				
 					var act_fecha = value.parent.actdocenfechamod != null ? value.parent.actdocenfechamod : value.parent.actfecha;
-					var dias = getDiffdays(value.parent.fecha_limit, act_fecha);
-					var color_bg = getDiffdaysColor(value.parent.fecha_limit, act_fecha,value.parent.id)  ;
+					var dias = getDiffdays(value.parent.fecha_limit, act_fecha);					
+					var color_bg = getDiffdaysColor(value.parent.fecha_limit, act_fecha,value.parent.id,"pr")  ;
 					var vacdia = 0;
-					console.log(value.parent.actdocenfechamod,value.parent.id);
-
 					if(res.vacaciones.length > 0){
 						vacdia = getDiffVacations(value.parent.fecha_limit,res.vacaciones);
 						if(Number.isInteger(dias)) dias+=vacdia;			
-					}
-
-					
+					}	
 					
 					if((dias<0 && value.parent.actestado_id !=176)  || value.children.length > 0){						
 						dias =  value.parent.fecha_limit == null ? moment(value.parent.created_at).format('MM/DD/YYYY'): value.parent.fecha_limit;	
 						color_bg = 'bg-gray';
 					} 
-					
+				
+				
+
 				tabla.prepend("<tr role='row' class='odd row-parent'><td>"+ value.parent.actnombre +
 				"</td><td>"+value.parent.actdescrip+"</td><td><span style='background-color:"+color+"' class='pull-center badge'>"+
 				value.ref_nombre + "</span></td><td><span class='badge "+color_bg+"'>" +
@@ -725,7 +723,6 @@ var con=0;
 }
 
 function getDiffdays(fecha_limit,date_2=''){
-console.log(fecha_limit,date_2);
 	if(fecha_limit!=null){
 		var given = moment(fecha_limit,"YYYY-MM-DD");
 		var current = moment().startOf('day');
@@ -735,27 +732,23 @@ console.log(fecha_limit,date_2);
 	return date_2;	
 }
 
-function getDiffVacations(fecha_limit,vacaciones){
-	
-	if(vacaciones[0].fecha_inicio <= fecha_limit && vacaciones[0].fecha_fin <= fecha_limit ){
+function getDiffVacations(fecha_limit,vacaciones){	
+	if(vacaciones[0].fecha_inicio <= fecha_limit && vacaciones[0].fecha_fin >= fecha_limit ){
 		var admission = moment(vacaciones[0].fecha_inicio, 'YYYY-MM-DD');
 		var discharge = moment(vacaciones[0].fecha_fin, 'YYYY-MM-DD');
 		return moment.duration(discharge.diff(admission)).asDays();
-			 // 
-		//console.log(days,admission,discharge);
-	}
-	
+	}	
 	return 0;	
 }
 
-function getDiffdaysColor(fecha_limit,actfecha='',id){
-	if(fecha_limit!=null){
+function getDiffdaysColor(fecha_limit,actfecha='',id){	
+	if(fecha_limit!=null){		
 		var percent = 100;
 		var ini = moment(fecha_limit, "YYYY-MM-DD");
 		var fin = moment(actfecha, "YYYY-MM-DD");
 		var dias_total = moment.duration(ini.diff(fin)).asDays();
-		dias = getDiffdays(fecha_limit,actfecha);
-		x_percent = dias * percent / dias_total;
+		dias = getDiffdays(fecha_limit,actfecha);		
+		x_percent = dias * percent / dias_total;		
 		color = 'bg-gray';		
 		if(x_percent>=75){
 			color = 'bg-green';
@@ -764,8 +757,7 @@ function getDiffdaysColor(fecha_limit,actfecha='',id){
 		}else if(x_percent<=29 && x_percent>=0){
 			color = 'bg-red';
 		}else if(x_percent<0){
-			color = 'bg-gray';
-			
+			color = 'bg-gray';			
 		}	
 		return color;
 	}
@@ -1282,7 +1274,7 @@ var btnAsistencia = "";
 var btnDetalles = "";
 var btnChangeEstado ="";
 fechaActual = getFechaActual();
-console.log(res)
+//console.log(res)
 	$(res.requerimientos).each(function(key, value){
 		if (fechaActual >= value.reqfecha && value.reqentregado && !value.evaluado) {
 			estadoBtn = '';

@@ -7601,7 +7601,7 @@ $(document).ready(searchCitaciones());
 function searchCitaciones() {
     var data = { expid: $("#expid").val() };
     if (data.expid !== undefined) {
-        console.log(data, "data");
+        //console.log(data, "data");
         var route = "/citaciones/estudiante";
         $.ajax({
             url: route,
@@ -7618,7 +7618,7 @@ function searchCitaciones() {
                 $("#wait").css("display", "block");
             },
             success: function (res) {
-                console.log(res);
+               // console.log(res);
                 llenarTablaListCitaciones(res);
                 $("#wait").css("display", "none");
             },
@@ -7634,7 +7634,7 @@ function searchCitaciones() {
 
 function llenarTablaListCitaciones(res) {
     row = "";
-    console.log(res);
+   // console.log(res);
     res.forEach((element) => {
         row += `<tr>
    <td>${element.docente_fullname}</td>
