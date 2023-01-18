@@ -3,6 +3,8 @@
  //       $("#wait").css("display", "block");
  //   });
 
+
+
 /*$("#btn_enviar").click(function(){
 
 oculta mensaje y limpia campos
@@ -662,9 +664,15 @@ var con=0;
 							estadoBtn = '';
  
 						}
-con++;			
-						
-						var dias = getDiffdays(child.fecha_limit, child.actfecha);
+						con++;			
+						var act_fecha = child.actdocenfechamod != null ? child.actdocenfechamod : child.actfecha;
+					    var dias = getDiffdays(child.fecha_limit, act_fecha);
+						var vacdia = 0;
+					
+						if(res.vacaciones.length > 0){
+							vacdia = getDiffVacations(value.parent.fecha_limit,res.vacaciones);
+							if(Number.isInteger(dias)) dias+=vacdia;			
+						}
 						
 						if(dias<=0) dias = child.fecha_limit;
 						var color_bg = getDiffdaysColor(child.fecha_limit, child.actfecha,child.id);
@@ -685,18 +693,24 @@ con++;
 
                 }
 				
-
-					var dias = getDiffdays(value.parent.fecha_limit, value.parent.actfecha);
-					var color_bg = getDiffdaysColor(value.parent.fecha_limit, value.parent.actfecha,value.parent.id)  ;
+					var act_fecha = value.parent.actdocenfechamod != null ? value.parent.actdocenfechamod : value.parent.actfecha;
+					var dias = getDiffdays(value.parent.fecha_limit, act_fecha);
+					var color_bg = getDiffdaysColor(value.parent.fecha_limit, act_fecha,value.parent.id)  ;
 					var vacdia = 0;
+					console.log(value.parent.actdocenfechamod,value.parent.id);
+
 					if(res.vacaciones.length > 0){
-						vacdia = getDiffVacations(value.parent.fecha_limit,res.vacaciones);					
+						vacdia = getDiffVacations(value.parent.fecha_limit,res.vacaciones);
+						if(Number.isInteger(dias)) dias+=vacdia;			
 					}
-					dias+=vacdia;
+
+					
+					
 					if((dias<0 && value.parent.actestado_id !=176)  || value.children.length > 0){						
-						dias = value.parent.fecha_limit == null ? moment(value.parent.created_at).format('MM/DD/YYYY'): value.parent.fecha_limit;	
+						dias =  value.parent.fecha_limit == null ? moment(value.parent.created_at).format('MM/DD/YYYY'): value.parent.fecha_limit;	
 						color_bg = 'bg-gray';
 					} 
+					
 				tabla.prepend("<tr role='row' class='odd row-parent'><td>"+ value.parent.actnombre +
 				"</td><td>"+value.parent.actdescrip+"</td><td><span style='background-color:"+color+"' class='pull-center badge'>"+
 				value.ref_nombre + "</span></td><td><span class='badge "+color_bg+"'>" +
@@ -711,7 +725,7 @@ con++;
 }
 
 function getDiffdays(fecha_limit,date_2=''){
-
+console.log(fecha_limit,date_2);
 	if(fecha_limit!=null){
 		var given = moment(fecha_limit,"YYYY-MM-DD");
 		var current = moment().startOf('day');

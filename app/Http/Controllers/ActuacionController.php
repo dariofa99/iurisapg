@@ -10,7 +10,7 @@ use App\Actuacion;
 use App\Conciliacion;
 use App\ConciliacionEstado;
 use App\ConciliacionPdfTemporal;
-use App\Expediente;
+use App\Expediente; 
 use DB;
 use Storage;
 use Carbon\Carbon;
@@ -72,7 +72,9 @@ class ActuacionController extends Controller
   }
 
 
+function vacations(){
 
+}
 
 
   public function index(Request $request)
@@ -103,9 +105,26 @@ class ActuacionController extends Controller
 
   public function get_act_ant(Request $request)
   {
+    $now = Carbon::now();
+    $periodo = Periodo::join('sede_periodos as sp', 'sp.periodo_id', '=', 'periodo.id')
+    ->where('sp.sede_id', session('sede')->id_sede)
+    ->where('estado', true)
+    ->first();
+    $vacaciones = DB::table("vacaciones_periodo")         
+            ->where("periodo_id",$periodo->id)->get();
+
+    $vacaciones_text = DB::table("vacaciones_periodo")            
+            ->whereDate('fecha_fin','>=',$now)
+            ->where("periodo_id",$periodo->id)->first();
 
     $actuaciones = $this->getActuacionesExp($request->id_control_list, 1);
-    return response()->json($actuaciones);
+    
+    return response()->json([
+      "actuaciones"=>$actuaciones,
+      "vacaciones_text"=> $vacaciones_text ? $vacaciones : false,
+      "vacaciones"=> count($vacaciones) > 0 ? $vacaciones : false
+    ]); 
+    //return response()->json($actuaciones);
   }
 
   /**

@@ -490,7 +490,7 @@ Route::get('/prueba', function () {
 
   $expediente = Expediente::where('expid', "2022B-103")->first();
   //
-  $fecha = $expediente->setNotActLimit();
+  $fecha = $expediente->setNotActLimit(); 
 
   dd($fecha);
   $us = User::where("email",'darioj99@gmail.com')->first();

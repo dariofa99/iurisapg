@@ -9119,7 +9119,7 @@ function searchHorasDocente(idnumber) {
             );
         },
     });
-}
+} 
 
 function llenarTablaShowDocToAsig(res) {
     var table = $("#table_show_docente_toAsig tbody");
@@ -10313,7 +10313,7 @@ function get_act_ant() {
     var route = "/actuaciones/search/previous";
     $.ajax({
         url: route,
-        type: "GET",
+        type: "GET", 
         datatype: "json",
         data: { id_control_list: id_control_list, bandera: "1" },
         cache: false,
@@ -10322,8 +10322,8 @@ function get_act_ant() {
             $("#wait").css("display", "block");
         },
         success: function (res) {
-            // console.log(res.length)
-            if (res.length > 0) {
+            // console.log(res)
+            if (res.actuaciones.length > 0) {
                 llenarTabla(res, "datos_prev");
             }
             $(".cont_act_prev").toggle();
