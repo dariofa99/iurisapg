@@ -569,7 +569,7 @@ $(document).ready(function (e) {
                 "disabled",
                 true
             );
-        }else if ($(this).val() == "212") {
+        }else if ($(this).val() == "234") {
             hideElement("addNotasAct", "class");
             $("#myform_act_edit_docente #fecha_limit_doc").prop(
                 "disabled",

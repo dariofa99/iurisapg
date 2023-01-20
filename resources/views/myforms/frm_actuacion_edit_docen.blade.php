@@ -70,7 +70,7 @@
 										
 										'104' => 'Aprobar',
 
-										'212' => 'Anular',
+										'234' => 'Anular',
 									],
 
 			 null, ['id'=>'actestado','placeholder' => 'Selecciona...', 'class' => 'form-control required', 'required' => 'required' ]); !!}

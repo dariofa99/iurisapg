@@ -436,12 +436,12 @@ var estado_exp = $("#expestado_id").val();
 				color='blue';
 				estadoBtn = '';
 
-			}else{
+		}else{
 				actuacion_estado='No especificado';
 				color='ora';
 				estadoBtn = '';
 
-			}
+		}
 				
 
                 if (value.children.length >0) {
