@@ -5,7 +5,8 @@
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini"><b>A</b>LT</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><img src="{{ asset('dist/img/consultorios-min.png') }}" alt="Sis Image" style="height: 45px;"> <b>Iuris</b></span>
+      <span class="logo-lg"><img src="{{ asset('dist/img/conciliapp_logo.png') }}" alt="Sis Image" style="height: 60px">
+         <b></b></span>
     </a>
     <!-- Header Navbar: style can be found in header.less -->
     <nav class="navbar navbar-static-top">

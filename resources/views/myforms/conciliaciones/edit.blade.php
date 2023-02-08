@@ -79,9 +79,6 @@
             $conciliacion->getUser(203)->pivot->estado_id == 230
             ))
 
-            <li>
-                <a class="urlactive" data-toggle="tab" href="#documentos">Documentos </a>
-            </li>
             @endif
         
             @if((currentUser()->can('ver_comentarios_conciliacion'))
@@ -136,6 +133,10 @@
               <li><a class="urlactive" data-toggle="tab" href="#menu6">Expediente</a></li>
               @endif
            @endif
+           
+           <li>
+            <a class="urlactive" data-toggle="tab" href="#documentos">Documentos </a>
+        </li>
           </ul>
 
           <div class="tab-content">

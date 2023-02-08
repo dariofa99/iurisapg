@@ -2168,8 +2168,8 @@ return false;
     $("#btn_cambiar_estado").on("click", function (e) {
         $("#myformEditEstado").attr("id", "myformCreateEstado");
         $("#myformCreateEstado textarea[name=comentario]").val("");
-        $("#myformCreateEstado button[type=submit]").text("Crear");
-        $("#myModal_create_estado .modal-title").text("Creando estado");
+        $("#myformCreateEstado button[type=submit]").text("Cambiar");
+        $("#myModal_create_estado .modal-title").text("Cambiando estado");
         $("#myModal_create_estado").modal("show");
     });
     $("#btn_agregar_comentario").on("click", function (e) {

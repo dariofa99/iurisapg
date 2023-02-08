@@ -118,10 +118,10 @@ a {
 
 <div class="row" style="background-color: #222d32; opacity: 1; margin-right: 0px;" >
     <div class="col-md-3 image d-none d-sm-inline-block" style="padding-left: 50px;">
-        <img src="{{ asset('dist/img/udenarbl.png') }}" class="elevation-2" style="width: 250px;margin:10px;" alt="User Image">
+        <img src="{{ asset('dist/img/conciliapp_logo_mesa.png') }}" class="elevation-2" style="width: 160px;margin:10px;" alt="User Image">
     </div>
     <div class="col-md-6 " style="padding-top: 25px; text-align: center; font-size: 17px;">
-        <p style="color:#ffffff;     font-size: 20px; font-weight: 900;"><b>Consultorios Jurídicos y Centro de Conciliación<br>"Eduardo Alvarado Hurtado"</b></p> 
+        <p style="color:#ffffff;     font-size: 20px; font-weight: 900;"><b>Centro de Conciliación</p> 
     </div>
 </div>
    
@@ -204,17 +204,23 @@ a {
     <footer class="footer">
   
         <div class="container container-footer" style="text-align: end;">
-            <img src="https://iurisapp.udenar.edu.co/dist/img/consultorios.png" class="d-none d-sm-inline-block" style="width: 400px;margin-top:-370px;opacity: 0.3;z-index: -1;position: absolute;margin-left: -401px;" alt="User Image">
+            <img src="{{asset("dist/img/logocj.PNG")}}" class="d-none d-sm-inline-block" style="width: 400px;margin-top:-370px;opacity: 0.3;z-index: -1;position: absolute;margin-left: -401px;" alt="User Image">
     
             <div class="row" style="text-align: center; margin: 0px 30px 0px 30px;">
                 <div class="col-md-4" style="text-align: left;">
-                    <span class="text-muted"><span style="color:#d1941e;">Contactos</span><br><i class="nav-icon fa fa-phone" style="margin-right: 7px;"></i> (032)7244309 ext. 555<br><i class="nav-icon fa fa-envelope" style="margin-right: 7px;"></i> infojuridicos@udenar.edu.co</span>
+                    <span class="text-muted"><span style="color:#d1941e;">Contactos</span><br>
+                    <i class="nav-icon fa fa-phone" style="margin-right: 7px;"></i>
+                    314 3699097<br><i class="nav-icon fa fa-envelope" style="margin-right: 7px;"></i> 
+                     info@fundacionapg.org</span>
                 </div>
                     <div class="col-md-4">
-                    <span class="text-muted"><a href="http://derecho.udenar.edu.co/" target="_blank">Facultad de Derecho y Ciencias Políticas</a><br>Acreditado en Alta Calidad<br>Res. 2160 05/02/2016</span>
+                    <span class="text-muted"><a href="https://www.facebook.com/FundacionAPG" target="_blank">
+                        APG Paz & Reconciliación</a><br><br></span>
                 </div>
                     <div class="col-md-4" style="text-align: right;">
-                    <span class="text-muted"><a href="/register">Registro (Estudiantes matriculados)</a><br><span style="font-size: 11px;">IURIS - AMATAI Ingeniería Informática SAS<br>© 2022</span></span>
+                    <span class="text-muted">{{-- <a href="/register">Registro (Estudiantes matriculados)</a> --}}
+                        <span style="font-size: 11px;">ConciliApp - AMATAI Ingeniería Informática SAS<br>© {{date('Y')}}</span>
+                    </span>
                 </div>
             </div>
             
